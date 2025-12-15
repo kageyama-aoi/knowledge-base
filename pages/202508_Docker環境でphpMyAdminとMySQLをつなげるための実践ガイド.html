@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker環境でphpMyAdminとMySQLをつなげるための実践ガイド</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      line-height: 1.8;
+      margin: 2rem auto;
+      max-width: 1000px;
+      padding: 0 1rem;
+      background-color: #fefefe;
+      color: #333;
+    }
+    h1, h2, h3, h4 {
+      color: #2c3e50;
+    }
+    pre {
+      background-color: #f4f4f4;
+      padding: 1em;
+      overflow-x: auto;
+      border-left: 5px solid #ccc;
+    }
+    code {
+      background-color: #eee;
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 1em 0;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.6em;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    hr {
+      margin: 2em 0;
+      border: none;
+      border-top: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Docker環境でphpMyAdminとMySQLをつなげるための実践ガイド</h1>
+  <h2>【目的】</h2>
+  <p>
+    Dockerで組み合わせることの多い <code>phpMyAdmin</code> と <code>MySQL</code>の接続について、
+    ネットワーク構成やケースごとの問題を分析し、各対処策をまとめたハンドブックサンプル手順書です。
+  </p>
+
+  <h2>【前提知識】</h2>
+  <ul>
+    <li>Dockerコンテナはデフォルトでは個別のブリッジネットワークに属します</li>
+    <li>同じネットワーク上でないと、名前解決(DNS)では通信できません</li>
+    <li>Docker Composeを使うと、同じネットワークに入れるため、DNS解決が自動化されます</li>
+  </ul>
+
+  <h2>【パターン別対処ハンドブック】</h2>
+
+  <h3>▶ パターンA: Docker Composeで初めから一緒に構成</h3>
+  <ol>
+    <li><code>docker-compose.yml</code>を作成</li>
+    <li>MySQLとphpMyAdminを同じネットワークに組み込む</li>
+    <li><code>PMA_HOST</code>にMySQLサービスのサービス名を指定</li>
+    <li><code>docker compose up -d</code>で一括起動</li>
+  </ol>
+
+  <ul>
+    <li>コマンド一発で環境再現</li>
+    <li>DNSも自動解決。最も安定。</li>
+  </ul>
+
+  <h3>▶ パターンB: docker run で個別に起動済み</h3>
+  <h4>問題</h4>
+  <ul>
+    <li>名前解決ができず <code>PMA_HOST=aoi-mysql</code>としても失敗</li>
+    <li>同じブリッジネットワーク(初期値) にはいてても、名前は通じない</li>
+  </ul>
+
+  <h4>対処策 1: カスタムネットワークを作成</h4>
+  <pre><code>docker network create my-net
+
+docker network connect my-net aoi-mysql
+docker network connect my-net phpmyadmin-container</code></pre>
+
+  <h4>対処策 2: IP直接指定 (不安定な手法)</h4>
+  <pre><code>PMA_HOST=172.17.0.2</code></pre>
+
+  <h4>対処策 3: --add-host で名前を代用</h4>
+  <pre><code>docker run -d \
+  --name phpmyadmin-container \
+  --add-host=aoi-mysql:172.17.0.2 \
+  -p 8080:80 \
+  phpmyadmin</code></pre>
+
+  <h2>【ネットワーク確認手順】</h2>
+  <pre><code>docker inspect &lt;コンテナ名&gt; --format='{{range $k, $v := .NetworkSettings.Networks}}{{$k}}{{end}}'</code></pre>
+
+  <pre><code>docker inspect &lt;コンテナ名&gt; --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'</code></pre>
+
+  <h2>【接続テスト用指定値】</h2>
+  <table>
+    <tr><th>項目</th><th>値</th></tr>
+    <tr><td>URL</td><td>http://localhost:8080</td></tr>
+    <tr><td>ユーザー名</td><td>root</td></tr>
+    <tr><td>パスワード</td><td><code>docker-compose.yml</code>で指定した値 (例: rootpassword)</td></tr>
+    <tr><td>サーバー</td><td><code>aoi-mysql</code>（コンテナ名）</td></tr>
+  </table>
+
+  <h2>【おすすめ構成例 - docker-compose.yml】</h2>
+  <pre><code>version: '3.8'
+services:
+  db:
+    image: mysql
+    container_name: aoi-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "13306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin-container
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: aoi-mysql
+    depends_on:
+      - db</code></pre>
+
+  <h2>【まとめ】</h2>
+  <table>
+    <tr><th>パターン</th><th>状況</th><th>対処策</th></tr>
+    <tr><td>A</td><td>Compose使用</td><td>自動解決、ネットワーク管理すべて自動</td></tr>
+    <tr><td>B1</td><td>docker run 単独</td><td>同じカスタムネットワークに接続</td></tr>
+    <tr><td>B2</td><td>IP直接指定</td><td>再起動でIP変わるため非推奨</td></tr>
+    <tr><td>B3</td><td>--add-host使用</td><td>/etc/hosts作成で代用</td></tr>
+  </table>
+
+  <p>DockerでMySQLを利用する場合は、同じネットワークにいることが前提の技術が多く、Compose一本にするのが最も簡単で安定です。</p>
+
+</body>
+</html>

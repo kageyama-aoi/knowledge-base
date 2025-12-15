@@ -1,0 +1,15 @@
+# Gitの追跡から除外するファイルを設定します。
+
+# README.md以外の、このプロジェクトの初期設定で作成された
+# 説明用Markdownファイルを追跡対象から除外します。
+SETUP_GUIDE.md
+LEARNING_SUMMARY.md
+HOW_THIS_REPOSITORY_WORKS.md
+
+# Pythonの中間ファイル
+__pycache__/
+*.pyc
+
+# OSが自動生成するファイル
+.DS_Store
+Thumbs.db

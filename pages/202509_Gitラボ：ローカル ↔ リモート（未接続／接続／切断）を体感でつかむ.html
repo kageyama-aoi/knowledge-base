@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Gitラボ v2.3：1コマンド刻み／Mermaid可視化／観察ポイント（裸リポ HEAD 対応）</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<style>
+  :root { --bg:#0b1020; --panel:#121733; --ink:#e6e8ff; --muted:#a8b0d3; --accent:#7aa2ff; --good:#74d69e; --warn:#ffb86b; --code:#0f1530; --border:#2a335b; --obs-b:#40c4aa; --bad:#ff7a7a; }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,#0d1533 0%,var(--bg) 60%);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP";line-height:1.6;padding:22px}
+  header,section{max-width:1100px;margin:0 auto 18px;border:1px solid var(--border);background:var(--panel);border-radius:14px;padding:16px}
+  h1{margin:0 0 6px;font-size:clamp(20px,4vw,28px)} h2{margin:6px 0 10px;font-size:clamp(18px,3vw,22px)} h3{margin:14px 0 8px}
+  .tip{border-left:3px solid var(--accent);padding:10px 12px;background:rgba(122,162,255,.08);border-radius:10px;color:#dfe6ff}
+  .obs{border-left:3px solid var(--obs-b);padding:8px 12px;background:rgba(64,196,170,.10);border-radius:10px;color:#d7fff2}
+  pre{position:relative;margin:10px 0;padding:12px 10px 12px 12px;background:var(--code);border:1px solid var(--border);border-radius:10px;overflow:auto;white-space:pre-wrap}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,Roboto Mono,"Noto Sans Mono",monospace;font-size:13.5px;color:#e7ecff}
+  .copy{position:absolute;top:6px;right:6px;padding:5px 9px;border-radius:8px;border:1px solid var(--border);background:#141a3a;color:var(--ink);font-size:12px;cursor:pointer}
+  .copy.ok{border-color:rgba(116,214,158,.6);background:rgba(116,214,158,.12)}
+  .mermaid{background:var(--code);border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:8px}
+  .status{font-size:12px;color:var(--muted);margin-left:6px}
+  .kbd{display:inline-block;padding:1px 6px;border:1px solid var(--border);border-bottom-width:2px;border-radius:6px;background:#101737;color:var(--ink);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Gitラボ v2.3：1コマンド刻み／Mermaid可視化／観察ポイント</h1>
+  <div class="tip">各章の節目で <span class="kbd">git status</span> / <span class="kbd">git lg</span> を実行し、<b>状態遷移</b>と<b>履歴の形</b>を確認。</div>
+  <div id="merm-status" class="status">Mermaid: 未初期化</div>
+</header>
+
+<section>
+  <h2>0) 事前準備（ベース環境）</h2>
+  <div>作業用ディレクトリを作成 → 入る</div>
+  <pre><button class="copy">Copy</button><code>mkdir git-lab</code></pre>
+  <pre><button class="copy">Copy</button><code>cd git-lab</code></pre>
+  <div>バージョン確認</div>
+  <pre><button class="copy">Copy</button><code>git --version</code></pre>
+  <div>履歴可視化エイリアス（見やすいグラフ）</div>
+  <pre><button class="copy">Copy</button><code>git config --global alias.lg "log --oneline --graph --decorate --all"</code></pre>
+  <p class="obs"><b>観察ポイント:</b> 以後、重要操作の直後に <code>git lg</code> で履歴の形を確認。</p>
+</section>
+
+<section>
+  <h2>1) S1：ローカル単独（リモート未接続）</h2>
+  <div>空リポ作成（.gitを作る）</div>
+  <pre><button class="copy">Copy</button><code>git init</code></pre>
+  <div>作業ファイル作成 → ステージング → コミット</div>
+  <pre><button class="copy">Copy</button><code>echo "hello" &gt; readme.txt</code></pre>
+  <pre><button class="copy">Copy</button><code>git add readme.txt</code></pre>
+  <pre><button class="copy">Copy</button><code>git commit -m "first commit (local only)"</code></pre>
+  <div>リモート設定の有無を確認</div>
+  <pre><button class="copy">Copy</button><code>git remote -v</code></pre>
+  <p class="obs"><b>観察ポイント:</b> <code>remote -v</code> が空＝未接続。履歴はローカルのみ。</p>
+</section>
+
+<section>
+  <h2>2) S2：疑似リモート（ローカル裸リポジトリ）</h2>
+  <details><summary>補足：裸リポ（--bare）とは？</summary><p>作業ツリーなしの「受け渡し専用」リポジトリ。サーバー上のリモート役。push/pull の練習に最適。</p></details>
+  <div>リモート役（裸）を作る</div>
+  <pre><button class="copy">Copy</button><code>git init --bare ../remote-bare.git</code></pre>
+  <div>作業側から origin を登録</div>
+  <pre><button class="copy">Copy</button><code>git remote add origin ../remote-bare.git</code></pre>
+  <div>ブランチ名を main に統一</div>
+  <pre><button class="copy">Copy</button><code>git branch -M main</code></pre>
+  <div>初回 push（upstream 設定）</div>
+  <pre><button class="copy">Copy</button><code>git push -u origin main</code></pre>
+
+  <div>★ 裸リポのデフォルトブランチ（HEAD）を main に向ける（推奨）</div>
+  <pre><button class="copy">Copy</button><code># どの階層からでも可。--git-dir で裸リポを明示
+git --git-dir=../remote-bare.git symbolic-ref HEAD refs/heads/main</code></pre>
+  <p class="obs"><b>観察ポイント:</b> これをしないと clone 時に <code>warning: remote HEAD refers to nonexistent ref</code> が出ることがある。</p>
+
+  <div>（代替）HEADを設定しない場合は、clone 時に -b main を指定</div>
+  <pre><button class="copy">Copy</button><code>git clone -b main ../remote-bare.git another</code></pre>
+
+  <div>HEADを設定済みなら通常の clone でOK</div>
+  <pre><button class="copy">Copy</button><code>git clone ../remote-bare.git another</code></pre>
+  <div>クローン先で履歴確認</div>
+  <pre><button class="copy">Copy</button><code>cd another</code></pre>
+  <pre><button class="copy">Copy</button><code>git lg</code></pre>
+</section>
+
+<section>
+  <h2>3) S3：GitHub 接続（本番同様）</h2>
+  <div>GitHub で空リポ作成 → URL を登録</div>
+  <pre><button class="copy">Copy</button><code>git remote add origin https://github.com/&lt;yourname&gt;/&lt;repo&gt;.git</code></pre>
+  <div>必要なら main に統一</div>
+  <pre><button class="copy">Copy</button><code>git branch -M main</code></pre>
+  <div>初回 push（upstream 設定）</div>
+  <pre><button class="copy">Copy</button><code>git push -u origin main</code></pre>
+  <div>追跡ブランチの可視化</div>
+  <pre><button class="copy">Copy</button><code>git branch -vv</code></pre>
+  <p class="obs"><b>観察ポイント:</b> <code>[origin/main]</code> のように upstream が見えれば追跡OK。</p>
+</section>
+
+<section>
+  <h2>4) ブランチ操作（マージとリベース）</h2>
+  <div>新ブランチ作成 → 変更 → コミット</div>
+  <pre><button class="copy">Copy</button><code>git switch -c feature/x</code></pre>
+  <pre><button class="copy">Copy</button><code>echo "line1" &gt;&gt; app.txt</code></pre>
+  <pre><button class="copy">Copy</button><code>git commit -am "feat: add line1"</code></pre>
+  <div>mainへ戻る → --no-ff でマージ</div>
+  <pre><button class="copy">Copy</button><code>git switch main</code></pre>
+  <pre><button class="copy">Copy</button><code>git merge --no-ff feature/x</code></pre>
+  <div class="mermaid" id="m1-pre">gitGraph
+  commit id: "C0"
+  branch feature
+  commit id: "F1"
+  checkout main
+  commit id: "C1"
+  merge feature
+</div>
+  <p class="obs"><b>観察ポイント:</b> マージは枝分かれ痕跡が残る。</p>
+
+  <div>リベース体験</div>
+  <pre><button class="copy">Copy</button><code>git switch -c feature/y main</code></pre>
+  <pre><button class="copy">Copy</button><code>echo "y1" &gt;&gt; app.txt</code></pre>
+  <pre><button class="copy">Copy</button><code>git commit -am "y1"</code></pre>
+  <pre><button class="copy">Copy</button><code>git switch main</code></pre>
+  <pre><button class="copy">Copy</button><code>echo "hotfix" &gt;&gt; app.txt</code></pre>
+  <pre><button class="copy">Copy</button><code>git commit -am "hotfix"</code></pre>
+  <pre><button class="copy">Copy</button><code>git switch feature/y</code></pre>
+  <pre><button class="copy">Copy</button><code>git rebase main</code></pre>
+  <pre class="mermaid" id="m2-pre">gitGraph
+  commit id: "A"
+  branch b
+  commit id: "b1"
+  checkout main
+  commit id: "hotfix"
+  checkout b
+  commit id: "b2"
+  rebase main
+</pre>
+  <p class="obs"><b>観察ポイント:</b> リベースは履歴が直線化される。</p>
+</section>
+
+<section>
+  <h2>5) コンフリクト体験と解消</h2>
+  <div>A と B で同じファイルを別内容にして衝突させる → 解消</div>
+  <pre><button class="copy">Copy</button><code>git switch -c conflict/a main</code></pre>
+  <pre><button class="copy">Copy</button><code>echo "A" &gt; same.txt</code></pre>
+  <pre><button class="copy">Copy</button><code>git add same.txt</code></pre>
+  <pre><button class="copy">Copy</button><code>git commit -m "A writes"</code></pre>
+  <pre><button class="copy">Copy</button><code>git switch -c conflict/b main</code></pre>
+  <pre><button class="copy">Copy</button><code>echo "B" &gt; same.txt</code></pre>
+  <pre><button class="copy">Copy</button><code>git add same.txt</code></pre>
+  <pre><button class="copy">Copy</button><code>git commit -m "B writes"</code></pre>
+  <pre><button class="copy">Copy</button><code>git switch conflict/a</code></pre>
+  <pre><button class="copy">Copy</button><code>git merge conflict/b</code></pre>
+  <pre><button class="copy">Copy</button><code>git add same.txt</code></pre>
+  <pre><button class="copy">Copy</button><code>git commit</code></pre>
+  <p class="obs"><b>観察ポイント:</b> <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> 印を解消して add → commit。</p>
+</section>
+
+<section>
+  <h2>6) 取り消し3兄弟／stash／タグ</h2>
+  <div>revert / reset / restore など</div>
+  <pre><button class="copy">Copy</button><code>git revert HEAD</code></pre>
+  <pre><button class="copy">Copy</button><code>git reset --soft HEAD~1</code></pre>
+  <pre><button class="copy">Copy</button><code>git reset --hard HEAD~1</code></pre>
+  <pre><button class="copy">Copy</button><code>echo "wip" &gt;&gt; temp.txt</code></pre>
+  <pre><button class="copy">Copy</button><code>git stash push -m "wip-temp"</code></pre>
+  <pre><button class="copy">Copy</button><code>git stash list</code></pre>
+  <pre><button class="copy">Copy</button><code>git stash pop</code></pre>
+  <pre><button class="copy">Copy</button><code>git tag v1.0.0</code></pre>
+  <pre><button class="copy">Copy</button><code>git tag -n</code></pre>
+  <pre><button class="copy">Copy</button><code>git push origin --tags</code></pre>
+  <p class="obs"><b>観察ポイント:</b> 共有履歴では基本 <code>revert</code> を選ぶ。<code>reset --hard</code> は練習場のみ推奨。</p>
+</section>
+
+<section>
+  <h2>7) よくある“つながり”トラブル対処</h2>
+  <div>リモートが進んで push できない</div>
+  <pre><button class="copy">Copy</button><code>git fetch origin</code></pre>
+  <pre><button class="copy">Copy</button><code>git rebase origin/main</code></pre>
+  <pre><button class="copy">Copy</button><code>git push</code></pre>
+  <div>URL/権限ミス</div>
+  <pre><button class="copy">Copy</button><code>git remote -v</code></pre>
+  <pre><button class="copy">Copy</button><code>git remote set-url origin &lt;正しいURL&gt;</code></pre>
+  <div>消滅したリモートの掃除と再登録</div>
+  <pre><button class="copy">Copy</button><code>git remote prune origin</code></pre>
+  <pre><button class="copy">Copy</button><code>git remote remove origin</code></pre>
+  <pre><button class="copy">Copy</button><code>git remote add origin &lt;新URL&gt;</code></pre>
+</section>
+
+<section>
+  <h2>8) Mermaid 図（マージ／リベース）</h2>
+  <pre class="mermaid" id="m1">gitGraph
+  commit id: "C0"
+  branch feature
+  commit id: "F1"
+  checkout main
+  commit id: "C1"
+  merge feature
+</pre>
+  <pre class="mermaid" id="m2">gitGraph
+  commit id: "A"
+  branch b
+  commit id: "b1"
+  checkout main
+  commit id: "hotfix"
+  checkout b
+  commit id: "b2"
+  rebase main
+</pre>
+  <p class="obs"><b>観察ポイント:</b> マージは合流点が残り、リベースは一直線。</p>
+</section>
+
+<script>
+  // 例外を可読化
+  function formatError(e){
+    try{
+      if(e instanceof Error){
+        return `${e.name}: ${e.message}${e.stack?"\n"+e.stack:""}`;
+      }
+      const js = JSON.stringify(e, Object.getOwnPropertyNames(e));
+      return js && js !== '{}' ? js : String(e);
+    }catch(_){ return String(e); }
+  }
+  const statusEl = document.getElementById('merm-status');
+  try {
+    mermaid.initialize({ startOnLoad:false, theme:'dark', themeVariables:{ primaryColor:'#101737', primaryTextColor:'#e6e8ff', lineColor:'#7aa2ff', tertiaryColor:'#0f1530' } });
+    const renderMermaid = async () => {
+      try {
+        await mermaid.run({ querySelector: '.mermaid' });
+        statusEl.textContent = 'Mermaid: 正常に描画しました';
+      } catch (e) {
+        statusEl.textContent = 'Mermaid: 失敗しました（Console参照）';
+        console.error('Mermaid run error:', formatError(e));
+      }
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', renderMermaid);
+    } else { renderMermaid(); }
+  } catch(e){
+    statusEl.textContent = 'Mermaid: 初期化エラー（Console参照）';
+    console.error('Mermaid init error:', formatError(e));
+  }
+
+  // コピーボタン
+  document.querySelectorAll('pre .copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const code = btn.nextElementSibling.innerText;
+      try {
+        await navigator.clipboard.writeText(code);
+        btn.classList.add('ok'); btn.textContent='Copied!';
+        setTimeout(()=>{btn.classList.remove('ok'); btn.textContent='Copy';},1200);
+      } catch(e){
+        console.error('Clipboard error:', formatError(e));
+        btn.textContent='Copy failed';
+        setTimeout(()=>btn.textContent='Copy',1200);
+      }
+    });
+  });
+</script>
+</body>
+</html>

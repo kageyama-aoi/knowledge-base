@@ -22,6 +22,11 @@ git branch -M main
 git push -u origin main
 ```
 
+git remote add origin knowledge-base
+git branch -M main
+git push -u origin main
+
+
 ---
 
 ### 手順3: GitHub Pagesを設定する
