@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>n8n × Gmail/OpenAI 構築ログ（Docker/インフラ編 肉付け版）</title>
+  <style>
+    :root{
+      --bg:#0b0f14;--panel:#0f172a;--card:#111827;--line:#1f2937;
+      --text:#e5e7eb;--muted:#9ca3af;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;
+      --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans JP",sans-serif;background:var(--bg);color:var(--text);line-height:1.75;}
+    header{position:sticky;top:0;background:rgba(11,15,20,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:18px 16px;z-index:10;}
+    h1{margin:0;font-size:18px;letter-spacing:.2px;}
+    .sub{margin-top:6px;color:var(--muted);font-size:12px;}
+    main{max-width:1100px;margin:0 auto;padding:18px 16px 40px;}
+
+    .grid{display:grid;grid-template-columns:1fr;gap:12px;}
+    @media (min-width:980px){.grid{grid-template-columns:1.6fr .9fr;}}
+
+    .card{background:rgba(17,24,39,.78);border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;box-shadow:0 8px 26px rgba(0,0,0,.25);}
+    h2{margin:0 0 8px;font-size:16px;border-left:4px solid var(--good);padding-left:10px;}
+    h3{margin:18px 0 8px;font-size:14px;}
+    p{margin:8px 0;}
+
+    .pill{display:inline-flex;gap:6px;align-items:center;font-size:11px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted);}
+    .pill b{color:var(--text);font-weight:600;}
+
+    .kbox{background:#050a14;border:1px solid var(--line);border-radius:12px;padding:10px 10px 8px;}
+    pre,code{font-family:var(--mono);}
+    pre{margin:0;white-space:pre;overflow:auto;background:#050a14;border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:#cbd5e1;font-size:12px;}
+    code{background:#050a14;border:1px solid var(--line);border-radius:8px;padding:1px 6px;color:#cbd5e1;font-size:12px;}
+
+    ul{margin:6px 0 6px 18px;padding:0;}
+    li{margin:6px 0;}
+
+    .tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;border-radius:999px;padding:3px 8px;border:1px solid var(--line);}
+    .ok{background:rgba(34,197,94,.12);color:#bbf7d0;}
+    .wip{background:rgba(245,158,11,.12);color:#fde68a;}
+    .ng{background:rgba(239,68,68,.12);color:#fecaca;}
+
+    table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+    th,td{padding:10px 10px;vertical-align:top;font-size:12px;border-bottom:1px solid var(--line);}
+    th{background:#0b1220;color:#cbd5e1;font-weight:600;text-align:left;}
+    tr:last-child td{border-bottom:none;}
+
+    details{border:1px solid var(--line);border-radius:12px;background:rgba(2,6,23,.25);padding:10px 10px 8px;}
+    summary{cursor:pointer;color:#cbd5e1;font-weight:700;font-size:12px;}
+    .muted{color:var(--muted);font-size:12px;}
+
+    .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+    button{cursor:pointer;background:#0b1220;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:8px 10px;font-size:12px;}
+    button:hover{border-color:#334155;}
+
+    footer{border-top:1px solid var(--line);padding:14px 16px;color:var(--muted);font-size:11px;}
+  </style>
+</head>
+<body>
+<header>
+  <h1>n8n × Gmail/OpenAI 構築ログ（Docker/インフラ編：肉付け・再現可能版）</h1>
+  <div class="sub">目的：今日の「つまづき」を、感想ではなく <b>再現できる技術ノウハウ</b>として残す（コマンド・設定・判断理由をセットで記録）。</div>
+</header>
+
+<main>
+  <div class="grid">
+    <section class="card">
+      <h2>0. 全体像（Docker/インフラ観点）</h2>
+      <ul>
+        <li>Docker Compose で <b>n8n + PostgreSQL</b> をローカル起動</li>
+        <li>起動エラー（5432 競合）を <b>ホスト側切り分け</b>で特定</li>
+        <li>PostgreSQL は <b>外部公開せず</b>、Docker 内ネットワークで接続する設計へ</li>
+        <li>結果：<code>http://localhost:5678</code> で n8n UI 到達</li>
+      </ul>
+      <p class="muted">※ Gmail/OpenAI の認証は別章で肉付け予定（このページは Docker/インフラに集中）。</p>
+
+      <h2 style="margin-top:18px;">1. トラブルシューティング要約表（Docker/インフラ）</h2>
+      <table aria-label="docker-troubleshooting">
+        <thead>
+          <tr>
+            <th style="width:160px;">症状</th>
+            <th>原因の要点</th>
+            <th style="width:300px;">対処（再現用）</th>
+            <th style="width:120px;">結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag ng">NG</span> 5432 port is already allocated</td>
+            <td>ホスト（Windows）側で 5432 が LISTEN（PostgreSQL 等が常駐）</td>
+            <td>ホスト公開をやめる：Postgres の <code>ports:</code> を削除し、Docker 内接続に寄せる</td>
+            <td><span class="tag ok">OK</span> 起動</td>
+          </tr>
+          <tr>
+            <td><span class="tag wip">WIP</span> version is obsolete 警告</td>
+            <td>Compose v2 では <code>version:</code> は実質不要（互換用）</td>
+            <td>任意：<code>version:</code> を削除（挙動は変えない）</td>
+            <td><span class="tag ok">OK</span> 影響なし</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 style="margin-top:18px;">2. 学びピックアップ（理由つき・肉付け）</h2>
+
+      <h3>2-1. Compose は「どの yml を読むか」を暗黙的に決めている</h3>
+      <p><span class="pill"><b>つまづき</b>：yml ファイルをどうやって読んでいるのか分からない</span></p>
+      <p><b>技術的な実態</b></p>
+      <ul>
+        <li><code>docker compose up</code> は、<b>カレントディレクトリ</b>の <code>docker-compose.yml</code>（または <code>compose.yml</code>）を読む</li>
+        <li>違う yml を読むには <code>-f</code> で明示する</li>
+      </ul>
+      <pre># カレントディレクトリの docker-compose.yml / compose.yml を読む
+cd n8n-compose
+docker compose up -d
+
+# 別名ファイルを読む
+docker compose -f compose.dev.yml up -d
+
+# 複数ファイルで上書き（差分運用）
+docker compose -f docker-compose.yml -f docker-compose.override.yml up -d</pre>
+      <p><b>学びの要点</b>："想定と違う yml が読まれた" は、だいたい <b>cd の位置ズレ</b>が原因。</p>
+
+      <h3>2-2. 5432 競合は「Dockerの不具合」ではなく「ホスト環境の占有」</h3>
+      <p><span class="pill"><b>つまづき</b>：<code>port is already allocated</code> で起動できない</span></p>
+      <p><b>技術的な実態</b></p>
+      <ul>
+        <li>5432 は PostgreSQL のデフォルトポート</li>
+        <li>ホスト側で既に LISTEN していると、Docker のポートバインドは必ず失敗する</li>
+      </ul>
+      <pre># Windows：5432 を掴んでいる PID を確認
+netstat -ano | findstr 5432
+
+#（任意）PID からプロセスを特定
+# tasklist | findstr &lt;PID&gt;
+
+# Docker：稼働中コンテナを確認
+docker ps</pre>
+      <p><b>設計としての正解</b>：n8n → Postgres は Docker 内ネットワークで十分。ホストに DB を出さない。</p>
+      <pre># 修正イメージ（postgres の ports を削除）
+# docker-compose.yml
+services:
+  postgres:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # ports: は付けない（ホストへ公開しない）</pre>
+      <p><b>学びの要点</b>：エラー原因を "Docker" に置かず、<b>ホスト→Docker→アプリ</b> の順で切り分ける。</p>
+
+      <h3>2-3. Docker Desktop は「GUI」ではなく「Docker Engine の稼働基盤」</h3>
+      <p><span class="pill"><b>つまづき</b>：ターミナル実行なら Desktop 不要？</span></p>
+      <p><b>技術的な実態</b></p>
+      <ul>
+        <li>Windows/macOS では Docker Engine を Desktop が提供する</li>
+        <li>CLI は Engine に命令を送るだけ（Engine が止まっていると何もできない）</li>
+      </ul>
+      <div class="kbox">
+        <pre>[ Terminal / docker CLI ]  →  [ Docker Engine (Docker Desktop) ]  →  [ Containers ]</pre>
+      </div>
+      <p><b>学びの要点</b>：Desktop を落とす＝エンジン停止。ターミナル実行でも起動が必要。</p>
+
+      <h3>2-4. Docker 内では <code>localhost</code> は「自分自身」。DB接続はサービス名で行う</h3>
+      <p><span class="pill"><b>つまづき</b>：DB ホストは localhost？</span></p>
+      <p><b>技術的な実態</b></p>
+      <ul>
+        <li>Compose の <code>services:</code> 名は Docker ネットワークの DNS 名になる</li>
+        <li>n8n コンテナからは <code>postgres</code> で接続できる</li>
+      </ul>
+      <pre># docker-compose.yml の例
+services:
+  n8n:
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+
+  postgres:
+    image: postgres:15</pre>
+      <p><b>学びの要点</b>：Docker 内の <code>localhost</code> は「そのコンテナ」。別サービスへは <b>サービス名</b>で接続。</p>
+
+      <h3>2-5. Volume は「コンテナを壊しても残るデータの置き場」</h3>
+      <p><span class="pill"><b>つまづき</b>：down したらデータ消える？</span></p>
+      <p><b>技術的な実態</b></p>
+      <ul>
+        <li>Volume はコンテナとは独立（コンテナ削除＝データ削除ではない）</li>
+        <li>n8n の設定・認証情報は <code>/home/node/.n8n</code> に保存される</li>
+      </ul>
+      <pre># 永続化の例
+services:
+  n8n:
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  postgres:
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  n8n_data:
+  postgres_data:</pre>
+      <p><b>学びの要点</b>："コンテナ" は使い捨て、"Volume" は資産。設計上の責務分離ができる。</p>
+
+      <h2 style="margin-top:18px;">3. 次に肉付け予定の章（同じ粒度で整備）</h2>
+      <details>
+        <summary>Gmail OAuth 編（redirect_uri / テストユーザー / エラー対応）</summary>
+        <ul>
+          <li><code>redirect_uri_mismatch</code> の発生条件と「完全一致」チェックリスト</li>
+          <li><code>access_denied</code>（審査未完了）の正体＝テストモード / テストユーザー</li>
+          <li>n8n の <code>Account connected</code> の意味（トークン保存の成功条件）</li>
+        </ul>
+      </details>
+      <div style="height:10px"></div>
+      <details>
+        <summary>OpenAI API キー編（取得・保管・n8n登録・注意点）</summary>
+        <ul>
+          <li>API キーの役割（本人確認トークン）と漏洩リスク</li>
+          <li>キーの保管ポリシー（再表示不可・最小権限・ローテーション）</li>
+          <li>n8n Credential の登録観点（環境分離 / 本番移行時の差分）</li>
+        </ul>
+      </details>
+
+      <div class="btns">
+        <button type="button" onclick="copySection('infra-cmds')">コマンドまとめをコピー</button>
+      </div>
+      <div id="infra-cmds" style="display:none;">
+netstat -ano | findstr 5432
+
+docker ps
+
+docker compose ps
+
+docker compose logs -f n8n
+
+docker compose logs -f postgres
+      </div>
+      <p class="muted">※「コピー」はブラウザで開いた場合に有効です。</p>
+
+    </section>
+
+    <aside class="card">
+      <h2>チェックリスト（Docker/インフラ）</h2>
+      <ul>
+        <li><span class="tag ok">OK</span> Docker Desktop 起動（Windows/macOS）</li>
+        <li><span class="tag ok">OK</span> <code>docker compose ps</code> で n8n/postgres が Up</li>
+        <li><span class="tag ok">OK</span> DB はホストに公開しない（<code>ports:</code> なし）</li>
+        <li><span class="tag ok">OK</span> DB host は <code>postgres</code>（サービス名）</li>
+        <li><span class="tag ok">OK</span> Volume で永続化（n8n_data / postgres_data）</li>
+      </ul>
+
+      <h3>よくある“誤解”メモ</h3>
+      <ul>
+        <li>「ターミナル実行だから Desktop 不要」→ Engine が動かないので NG</li>
+        <li>「DB は必ず 5432 公開」→ 内部接続だけで十分</li>
+        <li>「Docker 内の localhost はホスト」→ そのコンテナ自身</li>
+      </ul>
+
+      <h3>次に追記するなら</h3>
+      <p class="muted">Gmail/OpenAI 編も、このページと同じ粒度（つまづき→事実→具体例→学び）で統一すると、資料の価値が上がります。</p>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  このページは「Docker/インフラ編」の肉付け版。次は Gmail OAuth / OpenAI API 編を同様の粒度で拡張する。
+</footer>
+
+<script>
+  function copySection(id){
+    const el = document.getElementById(id);
+    const text = el ? el.textContent.trim() : '';
+    if(!text){ alert('コピー対象が見つかりません'); return; }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=>alert('コピーしました'));
+    } else {
+      prompt('以下をコピーしてください', text);
+    }
+  }
+</script>
+</body>
+</html>

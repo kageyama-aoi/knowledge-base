@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>学習ログ｜HTML資料一覧 自動生成ツール</title>
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; margin: 24px; }
+    h1, h2, h3 { line-height: 1.3; }
+    h1 { border-bottom: 2px solid #333; padding-bottom: 6px; }
+    h2 { margin-top: 48px; border-left: 6px solid #555; padding-left: 10px; }
+    h3 { margin-top: 28px; }
+    pre, code { background: #f6f8fa; }
+    pre { padding: 12px; overflow-x: auto; border-radius: 6px; }
+    ul { margin-left: 20px; }
+    .note { background: #f0f7ff; border-left: 6px solid #4c8bf5; padding: 12px; margin: 16px 0; border-radius: 6px; }
+    .warn { background: #fff4f4; border-left: 6px solid #e5533d; padding: 12px; margin: 16px 0; border-radius: 6px; }
+    .cmd { background: #0f172a; color: #e5e7eb; padding: 12px; border-radius: 6px; }
+    footer { margin-top: 64px; font-size: 0.9em; color: #555; }
+    a { color: inherit; }
+  </style>
+</head>
+<body>
+
+<h1>学習ログ：HTML資料一覧を自動生成する仕組み</h1>
+
+<p>このドキュメントは、HTMLで作成した個人資料を <strong>GitHub Pages + GitHub Actions</strong> を使って管理・公開する仕組みを、<strong>実際に構築した過程そのもの</strong>を記録した学習ログである。</p>
+
+<div class="note">
+  <strong>位置づけ：</strong><br />
+  ・自分用の記録（未来の自分が読み返す前提）<br />
+  ・「完成物」よりも「判断・失敗・回避策」を残す
+</div>
+
+<h2>0. 出発点（思いつき）</h2>
+<ul>
+  <li>HTMLでメモや資料を作ることが増えた</li>
+  <li>index.html にリンクを手動で追加する運用が破綻</li>
+  <li>Notion や CMS を持ち出すほどではない</li>
+</ul>
+<p><strong>結論：</strong> HTMLを置くだけで一覧が更新される仕組みが欲しい。</p>
+
+<h2>1. 構想と設計はChatGPT、実装作業はGemini CLI</h2>
+<p>構想段階（設計・考え方・全体像）は ChatGPT に相談して固めた。</p>
+
+<p>一方で、以下の作業は<strong>頭を使わずに済ませたかった</strong>：</p>
+<ul>
+  <li>ディレクトリ構成を作る</li>
+  <li>workflow yml を書く</li>
+  <li>Pythonファイルを作る</li>
+  <li>ファイル名・配置を決める</li>
+</ul>
+
+<p>そこで、<strong>Gemini CLI</strong> に以下のような指示文を送り、実作業を任せた。</p>
+
+<pre class="cmd"><code>このリポジトリに以下を実装してください。
+
+- pages/ ディレクトリを作成
+- tools/build_index.py を作成
+- .github/workflows/build-index.yml を作成
+- pages 配下の html を一覧化する index.html を自動生成
+- GitHub Actions で push をトリガーに自動更新
+
+構成とコードはシンプルにしてください。</code></pre>
+
+<div class="note">
+  <strong>学び：</strong><br />
+  「設計・判断」は人がやり、「作業」はAIに任せるとストレスが激減する。
+</div>
+
+<h2>2. 実際に使った主なGitコマンド</h2>
+
+<h3>2-1. 初期化とリモート設定</h3>
+<pre class="cmd"><code>git init
+git remote add origin https://github.com/kageyama-aoi/knowledge-base.git
+git branch -M main</code></pre>
+
+<h3>2-2. ファイル追加・初回コミット</h3>
+<pre class="cmd"><code>git add .
+git commit -m "initial commit"
+git push -u origin main</code></pre>
+
+<h3>2-3. 日常運用時</h3>
+<pre class="cmd"><code># pages に HTML を追加
+git add pages/2025-12-16_メモ.html
+git commit -m "メモ追加"
+git push</code></pre>
+
+<p>これ以降は <strong>index.html を触ることは一切ない</strong>。</p>
+
+<h2>3. GitHub Actions がやっていること</h2>
+<ul>
+  <li>push を検知</li>
+  <li>Python スクリプトを実行</li>
+  <li>pages/index.html を再生成</li>
+  <li>差分があれば自動コミット</li>
+</ul>
+
+<pre class="cmd"><code>git config user.name "github-actions"
+git config user.email "github-actions@github.com"
+git add pages/index.html
+git diff --cached --quiet || git commit -m "auto: update pages index"
+git push</code></pre>
+
+<h2>4. ハマりどころと学び</h2>
+
+<h3>4-1. GitHub Actions の権限</h3>
+<p>デフォルトでは <strong>Read only</strong> のため、commit が 403 で失敗した。</p>
+
+<div class="warn">
+  Settings → Actions → General → Workflow permissions<br />
+  → <strong>Read and write permissions</strong> に変更
+</div>
+
+<h3>4-2. GitHub Pages の参照ディレクトリ</h3>
+<ul>
+  <li>Pages は設定されたフォルダしか見ない</li>
+  <li>生成先と参照先がズレると「更新されてないように見える」</li>
+</ul>
+
+<p>今回は <code>pages/index.html</code> を正とする構成に統一。</p>
+
+<h3>4-3. auto: コミットの意味</h3>
+<p><code>auto:</code> は「人間が触っていない変更」という目印。</p>
+<ul>
+  <li>ログを見た瞬間に判断できる</li>
+  <li>事故調査が楽</li>
+</ul>
+
+<h2>5. 完成後の状態</h2>
+<ul>
+  <li>HTMLを置くだけで一覧が更新される</li>
+  <li>スマホからも即確認できる</li>
+  <li>メモ帳感覚でHTMLを量産できる</li>
+</ul>
+
+<h2>6. 今後の自分へのメモ</h2>
+<ul>
+  <li>無理に拡張しない</li>
+  <li>便利になりすぎたらタグ化を検討</li>
+  <li>Markdown対応は必要になってから</li>
+</ul>
+
+<footer>
+  <p>この学習ログは「なぜこの構成なのか」を未来の自分が即思い出すための記録である。</p>
+</footer>
+
+</body>
+</html>

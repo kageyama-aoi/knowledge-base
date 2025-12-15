@@ -1,0 +1,131 @@
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>n8n × Docker × Gmail/OpenAI まとめ（今日の学び）</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans JP",sans-serif;background:#0b0f14;color:#e5e7eb;margin:0;line-height:1.7}
+    header{padding:24px 20px;border-bottom:1px solid #1f2937;background:#0b0f14;position:sticky;top:0}
+    h1{margin:0;font-size:20px}
+    h2{margin-top:28px;font-size:18px;border-left:4px solid #22c55e;padding-left:10px}
+    h3{margin-top:18px;font-size:15px}
+    main{max-width:1100px;margin:0 auto;padding:20px}
+    section{margin-bottom:28px}
+    ul{padding-left:20px}
+    li{margin-bottom:6px}
+    code,pre{background:#020617;border:1px solid #1f2937;border-radius:8px;padding:6px 8px;color:#cbd5f5}
+    pre{overflow:auto}
+    .note{color:#9ca3af;font-size:13px}
+    .box{border:1px solid #1f2937;border-radius:12px;padding:16px;background:#020617}
+  </style>
+</head>
+<body>
+<header>
+  <h1>n8n × Docker × Gmail / OpenAI 環境構築まとめ（今日の学び）</h1>
+</header>
+<main>
+
+<section>
+  <h2>0. 全体像（今日やったことの流れ）</h2>
+  <ul>
+    <li>Docker Compose を使って <b>n8n + PostgreSQL</b> をローカルで起動</li>
+    <li>n8n にアクセスし、Web UI が表示されることを確認</li>
+    <li>Google Cloud で OAuth 設定を行い、Gmail アカウントを連携</li>
+    <li>OpenAI / Gmail 用の API・認証情報を取得し、n8n に登録</li>
+    <li>トラブルを一つずつ潰しながら、仕組みの理解を深めた</li>
+  </ul>
+</section>
+
+<section>
+  <h2>1. Docker 内で n8n を使えるようにした手順</h2>
+
+  <h3>1-1. Docker Compose を選んだ理由</h3>
+  <ul>
+    <li>n8n と PostgreSQL を <b>一発でまとめて起動</b>できる</li>
+    <li>本番（VPS）移行時も同じ構成を流用できる</li>
+  </ul>
+
+  <h3>1-2. 基本構成</h3>
+  <ul>
+    <li>n8n：ワークフロー自動化エンジン</li>
+    <li>PostgreSQL：n8n の実行履歴・設定保存用 DB</li>
+    <li>Docker Volume：データ永続化</li>
+  </ul>
+
+  <h3>1-3. 起動手順（概要）</h3>
+  <pre>
+① Docker Desktop を起動
+② docker compose up -d
+③ http://localhost:5678 にアクセス
+④ n8n の初期画面が表示されれば成功
+  </pre>
+
+  <p class="note">※ PostgreSQL はホストにポート公開せず、Docker 内ネットワークで n8n から接続</p>
+</section>
+
+<section>
+  <h2>2. Gmail アカウント連携のためにやったこと（OAuth）</h2>
+
+  <h3>2-1. なぜ Google Cloud 設定が必要か</h3>
+  <ul>
+    <li>n8n は自前アプリのため、Google に <b>身元登録</b>が必要</li>
+    <li>Gmail の ID / パスワードを直接渡さないための仕組みが OAuth</li>
+  </ul>
+
+  <h3>2-2. 実際にやった作業</h3>
+  <ul>
+    <li>Google Cloud プロジェクト作成</li>
+    <li>Gmail API を有効化</li>
+    <li>OAuth クライアント ID を作成</li>
+    <li>承認済みリダイレクト URI を登録
+      <pre>http://localhost:5678/rest/oauth2-credential/callback</pre>
+    </li>
+    <li>OAuth 同意画面を設定</li>
+    <li>テストユーザーに自分の Gmail を追加</li>
+  </ul>
+
+  <h3>2-3. つまずきポイントと学び</h3>
+  <ul>
+    <li>redirect_uri_mismatch → URL の完全一致が必要</li>
+    <li>access_denied → テストユーザー未登録が原因</li>
+    <li>「Account connected」表示で認証成功を確認</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. OpenAI アカウント認証（APIキー取得）</h2>
+
+  <h3>3-1. なぜ API キーが必要か</h3>
+  <ul>
+    <li>n8n から OpenAI を使うための <b>本人確認トークン</b></li>
+    <li>ユーザーの代わりに API を呼び出すため</li>
+  </ul>
+
+  <h3>3-2. 実際にやったこと</h3>
+  <ul>
+    <li>OpenAI のアカウント作成 / ログイン</li>
+    <li>API Keys 画面から新規キー発行</li>
+    <li>キーを n8n の Credential に登録</li>
+  </ul>
+
+  <p class="note">※ APIキーは一度しか表示されないため、安全な場所に保管</p>
+</section>
+
+<section>
+  <h2>4. 今日の学びピックアップ（理由つき）</h2>
+
+  <ul>
+    <li><b>Docker のエラーはホスト環境が原因なことが多い</b>：5432競合は Windows 側 PostgreSQL が原因</li>
+    <li><b>n8n は SaaS ではなく Web サービス</b>：OAuth 設定が必要になる理由が理解できた</li>
+    <li><b>API = 即課金ではない</b>：Billing を設定しない限り無料枠内で使える</li>
+    <li><b>OAuth のエラーは段階的に前進している証拠</b>：失敗ではなくチェックポイント</li>
+    <li><b>今回の知識は汎用スキル</b>：他の SaaS や自社ツールにも応用可能</li>
+  </ul>
+</section>
+
+</main>
+</body>
+</html>
+```
