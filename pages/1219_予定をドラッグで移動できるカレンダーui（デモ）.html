@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>予定をドラッグで移動できる月間カレンダー（デモ）</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .day {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 6px;
+      min-height: 120px;
+      background: #fafafa;
+    }
+
+    .day.today {
+      border-color: #5b8cff;
+      background: #eef4ff;
+    }
+
+    .day-title {
+      font-size: 12px;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    .event {
+      background: #5b8cff;
+      color: #fff;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: grab;
+      margin-bottom: 6px;
+    }
+
+    .day.drag-over {
+      outline: 2px dashed #5b8cff;
+    }
+
+    #log {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>予定をドラッグして別の日へ移動（月間表示）</h1>
+
+  <div class="calendar" id="calendar"></div>
+  <div id="log">予定をドラッグしてください</div>
+
+  <script>
+    const calendarEl = document.getElementById("calendar");
+    const logEl = document.getElementById("log");
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    // 今月のカレンダー日付配列を作る（1ヶ月分）
+    function generateMonthDates(baseDate) {
+      const dates = [];
+      const year = baseDate.getFullYear();
+      const month = baseDate.getMonth();
+
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+
+      for (let d = 1; d <= lastDay.getDate(); d++) {
+        dates.push(new Date(year, month, d));
+      }
+      return dates;
+    }
+
+    const dates = generateMonthDates(today);
+
+    // イベントデータ（キーは YYYY-MM-DD）
+    const events = {};
+
+    const todayKey = formatDate(today);
+    events[todayKey] = [
+      { id: 1, title: "17:00 - 19:00 予定" }
+    ];
+
+    function render() {
+      calendarEl.innerHTML = "";
+
+      dates.forEach(date => {
+        const key = formatDate(date);
+
+        const dayEl = document.createElement("div");
+        dayEl.className = "day";
+        dayEl.dataset.date = key;
+
+        if (key === todayKey) {
+          dayEl.classList.add("today");
+        }
+
+        const titleEl = document.createElement("div");
+        titleEl.className = "day-title";
+        titleEl.textContent = key;
+        dayEl.appendChild(titleEl);
+
+        (events[key] || []).forEach(ev => {
+          const evEl = document.createElement("div");
+          evEl.className = "event";
+          evEl.textContent = ev.title;
+          evEl.draggable = true;
+          evEl.dataset.id = ev.id;
+          evEl.dataset.from = key;
+
+          evEl.addEventListener("dragstart", e => {
+            e.dataTransfer.setData("text/plain", JSON.stringify({
+              id: ev.id,
+              from: key
+            }));
+          });
+
+          dayEl.appendChild(evEl);
+        });
+
+        dayEl.addEventListener("dragover", e => {
+          e.preventDefault();
+          dayEl.classList.add("drag-over");
+        });
+
+        dayEl.addEventListener("dragleave", () => {
+          dayEl.classList.remove("drag-over");
+        });
+
+        dayEl.addEventListener("drop", e => {
+          e.preventDefault();
+          dayEl.classList.remove("drag-over");
+
+          const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+          moveEvent(data.id, data.from, key);
+        });
+
+        calendarEl.appendChild(dayEl);
+      });
+    }
+
+    function moveEvent(eventId, fromKey, toKey) {
+      if (fromKey === toKey) return;
+
+      const evIndex = events[fromKey].findIndex(e => e.id === eventId);
+      const ev = events[fromKey][evIndex];
+
+      events[fromKey].splice(evIndex, 1);
+      events[toKey] = events[toKey] || [];
+      events[toKey].push(ev);
+
+      logEl.textContent = `予定を「${fromKey}」から「${toKey}」へ移動しました`;
+      render();
+    }
+
+    function formatDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    render();
+  </script>
+
+</body>
+</html>

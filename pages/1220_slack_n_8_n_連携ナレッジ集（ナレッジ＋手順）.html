@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slack×n8n 連携ナレッジ集（ナレッジ＋手順）</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#111a33;
+      --panel2:#0f1730;
+      --text:#e7ecff;
+      --muted:#b9c2ff;
+      --line:rgba(231,236,255,.15);
+      --accent:#7aa2ff;
+      --accent2:#8ef0c8;
+      --warn:#ffcf5c;
+      --danger:#ff7a7a;
+      --code:#0a0f22;
+      --chip:#1a2650;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+      background: radial-gradient(1200px 700px at 15% 10%, rgba(122,162,255,.20), transparent 60%),
+                  radial-gradient(900px 600px at 85% 25%, rgba(142,240,200,.14), transparent 55%),
+                  radial-gradient(800px 500px at 55% 90%, rgba(255,207,92,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.7;
+    }
+
+    header{
+      padding:28px 18px 18px;
+      border-bottom:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(17,26,51,.7), rgba(17,26,51,.2));
+      position:sticky;
+      top:0;
+      backdrop-filter: blur(10px);
+      z-index:10;
+    }
+
+    .wrap{max-width:1020px; margin:0 auto;}
+
+    h1{
+      font-size:20px;
+      margin:0;
+      letter-spacing:.2px;
+    }
+
+    .sub{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .toolbar{
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .search{
+      flex:1;
+      min-width:240px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      background:rgba(15,23,48,.7);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .search input{
+      width:100%;
+      border:0;
+      outline:none;
+      background:transparent;
+      color:var(--text);
+      font-size:14px;
+    }
+
+    .btn{
+      border:1px solid var(--line);
+      background: rgba(15,23,48,.6);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:13px;
+      cursor:pointer;
+      box-shadow: var(--shadow);
+    }
+
+    .btn:hover{border-color: rgba(122,162,255,.45);}
+
+    main{padding:18px 18px 40px;}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    @media (max-width: 940px){
+      .grid{grid-template-columns:1fr;}
+    }
+
+    nav{
+      background: rgba(17,26,51,.55);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px 14px 10px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 116px;
+    }
+
+    @media (max-width: 940px){
+      nav{position:relative; top:0;}
+    }
+
+    nav h2{font-size:14px; margin:0 0 10px; color:var(--muted);}
+
+    .toc a{
+      display:block;
+      padding:8px 10px;
+      border-radius:12px;
+      text-decoration:none;
+      color:var(--text);
+      border:1px solid transparent;
+      font-size:13px;
+    }
+
+    .toc a:hover{background: rgba(15,23,48,.7); border-color: var(--line);}
+
+    .toc small{color:var(--muted);}
+
+    section{
+      background: rgba(17,26,51,.45);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      box-shadow: var(--shadow);
+      margin-bottom:14px;
+    }
+
+    section h2{
+      margin:0 0 10px;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+
+    section h3{
+      margin:16px 0 6px;
+      font-size:14px;
+      color: var(--muted);
+      letter-spacing:.2px;
+    }
+
+    .pill{
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+      padding:3px 9px;
+      border-radius:999px;
+      background: rgba(26,38,80,.75);
+      border:1px solid var(--line);
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .pill strong{color:var(--text); font-weight:600;}
+
+    .note{
+      background: rgba(15,23,48,.7);
+      border:1px solid rgba(122,162,255,.35);
+      border-radius:14px;
+      padding:12px 12px;
+      margin:10px 0;
+    }
+
+    .note.warn{border-color: rgba(255,207,92,.45);}
+    .note.danger{border-color: rgba(255,122,122,.45);}
+
+    ul{margin:8px 0 0; padding-left:18px;}
+    li{margin:6px 0;}
+
+    .two{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+
+    @media (max-width: 720px){
+      .two{grid-template-columns:1fr;}
+    }
+
+    .card{
+      background: rgba(15,23,48,.65);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+    }
+
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: rgba(10,15,34,.9);
+      border:1px solid rgba(231,236,255,.18);
+      padding:2px 6px;
+      border-radius:8px;
+      font-size:12px;
+      color:var(--text);
+    }
+
+    pre{
+      background: rgba(10,15,34,.9);
+      border:1px solid rgba(231,236,255,.18);
+      border-radius:14px;
+      padding:12px;
+      overflow:auto;
+      margin:10px 0 0;
+    }
+
+    code{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px;}
+
+    .tagrow{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+
+    .tag{
+      background: rgba(122,162,255,.12);
+      border:1px solid rgba(122,162,255,.35);
+      color: var(--text);
+      border-radius:999px;
+      padding:3px 10px;
+      font-size:12px;
+    }
+
+    footer{
+      padding:20px 18px 34px;
+      color:var(--muted);
+      font-size:12px;
+      border-top:1px solid var(--line);
+    }
+
+    .muted{color:var(--muted);}
+
+    .hide{display:none!important;}
+
+    .anchor{
+      color: var(--accent);
+      text-decoration:none;
+      font-size:12px;
+      border:1px solid rgba(122,162,255,.35);
+      padding:2px 8px;
+      border-radius:999px;
+      margin-left:8px;
+      vertical-align:middle;
+    }
+
+    .anchor:hover{background: rgba(122,162,255,.12);}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Slack×n8n 連携ナレッジ集（ナレッジ＋手順）</h1>
+      <p class="sub">目的：Slack を n8n から安全・確実に使えるようにするための「判断できる知識（Why）」と「再現手順（How）」を1つにまとめる。</p>
+
+      <div class="toolbar">
+        <div class="search" role="search">
+          <span class="pill"><strong>検索</strong><span class="muted">（本文を絞り込み）</span></span>
+          <input id="q" type="search" placeholder="例：scope / token / not_in_channel / Activate / Schedule" aria-label="本文検索" />
+        </div>
+        <button class="btn" id="btnExpand">すべて展開</button>
+        <button class="btn" id="btnCollapse">すべて折りたたみ</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap grid">
+      <nav aria-label="目次">
+        <h2>目次</h2>
+        <div class="toc">
+          <a href="#knowledge">ナレッジ編（背景知識） <small>— 判断できるようになる</small></a>
+          <a href="#steps">実作業サマリー（手順抽出） <small>— そのまま再現</small></a>
+          <a href="#troubles">典型エラーと意味 <small>— 迷子防止</small></a>
+          <a href="#glossary">用語メモ <small>— 読み返し用</small></a>
+        </div>
+        <div class="note warn" style="margin-top:12px;">
+          <div class="pill"><strong>重要</strong><span class="muted">Slack API 管理画面は Web のみ</span></div>
+          <ul>
+            <li>Slack App／モバイルアプリ内に管理画面はありません。</li>
+            <li>管理画面 URL：<span class="kbd">https://api.slack.com/apps</span></li>
+          </ul>
+        </div>
+      </nav>
+
+      <div>
+        <section id="knowledge" data-title="ナレッジ編" class="block">
+          <h2>ナレッジ編：Slack × n8n 連携を理解するための背景知識 <a class="anchor" href="#knowledge">#</a></h2>
+          <div class="tagrow">
+            <span class="tag">Why（判断軸）</span>
+            <span class="tag">構造理解</span>
+            <span class="tag">再現性</span>
+          </div>
+
+          <details open class="chunk" data-keywords="slack app api">
+            <summary><span class="pill"><strong>ナレッジ①</strong> Slack 連携は「Slackアプリ開発」である</span></summary>
+            <div class="note">
+              <p><strong>Slack と外部ツールの連携は「API設定」ではなく「アプリ開発」扱い</strong>です。Slack は外部からの操作をすべて Slack App 単位で管理し、人も Bot も同じユーザー概念の延長として扱います。したがって「Webhook を貼るだけ」「トークンを1個取って終わり」という設計ではありません。</p>
+              <p>結論として、<strong>n8n で Slack を使う＝Slack App を設計する行為</strong>です。</p>
+            </div>
+            <div class="two">
+              <div class="card">
+                <h3>この前提を知らないと起きること</h3>
+                <ul>
+                  <li>設定の多さに混乱する</li>
+                  <li>Scope / Token / Channel の関係が整理できない</li>
+                  <li>画面を行ったり来たりして迷子になる</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>ナレッジの使いどころ</h3>
+                <ul>
+                  <li>「どの画面が本丸か」を見失わない</li>
+                  <li>設計の単位を App として捉え直せる</li>
+                </ul>
+              </div>
+            </div>
+          </details>
+
+          <details open class="chunk" data-keywords="slack api management web oauth">
+            <summary><span class="pill"><strong>ナレッジ②</strong> Slack API 管理画面（Web）は唯一の正解ソース</span></summary>
+            <div class="note">
+              <p><strong>Slack API 管理画面（Web）は、Slack連携における一次情報</strong>です。権限・状態・制約が集約されているのは Web 管理画面だけで、n8n 側は Slack の状態を十分説明してくれません。</p>
+              <p>行動原則として、<strong>連携でおかしくなったら必ず Web 管理画面へ戻る</strong>を持つと迷子を防げます。</p>
+            </div>
+          </details>
+
+          <details open class="chunk" data-keywords="oauth scope permissions channels read chat write">
+            <summary><span class="pill"><strong>ナレッジ③</strong> OAuth Scope は「できることリスト」ではない</span></summary>
+            <div class="note">
+              <p><strong>OAuth Scope は「API を呼ぶ権利」</strong>であり、動作保証ではありません。たとえば <span class="kbd">channels:read</span> があっても投稿できるとは限らず、実際の可否はチャンネル参加状態や Workspace 設定などにも依存します。</p>
+              <p><strong>Scope は入口の鍵</strong>であって、通行証ではありません。</p>
+            </div>
+            <div class="card">
+              <h3>この認識がないと</h3>
+              <ul>
+                <li>「Scope あるのに動かない」で詰まる</li>
+                <li>原因を n8n 側に求めて遠回りする</li>
+                <li>本当の原因（Slack 側ルール）に辿り着けない</li>
+              </ul>
+            </div>
+          </details>
+
+          <details open class="chunk" data-keywords="token reinstall snapshot">
+            <summary><span class="pill"><strong>ナレッジ④</strong> Token は「権限のスナップショット」</span></summary>
+            <div class="note">
+              <p><strong>Token は Scope 設定を含んだスナップショット</strong>です。Scope を変えても Token は自動更新されず、<strong>再インストール時に初めて再生成</strong>されます。</p>
+              <p>したがって、<strong>Scope を触ったら Token も作り直す</strong>が基本ルールになります。</p>
+            </div>
+          </details>
+
+          <details open class="chunk" data-keywords="bot user not_in_channel invite">
+            <summary><span class="pill"><strong>ナレッジ⑤</strong> Bot は「自動投稿用のユーザー」</span></summary>
+            <div class="note">
+              <p>Bot は特別な存在ではなく、<strong>制限付きユーザー</strong>として扱われます。よって、チャンネル参加が必要で、参加していない場所には投稿できません。</p>
+              <p><span class="kbd">not_in_channel</span> は「あなたはこの場にいませんよ」という Slack の思想どおりのメッセージです。</p>
+            </div>
+          </details>
+
+          <details open class="chunk" data-keywords="n8n validation message text required">
+            <summary><span class="pill"><strong>ナレッジ⑥</strong> n8n は「実行前チェックが強い」</span></summary>
+            <div class="note">
+              <p>Message Text が空などの必須入力不足は、Slack に投げる前に n8n が止めます。これは連携失敗ではなく、<strong>入力不足エラー</strong>です。</p>
+              <p>切り分けとして、<strong>n8n エラーか Slack エラーか</strong>をまず分けると早く解決できます。</p>
+            </div>
+          </details>
+
+          <details open class="chunk" data-keywords="schedule trigger or rules minutes days">
+            <summary><span class="pill"><strong>ナレッジ⑦</strong> Schedule Trigger は「条件 OR 実行」</span></summary>
+            <div class="note">
+              <p>Schedule Trigger は複数ルールを並べると、<strong>AND ではなく OR</strong>で動きます。テスト用・本番用のルールを同居させると想定外の時間に動くリスクがあります。</p>
+            </div>
+          </details>
+
+          <details open class="chunk" data-keywords="activate execute production">
+            <summary><span class="pill"><strong>ナレッジ⑧</strong> Activate は「本番スイッチ」</span></summary>
+            <div class="note">
+              <p><strong>Execute と Activate は別物</strong>です。Execute はその場のテスト、Activate は常駐実行（スケジュール登録）です。手動で動いたのに自動で動かない場合、Activate 忘れが典型です。</p>
+            </div>
+          </details>
+
+          <div class="note warn">
+            <div class="pill"><strong>補足</strong><span class="muted">App を複数持つか問題</span></div>
+            <ul>
+              <li><strong>基本：用途ごとに App を分ける</strong>（通知用／監視用／社内ツール用 など）</li>
+              <li>理由：権限の盛りすぎを防ぎ、影響範囲を小さくし、用途の説明がしやすい</li>
+              <li>既存 App を使うのは「目的が明確」「権限が近い」場合に限る</li>
+            </ul>
+          </div>
+        </section>
+
+        <section id="steps" data-title="実作業サマリー" class="block">
+          <h2>実作業サマリー（ナレッジ対応・手順抽出版） <a class="anchor" href="#steps">#</a></h2>
+          <p class="muted">以下は上のナレッジを踏まえたうえで、実際にやる操作だけを抜き出したもの。各手順の番号はナレッジ番号（①〜⑧）と対応。</p>
+
+          <details open class="chunk" data-keywords="api management web">
+            <summary><span class="pill"><strong>【①②】</strong> Slack API 管理画面へアクセス</span></summary>
+            <ul>
+              <li>Web ブラウザで <span class="kbd">https://api.slack.com/apps</span> を開く</li>
+              <li>「Your Apps」を開く</li>
+              <li>対象 Workspace を確認</li>
+            </ul>
+          </details>
+
+          <details open class="chunk" data-keywords="create app existing app">
+            <summary><span class="pill"><strong>【①】</strong> Slack App を作成 or 選択</span></summary>
+            <div class="two">
+              <div class="card">
+                <h3>新規</h3>
+                <ul>
+                  <li>「Create New App」→「From scratch」</li>
+                  <li>App 名と Workspace を指定</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3>既存</h3>
+                <ul>
+                  <li>一覧から対象 App を選択</li>
+                </ul>
+              </div>
+            </div>
+          </details>
+
+          <details open class="chunk" data-keywords="oauth permissions bot token scopes chat write channels read">
+            <summary><span class="pill"><strong>【③】</strong> OAuth & Permissions を設定</span></summary>
+            <ul>
+              <li>左メニュー「OAuth & Permissions」を開く</li>
+              <li>Bot Token Scopes に追加：<span class="kbd">chat:write</span>, <span class="kbd">channels:read</span></li>
+              <li>必要に応じて：<span class="kbd">groups:read</span>（プライベート）, <span class="kbd">im:read</span>（DM）</li>
+            </ul>
+          </details>
+
+          <details open class="chunk" data-keywords="install reinstall workspace token refresh">
+            <summary><span class="pill"><strong>【④】</strong> Workspace へインストール（再インストール）</span></summary>
+            <ul>
+              <li>「Install to Workspace」または「Reinstall to Workspace」</li>
+              <li>Slack 側で許可</li>
+            </ul>
+          </details>
+
+          <details open class="chunk" data-keywords="xoxb bot user oauth token">
+            <summary><span class="pill"><strong>【④⑤】</strong> Bot User OAuth Token を取得</span></summary>
+            <ul>
+              <li>表示される <strong>Bot User OAuth Token</strong> をコピー（<span class="kbd">xoxb-</span> から始まる）</li>
+            </ul>
+          </details>
+
+          <details open class="chunk" data-keywords="n8n credentials slack access token">
+            <summary><span class="pill"><strong>【⑤】</strong> n8n に Slack Credential を登録</span></summary>
+            <ul>
+              <li>n8n の Credentials で Slack を新規作成</li>
+              <li>Connect using：Access Token</li>
+              <li>Bot Token（xoxb-…）を貼り付けて保存</li>
+            </ul>
+          </details>
+
+          <details open class="chunk" data-keywords="slack node message send channel message text">
+            <summary><span class="pill"><strong>【⑥】</strong> Slack ノードを設定</span></summary>
+            <ul>
+              <li>Resource：Message</li>
+              <li>Operation：Send</li>
+              <li>Send Message To：Channel</li>
+              <li>Channel：送信先を選択／指定</li>
+              <li>Message Text：固定文 or Expression（例 <span class="kbd">{{$json.message}}</span>）</li>
+            </ul>
+          </details>
+
+          <details open class="chunk" data-keywords="invite bot channel not in channel">
+            <summary><span class="pill"><strong>【⑤⑥】</strong> Bot をチャンネルに参加させる</span></summary>
+            <ul>
+              <li>Slack の対象チャンネルで <span class="kbd">/invite @Bot名</span></li>
+              <li>Bot がメンバーになったことを確認</li>
+            </ul>
+          </details>
+
+          <details open class="chunk" data-keywords="execute step test">
+            <summary><span class="pill"><strong>【⑥】</strong> 動作確認（手動実行）</span></summary>
+            <ul>
+              <li>n8n で Execute step</li>
+              <li>Slack に投稿されることを確認</li>
+            </ul>
+          </details>
+
+          <details open class="chunk" data-keywords="schedule trigger minutes days rules">
+            <summary><span class="pill"><strong>【⑦】</strong> Schedule Trigger を設定（任意）</span></summary>
+            <ul>
+              <li>Trigger Interval を設定（例：Minutes / 5）</li>
+              <li>不要ルールは削除（OR 実行事故防止）</li>
+            </ul>
+          </details>
+
+          <details open class="chunk" data-keywords="activate workflow">
+            <summary><span class="pill"><strong>【⑧】</strong> ワークフローを Activate</span></summary>
+            <ul>
+              <li>ワークフロー全体を Activate（本番稼働）</li>
+              <li>以後、スケジュール通り自動実行</li>
+            </ul>
+          </details>
+        </section>
+
+        <section id="troubles" data-title="典型エラー" class="block">
+          <h2>典型エラーと意味（迷子防止） <a class="anchor" href="#troubles">#</a></h2>
+          <div class="two">
+            <div class="card chunk" data-keywords="missing required oauth scopes could not load list">
+              <h3>チャンネル一覧が出ない</h3>
+              <ul>
+                <li>例：<span class="kbd">Could not load list</span></li>
+                <li>例：<span class="kbd">missing required OAuth Scopes</span></li>
+              </ul>
+              <div class="note">
+                <p><strong>原因</strong>：Scope 不足（<span class="kbd">channels:read</span> など）／再インストール未実施。</p>
+                <p><strong>対応</strong>：【③】【④】を見直す。</p>
+              </div>
+            </div>
+
+            <div class="card chunk" data-keywords="not_in_channel">
+              <h3>Slack error: not_in_channel</h3>
+              <div class="note">
+                <p><strong>原因</strong>：Bot がそのチャンネルに参加していない。</p>
+                <p><strong>対応</strong>：【⑤⑥】<span class="kbd">/invite @Bot名</span> を実行。</p>
+              </div>
+            </div>
+
+            <div class="card chunk" data-keywords="workflow has issues cannot be executed message text">
+              <h3>Problem executing workflow</h3>
+              <ul>
+                <li>例：<span class="kbd">The workflow has issues and cannot be executed</span></li>
+              </ul>
+              <div class="note">
+                <p><strong>原因</strong>：n8n の必須入力不足（例：Message Text が空）。</p>
+                <p><strong>対応</strong>：【⑥】Message Text を入れて再実行。</p>
+              </div>
+            </div>
+
+            <div class="card chunk" data-keywords="schedule trigger unexpected time or rules">
+              <h3>想定外の時間に動く</h3>
+              <div class="note">
+                <p><strong>原因</strong>：Schedule Trigger に複数ルール（OR）を入れている。</p>
+                <p><strong>対応</strong>：【⑦】不要ルールを削除し、テスト／本番を分ける。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="glossary" data-title="用語メモ" class="block">
+          <h2>用語メモ（読み返し用） <a class="anchor" href="#glossary">#</a></h2>
+          <div class="two">
+            <div class="card chunk" data-keywords="scope oauth permissions">
+              <h3>OAuth Scope</h3>
+              <p class="muted">API を呼ぶ権利（入口の鍵）。実際の可否はチャンネル参加状態などにも依存。</p>
+            </div>
+            <div class="card chunk" data-keywords="token xoxb">
+              <h3>Bot User OAuth Token（xoxb-）</h3>
+              <p class="muted">n8n が Slack を操作するための鍵。Scope 変更後は再インストールで再発行が必要。</p>
+            </div>
+            <div class="card chunk" data-keywords="install reinstall">
+              <h3>Install / Reinstall to Workspace</h3>
+              <p class="muted">Scope 変更を Workspace に反映し、Token を作り直す工程。</p>
+            </div>
+            <div class="card chunk" data-keywords="activate execute">
+              <h3>Execute と Activate</h3>
+              <p class="muted">Execute＝手動テスト。Activate＝スケジュール実行（本番稼働）。</p>
+            </div>
+          </div>
+
+          <div class="note danger">
+            <div class="pill"><strong>セキュリティ注意</strong><span class="muted">Token の取り扱い</span></div>
+            <ul>
+              <li>Bot Token（xoxb-…）は漏洩すると第三者が投稿できる可能性があります。</li>
+              <li>ナレッジ共有時は Token を貼らない／伏字にする運用が安全です。</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="pill"><strong>使い方</strong><span class="muted">検索で本文を絞り込み／各セクションは折りたたみ可能</span></div>
+      <p style="margin:10px 0 0;">このドキュメントは「Why（ナレッジ）」と「How（手順）」をセットで残すことを意図しています。追記する場合は、該当ナレッジ（①〜⑧）か該当手順（【①〜⑧】）の直下に、失敗例・エラー文・スクショ参照などを追加するのが扱いやすいです。</p>
+    </div>
+  </footer>
+
+  <script>
+    // Simple in-page search + expand/collapse.
+    const q = document.getElementById('q');
+    const blocks = [...document.querySelectorAll('.block')];
+    const chunks = [...document.querySelectorAll('.chunk')];
+    const btnExpand = document.getElementById('btnExpand');
+    const btnCollapse = document.getElementById('btnCollapse');
+
+    function normalize(s){
+      return (s || '').toLowerCase();
+    }
+
+    function chunkText(el){
+      const kw = el.getAttribute('data-keywords') || '';
+      const title = el.getAttribute('data-title') || '';
+      const txt = el.innerText || '';
+      return normalize(kw + ' ' + title + ' ' + txt);
+    }
+
+    function applyFilter(){
+      const term = normalize(q.value.trim());
+      if(!term){
+        chunks.forEach(c => c.classList.remove('hide'));
+        blocks.forEach(b => b.classList.remove('hide'));
+        return;
+      }
+
+      // Hide chunks that don't match.
+      chunks.forEach(c => {
+        const t = chunkText(c);
+        c.classList.toggle('hide', !t.includes(term));
+      });
+
+      // Hide blocks if all of their chunks are hidden.
+      blocks.forEach(b => {
+        const anyVisible = [...b.querySelectorAll('.chunk')].some(c => !c.classList.contains('hide'));
+        b.classList.toggle('hide', !anyVisible);
+      });
+    }
+
+    q.addEventListener('input', applyFilter);
+
+    btnExpand.addEventListener('click', () => {
+      document.querySelectorAll('details').forEach(d => d.open = true);
+    });
+
+    btnCollapse.addEventListener('click', () => {
+      document.querySelectorAll('details').forEach(d => d.open = false);
+      // Keep main sections visible; only collapses details.
+    });
+
+    // If the page is opened with a hash, ensure relevant details open.
+    window.addEventListener('hashchange', () => {
+      const id = location.hash.replace('#','');
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.querySelectorAll('details').forEach(d => d.open = true);
+    });
+  </script>
+</body>
+</html>
