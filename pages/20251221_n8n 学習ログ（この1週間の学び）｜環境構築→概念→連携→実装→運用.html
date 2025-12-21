@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>n8n 学習ログ（この1週間の学び）｜環境構築→概念→連携→実装→運用</title>
+</head>
+<body>
+<h1>n8n 学習ログ（この1週間の学び）｜環境構築→概念→連携→実装→運用</h1>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>n8n 学習ログ（この1週間の学び）｜環境構築→概念→連携→実装→運用</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#111826;
+      --panel2:#0f1724;
+      --text:#e6edf3;
+      --muted:#a7b1bb;
+      --accent:#67e8f9;
+      --line:#223047;
+      --warn:#fbbf24;
+      --ok:#34d399;
+      --danger:#fb7185;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --radius2:12px;
+      --max: 980px;
+      --fs: 16px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 10% 0%, #0c1b2a 0%, var(--bg) 55%) fixed;
+      color:var(--text);
+      font-size: var(--fs);
+      line-height:1.6;
+      padding: 18px 14px 80px;
+    }
+
+    a{ color: var(--accent); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+
+    header{
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(11,15,20,.72);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(34,48,71,.55);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 14px;
+      margin-bottom: 14px;
+    }
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      margin-bottom: 10px;
+    }
+    .title h1{
+      font-size: 1.05rem;
+      margin: 0;
+      letter-spacing: .2px;
+    }
+    .subtitle{
+      color: var(--muted);
+      font-size: .92rem;
+      margin:0;
+    }
+
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-start;
+      margin-top: 10px;
+    }
+
+    button{
+      appearance:none;
+      border: 1px solid rgba(34,48,71,.9);
+      background: linear-gradient(180deg, rgba(17,24,38,.95), rgba(15,23,36,.95));
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: .92rem;
+      line-height: 1;
+      cursor:pointer;
+      transition: transform .05s ease, border-color .2s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    button:active{ transform: translateY(1px); }
+    button:hover{ border-color: rgba(103,232,249,.55); }
+    button.secondary{
+      background: rgba(17,24,38,.55);
+      box-shadow:none;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(34,48,71,.8);
+      background: rgba(17,24,38,.55);
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .card{
+      background: rgba(17,24,38,.72);
+      border: 1px solid rgba(34,48,71,.75);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    .toc{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .toc a{
+      display:block;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(34,48,71,.65);
+      background: rgba(15,23,36,.6);
+    }
+    .toc a span{
+      display:block;
+      color: var(--muted);
+      font-size: .88rem;
+      margin-top: 2px;
+    }
+
+    details{
+      border: 1px solid rgba(34,48,71,.8);
+      border-radius: var(--radius);
+      overflow:hidden;
+      background: rgba(15,23,36,.55);
+      margin: 12px 0;
+    }
+    summary{
+      list-style:none;
+      cursor:pointer;
+      padding: 14px 14px;
+      font-weight: 700;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      user-select:none;
+    }
+    summary::-webkit-details-marker{ display:none; }
+
+    .sum-left{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width: 0;
+    }
+    .sum-left .h{
+      font-size: 1rem;
+      margin:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .sum-left .d{
+      font-weight: 500;
+      color: var(--muted);
+      font-size: .88rem;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .caret{
+      flex: 0 0 auto;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid rgba(34,48,71,.85);
+      display:grid;
+      place-items:center;
+      background: rgba(17,24,38,.55);
+    }
+    details[open] .caret{
+      border-color: rgba(103,232,249,.55);
+    }
+    .caret svg{
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: var(--text);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transform: rotate(0deg);
+      transition: transform .15s ease;
+      opacity: .9;
+    }
+    details[open] .caret svg{ transform: rotate(180deg); }
+
+    .content{
+      padding: 0 14px 14px;
+      border-top: 1px solid rgba(34,48,71,.7);
+    }
+
+    h2,h3{
+      margin: 14px 0 8px;
+      line-height: 1.25;
+    }
+    h2{ font-size: 1.05rem; }
+    h3{ font-size: 1.0rem; color: var(--accent); }
+    p{ margin: 8px 0; color: var(--text); }
+    ul{ margin: 8px 0 8px 1.1em; padding:0; }
+    li{ margin: 6px 0; }
+    .muted{ color: var(--muted); }
+
+    .note{
+      border-left: 4px solid rgba(103,232,249,.7);
+      background: rgba(103,232,249,.08);
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+    .note .label{
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+      font-size: .9rem;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(34,48,71,.75);
+      background: rgba(17,24,38,.55);
+      font-size: .82rem;
+      color: var(--muted);
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .badge.ok{ border-color: rgba(52,211,153,.55); color: #c7f9e6; }
+    .badge.warn{ border-color: rgba(251,191,36,.55); color: #ffe9b3; }
+    .badge.danger{ border-color: rgba(251,113,133,.55); color: #ffd0d8; }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media(min-width: 860px){
+      .grid2{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .kvs{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .kv{
+      border: 1px solid rgba(34,48,71,.7);
+      border-radius: 12px;
+      background: rgba(17,24,38,.55);
+      padding: 10px 12px;
+    }
+    .kv b{ display:block; margin-bottom: 2px; }
+    .kv span{ color: var(--muted); font-size: .92rem; }
+
+    footer{
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: .9rem;
+      text-align:center;
+    }
+
+    .toplink{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 20;
+      border-radius: 999px;
+      padding: 12px 14px;
+      background: rgba(17,24,38,.88);
+      border: 1px solid rgba(34,48,71,.85);
+      box-shadow: var(--shadow);
+    }
+
+    .sr-only{
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      border:0;
+    }
+  </style>
+</head>
+
+<body>
+  <a id="top"></a>
+  <div class="wrap">
+
+    <header>
+      <div class="title">
+        <h1>n8n 学習ログ（この1週間の学び）</h1>
+        <p class="subtitle">環境構築 → 概念 → 連携（Webhook / Slack / GitHub / GAS）→ 実装（Code Node）→ 運用の見取り図</p>
+      </div>
+
+      <div class="toolbar" role="group" aria-label="折りたたみ操作">
+        <button type="button" id="btnOpenAll" title="すべての章を開きます">
+          <span aria-hidden="true">⬇️</span> すべて開く
+        </button>
+        <button type="button" id="btnCloseAll" class="secondary" title="すべての章を閉じます">
+          <span aria-hidden="true">⬆️</span> すべて閉じる
+        </button>
+        <button type="button" id="btnOpenKey" class="secondary" title="重要章（基礎〜連携の芯）だけ開きます">
+          <span aria-hidden="true">⭐</span> 重要章だけ開く
+        </button>
+        <span class="chip" title="スマホで読みやすい折りたたみ構成">
+          <span aria-hidden="true">📱</span> Mobile-first / details 折りたたみ
+        </span>
+      </div>
+    </header>
+
+    <section class="card" aria-labelledby="intro">
+      <h2 id="intro">この資料について</h2>
+      <p>
+        この1週間（特に「昨日〜今日」）で学んだ n8n の知識を、<b>最初は環境構築 → 概念 → 連携 → 実装 → 運用</b>の順に整理しました。
+        会話で出てきたテーマを軸にしているため、「自分が何をどこまで触ったか」を思い出しやすい構成です。
+      </p>
+
+      <div class="note">
+        <div class="label">なぜこの順番か</div>
+        <p class="muted" style="margin:0;">
+          n8n は「まず動かせる状態」がないと概念が腹落ちしにくく、次に「連携したい」が自然に出てきます。
+          さらに連携が増えるほど、整形・分岐・エラー処理（運用）の重要度が上がるため、この順が再現性を作りやすいです。
+        </p>
+      </div>
+
+      <div class="grid2">
+        <div class="card" style="margin:0; background:rgba(15,23,36,.35); border-radius:12px;">
+          <h3 style="margin-top:0;">目次（タップで移動）</h3>
+          <nav class="toc" aria-label="目次">
+            <a href="#s1">1. n8n って結局なに？<span>ノーコード/ローコード自動化の全体像</span></a>
+            <a href="#s2">2. 環境構築（Docker / DB / 設定）<span>最初に固めるべき土台</span></a>
+            <a href="#s3">3. 基本概念（データが流れる）<span>腹落ちすると一気に楽</span></a>
+            <a href="#s4">4. Webhook（発行側/受け側）<span>入口を作る学び</span></a>
+            <a href="#s5">5. Slack（Token / Scope / Bot）<span>認証と権限の芯</span></a>
+            <a href="#s6">6. GitHub（Issue / コメント / ラベル）<span>使いどころ→自動化へ</span></a>
+            <a href="#s7">7. Code Node（JavaScript）<span>整形・抽出・分岐の実装</span></a>
+            <a href="#s8">8. n8n × GAS 連携のメリット<spaN>得意領域を分担する設計</spaN></a>
+            <a href="#s9">9. HTML5 手順書化の方向性<spaN>知識の形式化（再現可能）</spaN></a>
+            <a href="#s10">10. 次の学習テーマ<spaN>自然に伸びる順番</spaN></a>
+          </nav>
+        </div>
+
+        <div class="card" style="margin:0; background:rgba(15,23,36,.35); border-radius:12px;">
+          <h3 style="margin-top:0;">タグ（学びの焦点）</h3>
+          <div>
+            <span class="badge ok">環境構築</span>
+            <span class="badge ok">データフロー</span>
+            <span class="badge warn">認証/権限</span>
+            <span class="badge warn">Webhook</span>
+            <span class="badge ok">Slack連携</span>
+            <span class="badge ok">GitHub運用</span>
+            <span class="badge ok">GAS連携</span>
+            <span class="badge danger">詰まりポイントの切り分け</span>
+            <span class="badge ok">手順書化（HTML5）</span>
+          </div>
+
+          <div class="note" style="margin-top:12px;">
+            <div class="label">読み方のコツ</div>
+            <p class="muted" style="margin:0;">
+              まずは「3. 基本概念」と「4〜6. 連携」を押さえると、n8nの学びが線でつながります。
+              次に「7. Code Node」で“通知＋要約”のような一段上の自動化へ進みやすくなります。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1 -->
+    <details id="s1" data-key="true" open>
+      <summary>
+        <div class="sum-left">
+          <div class="h">1. n8n って結局なに？</div>
+          <div class="d">ノーコード/ローコード自動化ツールの役割と強み</div>
+        </div>
+        <div class="caret" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </summary>
+      <div class="content">
+        <ul>
+          <li><b>ノーコード/ローコードの自動化ツール</b>：<br/>
+            「ある出来事をきっかけに（トリガー）」「処理をつないで（ワークフロー）」「別の場所へ結果を渡す」ための実行基盤。</li>
+          <li><b>強いポイント</b>
+            <ul>
+              <li>UIで組める（ノードをつなぐ）＋必要なら <b>Code Node（JS）でロジックを書ける</b></li>
+              <li>Webhook、API、Slack、GitHub、GAS、Notionなど <b>外部サービス連携</b>が中心</li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="note">
+          <div class="label">なぜこの整理にしたか</div>
+          <p class="muted" style="margin:0;">
+            学びの流れが「環境を作る → 概念が分かる → 連携したくなる → 実装が必要になる → 運用が重要になる」と自然に進んでいたため、
+            その順が最も思い出しやすく、再現しやすいからです。
+          </p>
+        </div>
+      </div>
+    </details>
+
+    <!-- 2 -->
+    <details id="s2" data-key="true" open>
+      <summary>
+        <div class="sum-left">
+          <div class="h">2. 環境構築で学んだこと（Docker / DB / 設定）</div>
+          <div class="d">永続化と認証が固まると、後が一気に楽になる</div>
+        </div>
+        <div class="caret" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </summary>
+      <div class="content">
+        <h3>2.1 Docker Compose で立ち上げる構成の理解</h3>
+        <ul>
+          <li><b>n8n 本体コンテナ</b></li>
+          <li><b>永続化のためのDB</b>（例：<code>postgres:15</code>）</li>
+          <li><b>ports</b> でブラウザからアクセス（例：<code>5678:5678</code>）</li>
+          <li><b>volumes</b> でデータ保持（DBの永続化）</li>
+        </ul>
+
+        <h3>2.2 重要な環境変数の意味</h3>
+        <div class="kvs">
+          <div class="kv">
+            <b>タイムゾーン系</b>
+            <span><code>GENERIC_TIMEZONE=Asia/Tokyo</code> / <code>TZ=Asia/Tokyo</code>：実行時刻・ログ・スケジュールのズレ防止</span>
+          </div>
+          <div class="kv">
+            <b>DB接続系</b>
+            <span><code>DB_TYPE=postgresdb</code> / <code>DB_POSTGRESDB_HOST=postgres</code> など：どこにワークフロー情報を保存するかを決める</span>
+          </div>
+          <div class="kv">
+            <b>権限/安全系</b>
+            <span><code>N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true</code>：設定ファイル権限が甘い場合に起動を止めて事故を防ぐ</span>
+          </div>
+          <div class="kv">
+            <b>実行方式系</b>
+            <span><code>N8N_RUNNERS_ENABLED=true</code> など：実行基盤の設定（バージョン/構成により意味合いが変わる）</span>
+          </div>
+        </div>
+
+        <h3>2.3 「最初の管理者」まわりで悩むポイント</h3>
+        <ul>
+          <li>「YAML（compose）で最初から管理者ユーザーを固定で作れないか？」という発想に到達</li>
+          <li>ここは <b>n8n側の認証方式（バージョン/モード）</b> によってやり方が変わるため、ハマりやすい</li>
+          <li>結果として「環境変数で全部済む話」と「初期化/画面操作が絡む話」がある、と切り分けが必要になった</li>
+        </ul>
+
+        <div class="note">
+          <div class="label">なぜここが重要か</div>
+          <p class="muted" style="margin:0;">
+            n8nは「ワークフロー作成」以前に、<b>永続化（DB）と認証（ログイン）</b>が固まっていないと運用で詰みます。
+            最初にここへ意識が向いたのは、学び順として正しいです。
+          </p>
+        </div>
+      </div>
+    </details>
+
+    <!-- 3 -->
+    <details id="s3" data-key="true" open>
+      <summary>
+        <div class="sum-left">
+          <div class="h">3. 基本概念（ここが腹落ちすると一気に楽になる）</div>
+          <div class="d">Trigger / Node / データフロー / Expression</div>
+        </div>
+        <div class="caret" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </summary>
+      <div class="content">
+        <h3>3.1 ワークフローの構造</h3>
+        <ul>
+          <li><b>Trigger（開始点）</b>：Webhook / Cron / アプリイベント / 手動実行</li>
+          <li><b>Node（処理）</b>：取得・変換・分岐・送信など</li>
+          <li><b>Connection（線）</b>：前ノードの出力を次ノードへ渡す</li>
+        </ul>
+
+        <h3>3.2 データの流れ（超重要）</h3>
+        <ul>
+          <li>各ノードは基本的に <b>items（配列）</b> を扱う</li>
+          <li>次ノードへ渡るのは「前ノードの出力JSON」</li>
+          <li>デバッグの視点：
+            <ul>
+              <li>「どのノードの出力が今の入力になってるか」</li>
+              <li>「配列の何番目を処理しているか」</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>3.3 Expression（式）の役割</h3>
+        <ul>
+          <li>UI上で <code>{{$json.xxx}}</code> のように参照して値を埋め込む</li>
+          <li>「コードを書かずにデータをつなぐ」ための最小手段</li>
+        </ul>
+
+        <div class="note">
+          <div class="label">なぜこの章が最重要か</div>
+          <p class="muted" style="margin:0;">
+            n8nは後半でCode Nodeも使えますが、まず<b>“データが流れている”</b>理解がないと、
+            WebhookもSlackもGitHubも「なぜ動かないのか分からない」状態になりやすいからです。
+          </p>
+        </div>
+      </div>
+    </details>
+
+    <!-- 4 -->
+    <details id="s4" data-key="true" open>
+      <summary>
+        <div class="sum-left">
+          <div class="h">4. Webhookで学んだこと（発行する側／される側）</div>
+          <div class="d">送る側は楽・受ける側は設計と安全性が増える</div>
+        </div>
+        <div class="caret" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </summary>
+      <div class="content">
+        <h3>4.1 Webhookの基本構造</h3>
+        <div class="grid2">
+          <div class="card" style="margin:0; background:rgba(17,24,38,.45); border-radius:12px;">
+            <h3 style="margin-top:0;">発行する側（送る側）</h3>
+            <ul>
+              <li>何かイベントが起きたら、指定URLへHTTPリクエストを送る</li>
+              <li>設定は比較的ラク（URL貼る＋イベント選ぶ程度が多い）</li>
+            </ul>
+          </div>
+          <div class="card" style="margin:0; background:rgba(17,24,38,.45); border-radius:12px;">
+            <h3 style="margin-top:0;">受け取る側（受ける側）</h3>
+            <ul>
+              <li>URLを用意する（n8nのWebhook Triggerがまさにこれ）</li>
+              <li>受け取ったデータ形式に合わせて後続処理を作る</li>
+              <li>セキュリティ（署名/トークン/Basic認証など）も考えることが増える</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>4.2 n8n目線でのWebhookの位置づけ</h3>
+        <ul>
+          <li>Webhook Trigger = 「外から叩ける入口」</li>
+          <li>入口ができると、Slack通知、GitHub操作、DB書き込み等へ繋げられる</li>
+        </ul>
+
+        <div class="note">
+          <div class="label">なぜこの整理にしたか</div>
+          <p class="muted" style="margin:0;">
+            疑問が「発行側は楽だが、受ける側は設定が多いの？」だったため、
+            まさにその構造差を学びとして固定するのが目的です。
+          </p>
+        </div>
+      </div>
+    </details>
+
+    <!-- 5 -->
+    <details id="s5" data-key="true" open>
+      <summary>
+        <div class="sum-left">
+          <div class="h">5. Slack連携で学んだこと（Token / Scope / Bot）</div>
+          <div class="d">認証と権限の“芯”を理解すると詰まりにくい</div>
+        </div>
+        <div class="caret" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </summary>
+      <div class="content">
+        <h3>5.1 Tokenとは</h3>
+        <ul>
+          <li>Slackが「このリクエストは誰が何の権限でやってるか」を判断するための鍵</li>
+          <li>n8nがSlack APIを叩くときは、基本Tokenが必要</li>
+        </ul>
+
+        <h3>5.2 Scopeとは</h3>
+        <ul>
+          <li>Tokenに紐づく「できることの範囲」</li>
+          <li>例：メッセージ投稿、チャンネル閲覧、ユーザー情報取得など</li>
+          <li><b>Token</b>＝鍵そのもの / <b>Scope</b>＝鍵で開く部屋の範囲</li>
+        </ul>
+
+        <h3>5.3 Botとは</h3>
+        <ul>
+          <li>Slack上で動作する “アプリの人格”</li>
+          <li>Bot token を使うと「Botとして投稿」などができる</li>
+        </ul>
+
+        <h3>5.4 詰まりやすいポイント（実際に踏みやすい所）</h3>
+        <ul>
+          <li>Slackの管理画面（アプリ設定）は基本Webで操作することが多い</li>
+          <li>「アプリを増やすべきか？既存を使うべきか？」の判断軸
+            <ul>
+              <li><b>既存</b>：管理が一元化できるが、権限が肥大化しがち</li>
+              <li><b>新規</b>：用途別に最小権限にできるが、管理対象が増える</li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="note">
+          <div class="label">なぜこの章を入れているか</div>
+          <p class="muted" style="margin:0;">
+            「tokenとscopeの違い」「Botとは」を言語化できるようになると、
+            Slack連携のトラブル時に“どこで詰まっているか”を切り分けやすくなるからです。
+          </p>
+        </div>
+      </div>
+    </details>
+
+    <!-- 6 -->
+    <details id="s6">
+      <summary>
+        <div class="sum-left">
+          <div class="h">6. GitHub連携で学んだこと（Issue / コメント / ラベル）</div>
+          <div class="d">APIより先に「使いどころ」が腹落ちするのが本質</div>
+        </div>
+        <div class="caret" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </summary>
+      <div class="content">
+        <h3>6.1 Issueって何？（個人開発目線）</h3>
+        <ul>
+          <li>「やること」「バグ」「改善案」をチケット化したメモ兼タスク</li>
+          <li>重要なのはAPIより前に <b>運用の使いどころ</b> が腹落ちすること</li>
+        </ul>
+
+        <h3>6.2 コメント追加・ラベル付与の意味</h3>
+        <ul>
+          <li><b>コメント</b>：状況共有（調査結果、決定事項、次アクション）</li>
+          <li><b>ラベル</b>：分類と可視化（優先度、種別、作業中/完了など）</li>
+          <li>n8nと繋ぐと、例えば以下が組める：
+            <ul>
+              <li>Slackの投稿 → Issue作成</li>
+              <li>特定キーワード → ラベル付け</li>
+              <li>定型返信 → コメント追加</li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="note">
+          <div class="label">なぜこの整理にしたか</div>
+          <p class="muted" style="margin:0;">
+            理解が「APIの話」から「そもそも使い所」に戻ったのが本質で、
+            n8n連携の価値もそこに直結するためです。
+          </p>
+        </div>
+      </div>
+    </details>
+
+    <!-- 7 -->
+    <details id="s7">
+      <summary>
+        <div class="sum-left">
+          <div class="h">7. Code Node（JavaScript）で学んだこと</div>
+          <div class="d">UIだけでは面倒な整形・抽出・分岐を担う</div>
+        </div>
+        <div class="caret" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </summary>
+      <div class="content">
+        <h3>7.1 役割</h3>
+        <ul>
+          <li>UIだけでは面倒な「整形」「抽出」「条件分岐」「集計」をやる場所</li>
+        </ul>
+
+        <h3>7.2 実例：天気JSONから最高/最低を取り出す</h3>
+        <ul>
+          <li><b>入力</b>：APIなどから返る大きなJSON</li>
+          <li><b>出力</b>：Slackに投げる短いメッセージ用データ</li>
+          <li><b>学びポイント</b>
+            <ul>
+              <li>どの階層に値があるか</li>
+              <li>配列/オブジェクトの扱い</li>
+              <li>n8nの「items構造」を崩さず返す</li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="note">
+          <div class="label">なぜここが重要か</div>
+          <p class="muted" style="margin:0;">
+            「通知するだけでなく10行くらいの要約も欲しい」など、単純転送より一段上の加工に関心が移っているため、
+            Code Node は今後の伸び代の中心になります。
+          </p>
+        </div>
+      </div>
+    </details>
+
+    <!-- 8 -->
+    <details id="s8">
+      <summary>
+        <div class="sum-left">
+          <div class="h">8. n8n × GAS の連携で学んだこと（メリットの方向性）</div>
+          <div class="d">得意領域を分担すると設計がスッキリする</div>
+        </div>
+        <div class="caret" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </summary>
+      <div class="content">
+        <ul>
+          <li>GASはGoogle側（スプレッドシート/Drive/カレンダー等）の操作に強い</li>
+          <li>n8nは「外部連携のハブ」と「ワークフロー可視化」に強い</li>
+          <li>連携すると、例えば：
+            <ul>
+              <li>Slack → n8n → GAS → スプレッドシート更新</li>
+              <li>スプレッドシート更新 → n8n → Slack通知</li>
+            </ul>
+            のように “得意領域を分担” できる
+          </li>
+        </ul>
+
+        <div class="note">
+          <div class="label">なぜこうまとめたか</div>
+          <p class="muted" style="margin:0;">
+            目的が「自動化の全体設計」寄りなので、ツール単体の機能より
+            <b>役割分担</b>で覚えた方が再利用しやすいからです。
+          </p>
+        </div>
+      </div>
+    </details>
+
+    <!-- 9 -->
+    <details id="s9">
+      <summary>
+        <div class="sum-left">
+          <div class="h">9. 「学習手順書をHTML5で残す」方向性も確立した</div>
+          <div class="d">詰まりポイント込みで“再現可能”にする設計</div>
+        </div>
+        <div class="caret" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </summary>
+      <div class="content">
+        <p>
+          この1週間でやっていたのは、n8nを動かすだけではなく、<b>知識の形式化</b>まで含まれていました。
+        </p>
+        <ul>
+          <li>詰まったポイントを含めて「再現できる手順書」にする</li>
+          <li>後から見返したときに「なぜ詰まったか」「どう考えるべきか」を思い出せる形にする</li>
+          <li><code>&lt;details&gt;&lt;summary&gt;</code> で折りたたみ、スマホで読みやすく</li>
+          <li>「すべて開く/閉じる」など一括UIも入れる</li>
+        </ul>
+
+        <div class="note">
+          <div class="label">なぜここを“学び”として扱うか</div>
+          <p class="muted" style="margin:0;">
+            n8nの学習は「やったら終わり」だと忘れやすい一方、
+            最初から“再現可能な資料化”を狙うのは、実務で強い学び方だからです。
+          </p>
+        </div>
+      </div>
+    </details>
+
+    <!-- 10 -->
+    <details id="s10">
+      <summary>
+        <div class="sum-left">
+          <div class="h">10. この先、理解が伸びやすい「次の学習テーマ」</div>
+          <div class="d">この1週間の流れから自然につながる順番</div>
+        </div>
+        <div class="caret" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </summary>
+      <div class="content">
+        <p class="muted">（この1週間の流れから、自然につながる順番です）</p>
+        <ol style="margin: 8px 0 8px 1.2em;">
+          <li><b>Webhookのセキュリティ</b>（署名検証、シークレット、Basic認証、リプレイ対策）</li>
+          <li><b>Slackイベント起点の設計</b>（メンション/特定チャンネル/特定キーワードで分岐）</li>
+          <li><b>GitHub Issue運用テンプレ</b>（個人開発で回る最小セット：ラベル設計＋定型コメント）</li>
+          <li><b>Code Node整形の定石</b>（items配列、例外時の返し方、ログの見方）</li>
+          <li><b>エラーの切り分け手順</b>（どこで止まってるか：認証/入力/変換/送信）</li>
+        </ol>
+      </div>
+    </details>
+
+    <footer class="card" style="background:rgba(15,23,36,.35);">
+      <p style="margin:0;">
+        このHTMLは「スマホで確認しやすい折りたたみ」＋「一括操作UI」を前提に作っています。<br/>
+        次のステップとして、この内容を維持したまま、章ごとに「手順」「詰まりポイント」「チェック項目」を追加して“手順書”へ発展させられます。
+      </p>
+    </footer>
+
+  </div>
+
+  <a class="toplink" href="#top" aria-label="ページ先頭へ">↑ Top</a>
+
+  <script>
+    (function(){
+      const all = Array.from(document.querySelectorAll("details"));
+      const key = all.filter(d => d.dataset.key === "true");
+      const btnOpenAll = document.getElementById("btnOpenAll");
+      const btnCloseAll = document.getElementById("btnCloseAll");
+      const btnOpenKey = document.getElementById("btnOpenKey");
+
+      function openMany(list){ list.forEach(d => d.open = true); }
+      function closeMany(list){ list.forEach(d => d.open = false); }
+
+      btnOpenAll?.addEventListener("click", () => openMany(all));
+      btnCloseAll?.addEventListener("click", () => closeMany(all));
+      btnOpenKey?.addEventListener("click", () => {
+        closeMany(all);
+        openMany(key);
+        // 重要章にフォーカス（スマホでの視認性）
+        const first = key[0];
+        if(first){ first.scrollIntoView({behavior:"smooth", block:"start"}); }
+      });
+
+      // URL hash がある場合、その章を開く（共有しやすく）
+      const hash = location.hash?.slice(1);
+      if(hash){
+        const target = document.getElementById(hash);
+        if(target && target.tagName.toLowerCase() === "details"){
+          target.open = true;
+          setTimeout(() => target.scrollIntoView({behavior:"smooth", block:"start"}), 100);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
+
+</body>
+</html>
