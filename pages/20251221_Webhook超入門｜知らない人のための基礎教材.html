@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Webhook超入門｜知らない人のための基礎教材</title>
+</head>
+<body>
+<!-- 20251221 -->
+<h1>Webhook超入門｜知らない人のための基礎教材</h1>
+
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Webhook超入門｜知らない人のための基礎教材</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      line-height:1.8;
+      background:#0f172a;
+      color:#e5e7eb;
+    }
+    header{
+      position:sticky;
+      top:0;
+      background:#020617;
+      border-bottom:1px solid #1e293b;
+      z-index:10;
+    }
+    header .inner{
+      max-width:900px;
+      margin:auto;
+      padding:12px;
+    }
+    h1{
+      font-size:18px;
+      margin:0;
+    }
+    .sub{
+      font-size:13px;
+      color:#94a3b8;
+    }
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+    button{
+      font-size:13px;
+      padding:8px 12px;
+      border-radius:10px;
+      border:1px solid #334155;
+      background:#1e293b;
+      color:#e5e7eb;
+    }
+    main{
+      max-width:900px;
+      margin:auto;
+      padding:14px;
+    }
+    details{
+      background:#020617;
+      border:1px solid #1e293b;
+      border-radius:12px;
+      margin-bottom:12px;
+      overflow:hidden;
+    }
+    summary{
+      padding:12px;
+      cursor:pointer;
+      font-weight:600;
+      background:#020617;
+    }
+    summary::-webkit-details-marker{display:none;}
+    .content{
+      padding:12px;
+      border-top:1px solid #1e293b;
+    }
+    .note{
+      background:#020617;
+      border-left:4px solid #38bdf8;
+      padding:10px;
+      margin:10px 0;
+      font-size:14px;
+    }
+    .warn{
+      border-left-color:#facc15;
+    }
+    .why{
+      border-left-color:#4ade80;
+    }
+
+    body.titles-only .content{
+      display:none;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="inner">
+    <h1>Webhook 超入門</h1>
+    <div class="sub">Webhookを知らない人が「設定が大変な理由」まで理解するための教材</div>
+
+    <div class="controls">
+      <button onclick="openAll()">すべて開く</button>
+      <button onclick="closeAll()">すべて閉じる</button>
+      <button onclick="toggleTitles()">タイトルだけ表示</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <details open>
+    <summary>1. Webhookとは何か</summary>
+    <div class="content">
+      <p>
+        Webhookとは、<strong>「ある出来事が起きたときに、あらかじめ登録されたURLへ通知を送る仕組み」</strong>です。
+      </p>
+
+      <p>
+        最大の特徴は、<strong>相手から突然データが送られてくる</strong>点です。
+      </p>
+
+      <div class="note">
+        Webhook = 「何か起きたら、向こうから知らせてくれる」
+      </div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>2. Webhookが生まれた理由</summary>
+    <div class="content">
+      <p>
+        Webhookが生まれる前は、「何か変わった？」を定期的に確認する必要がありました。
+      </p>
+
+      <p>
+        これは<strong>ポーリング</strong>と呼ばれ、無駄な通信が多くなります。
+      </p>
+
+      <div class="note why">
+        Webhookは「変化があった瞬間だけ知らせる」ための仕組み
+      </div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>3. Webhookの登場人物</summary>
+    <div class="content">
+      <ul>
+        <li><strong>発行する側</strong>：出来事を検知して送る人</li>
+        <li><strong>受け取る側</strong>：通知を受信して処理する人</li>
+      </ul>
+
+      <div class="note">
+        この2者は対等ではありません。<br>
+        <strong>受け取る側のほうが圧倒的に考えることが多い</strong>です。
+      </div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>4. 発行する側が「楽」な理由</summary>
+    <div class="content">
+      <ul>
+        <li>URLを1つ登録するだけ</li>
+        <li>決められた形式で送信するだけ</li>
+        <li>失敗しても「送った」時点で仕事は終わり</li>
+      </ul>
+
+      <div class="note">
+        発行する側は「投げるだけ」
+      </div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>5. 受け取る側が「大変」な理由</summary>
+    <div class="content">
+      <ul>
+        <li>外部からアクセスできるURLを用意する</li>
+        <li>本当に正しい相手かを確認する</li>
+        <li>変なデータが来ても壊れないようにする</li>
+        <li>同じ通知が何度来ても問題ないようにする</li>
+      </ul>
+
+      <div class="note warn">
+        受け取る側 = 「玄関を作る人」
+      </div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>6. Webhookを「玄関」に例える</summary>
+    <div class="content">
+      <p>
+        Webhookはよく<strong>玄関</strong>に例えられます。
+      </p>
+
+      <ul>
+        <li>誰でも来られる（外部公開）</li>
+        <li>鍵が必要（認証）</li>
+        <li>配達員を装った人が来るかもしれない（なりすまし）</li>
+      </ul>
+
+      <div class="note">
+        だから「受け取る側」の設計が重要になる
+      </div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>7. よくある誤解</summary>
+    <div class="content">
+      <ul>
+        <li>Webhook = API ではない</li>
+        <li>Webhook = 自動化そのものではない</li>
+        <li>Webhookは「きっかけ」</li>
+      </ul>
+
+      <div class="note why">
+        Webhookは「合図」、処理は別の仕組みが行う
+      </div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>8. なぜWebhookは「難しい」と言われるのか</summary>
+    <div class="content">
+      <p>
+        Webhookが難しいと言われる理由は、
+        <strong>コードよりも設計の話が多い</strong>からです。
+      </p>
+
+      <ul>
+        <li>セキュリティ</li>
+        <li>再送</li>
+        <li>失敗時の扱い</li>
+        <li>運用後のトラブル</li>
+      </ul>
+
+      <div class="note">
+        「受け取る責任」が発生するため
+      </div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>9. ここまで理解できていれば十分</summary>
+    <div class="content">
+      <ul>
+        <li>Webhookは通知の仕組み</li>
+        <li>発行する側は楽</li>
+        <li>受け取る側は玄関を作る</li>
+        <li>設定が多いのは理由がある</li>
+      </ul>
+
+      <div class="note why">
+        この理解があると、どんなサービスのWebhookも怖くなくなります
+      </div>
+    </div>
+  </details>
+
+</main>
+
+<script>
+  function openAll(){
+    document.querySelectorAll("details").forEach(d=>d.open=true);
+  }
+  function closeAll(){
+    document.querySelectorAll("details").forEach(d=>d.open=false);
+  }
+  function toggleTitles(){
+    document.body.classList.toggle("titles-only");
+  }
+</script>
+
+</body>
+</html>
+
+</body>
+</html>

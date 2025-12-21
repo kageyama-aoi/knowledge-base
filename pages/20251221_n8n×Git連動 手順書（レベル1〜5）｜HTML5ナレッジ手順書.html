@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>n8n×Git連動 手順書（レベル1〜5）｜HTML5ナレッジ手順書</title>
+</head>
+<body>
+<!-- 20251221 -->
+<h1>n8n×Git連動 手順書（レベル1〜5）｜HTML5ナレッジ手順書</h1>
+
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>n8n×Git連動 手順書（レベル1〜5）｜HTML5ナレッジ手順書</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --fg:#111;
+      --muted:#666;
+      --card:#f6f7f9;
+      --line:#e5e7eb;
+      --accent:#0b57d0;
+      --ok:#0f7b4a;
+      --ng:#b42318;
+      --warn:#8a6100;
+      --shadow: 0 1px 2px rgba(0,0,0,.06);
+      --radius: 14px;
+      --pad: 14px;
+      --pad2: 10px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    }
+    html,body{background:var(--bg); color:var(--fg); font-family:var(--sans); line-height:1.55; margin:0; padding:0;}
+    main{max-width: 860px; margin: 0 auto; padding: 14px;}
+    header{padding: 10px 0 8px;}
+    h1{font-size: 1.25rem; margin: 0 0 6px;}
+    .meta{font-size:.92rem; color:var(--muted); margin:0;}
+    .toolbar{
+      position: sticky; top: 0;
+      background: rgba(255,255,255,.94);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 14px;
+      z-index: 10;
+    }
+    .btns{display:flex; flex-wrap:wrap; gap:8px; max-width: 860px; margin: 0 auto;}
+    button{
+      appearance:none; border: 1px solid var(--line);
+      background:#fff; color:var(--fg);
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: .95rem;
+      box-shadow: var(--shadow);
+      cursor:pointer;
+      white-space: nowrap;
+    }
+    button:active{transform: translateY(1px);}
+    .tag{display:inline-block; font-size:.82rem; padding:2px 8px; border-radius: 999px; background: var(--card); border:1px solid var(--line); color: var(--muted);}
+    .callout{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: var(--pad);
+      box-shadow: var(--shadow);
+      margin: 12px 0;
+    }
+    .callout h3{margin:0 0 8px; font-size:1.02rem;}
+    .grid{display:grid; gap:10px;}
+    @media (min-width: 720px){ .grid.cols2{grid-template-columns: 1fr 1fr;} }
+    details{
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow);
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    summary{
+      list-style:none;
+      padding: 12px 14px;
+      font-weight: 700;
+      cursor:pointer;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    summary::-webkit-details-marker{display:none;}
+    .sec{padding: 12px 14px;}
+    h2{font-size: 1.10rem; margin: 0 0 8px;}
+    h3{font-size: 1.02rem; margin: 12px 0 6px;}
+    p{margin: 8px 0;}
+    ul{margin: 8px 0 8px 18px; padding:0;}
+    li{margin: 6px 0;}
+    .steps{counter-reset: step;}
+    .steps > li{
+      list-style:none;
+      border:1px solid var(--line);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 10px 10px 10px 12px;
+      margin: 8px 0;
+      position: relative;
+    }
+    .steps > li:before{
+      counter-increment: step;
+      content: "Step " counter(step);
+      font-weight: 800;
+      color: var(--accent);
+      display:block;
+      margin-bottom: 6px;
+    }
+    .mono{font-family: var(--mono); font-size: .92rem;}
+    .code{
+      font-family: var(--mono);
+      background: #0b1220;
+      color: #e6edf3;
+      border-radius: 12px;
+      padding: 10px 12px;
+      overflow:auto;
+      font-size: .90rem;
+      line-height: 1.45;
+      margin: 8px 0;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:.86rem; padding: 4px 10px; border-radius:999px;
+      border:1px solid var(--line); background:#fff;
+    }
+    .pill.ok{border-color: rgba(15,123,74,.35); color: var(--ok);}
+    .pill.ng{border-color: rgba(180,35,24,.35); color: var(--ng);}
+    .pill.warn{border-color: rgba(138,97,0,.35); color: var(--warn);}
+    .hr{height:1px; background: var(--line); margin: 12px 0;}
+    .checklist li{list-style: none; margin-left: 0;}
+    .checklist input{transform: scale(1.15); margin-right: 10px;}
+    .small{font-size:.92rem; color: var(--muted);}
+    a{color: var(--accent); text-decoration: none;}
+    a:hover{text-decoration: underline;}
+  </style>
+</head>
+
+<body>
+  <div class="toolbar">
+    <div class="btns" role="group" aria-label="一括操作">
+      <button type="button" data-action="openAll">すべて開く</button>
+      <button type="button" data-action="closeAll">すべて閉じる</button>
+      <button type="button" data-action="openSteps">手順だけ開く</button>
+      <button type="button" data-action="openTroubles">詰まり・トラブルだけ開く</button>
+    </div>
+  </div>
+
+  <main>
+    <header>
+      <h1>n8n×Git連動 手順書（レベル1 → レベル5）</h1>
+      <p class="meta">目的：n8n と Git（主に GitHub）を連動し、「イベント検知 → 通知 → API操作 → gitコマンド実行 → 判断つき自動化」へ段階的にレベルアップする。</p>
+      <p class="meta"><span class="tag">学習フェーズ前提</span> <span class="tag">事故りにくい順</span> <span class="tag">最終的にCI/CD的制御</span></p>
+    </header>
+
+    <section class="callout">
+      <h3>この手順書の「合格ライン」</h3>
+      <div class="grid cols2">
+        <div>
+          <p><span class="pill ok">OK</span> レベル1で <b>Webhookが届く</b>（payloadがn8n実行ログに出る）</p>
+          <p><span class="pill ok">OK</span> レベル2で <b>読みやすい通知</b>（誰が/どこに/何を が分かる）</p>
+        </div>
+        <div>
+          <p><span class="pill ok">OK</span> レベル3で <b>API操作</b>（Issue/コメント等が作れる）</p>
+          <p><span class="pill warn">後でやる</span> レベル4以降の最適化・セキュリティ強化（まずは動くところまで）</p>
+        </div>
+      </div>
+      <p class="small">理由：連動の起点は「イベント発火」。ここが通れば後の自動化は全部つながるためです。:contentReference[oaicite:0]{index=0}</p>
+    </section>
+
+    <details open data-kind="concept">
+      <summary>全体像（概念・視点整理）</summary>
+      <div class="sec">
+        <h2>まず「どっち向きの連動」をしているかを固定する</h2>
+        <p>混乱が起きやすいのは、<b>同じ“連動”でも方向が3種類ある</b>からです。</p>
+        <ul>
+          <li><b>Git → n8n</b>：Webhookでイベント通知（push / PR作成など）</li>
+          <li><b>n8n → Git（GitHub）</b>：GitHub APIで Issue 作成、コメント投稿、ラベル付与など</li>
+          <li><b>n8n → gitコマンド</b>：git clone/add/commit/push を実行</li>
+        </ul>
+        <p class="small">「今どれをやってる？」を毎回ここに戻って確認できると、作業が落ち着きます。:contentReference[oaicite:1]{index=1}</p>
+
+        <div class="hr"></div>
+
+        <h2>レベル設計（事故りにくい順）</h2>
+        <p>方針は「最初は事故りにくい構成（Webhook/通知/API）から入り、最後に強い権限（git push/merge）へ」。</p>
+        <ul>
+          <li><b>レベル1</b>：Webhookで「Gitイベントを受け取る」</li>
+          <li><b>レベル2</b>：通知に意味を持たせる（Slack/Email/Teams）</li>
+          <li><b>レベル3</b>：n8nからGitHub APIを操作する（安全寄り）</li>
+          <li><b>レベル4</b>：コマンド実行で git add/commit/push（強い権限）</li>
+          <li><b>レベル5</b>：CI/CD的制御（判断付き自動化）</li>
+        </ul>
+        <p class="small">理由：いきなり自動操作（push/merge）をすると事故りやすいので、まず「観測」と「共有」を作って運用判断をしやすくします。:contentReference[oaicite:2]{index=2} :contentReference[oaicite:3]{index=3} :contentReference[oaicite:4]{index=4}</p>
+
+        <div class="hr"></div>
+
+        <h2>セキュリティ・事故防止の原則（学習中は“最低限だけ守る”）</h2>
+        <ul>
+          <li>トークンは最小権限（read/writeの範囲を絞る）</li>
+          <li>本番リポジトリではいきなり push しない（ブランチ運用）</li>
+          <li>main/master 直叩きは避け、PR経由に寄せる</li>
+          <li>Webhook受信は署名検証（HMAC）を推奨</li>
+        </ul>
+        <p class="small">ここは本来かなり深い話になりますが、学習フェーズでは「最小権限」「main直push回避」だけでも守ると事故リスクが一気に下がります。:contentReference[oaicite:5]{index=5}</p>
+      </div>
+    </details>
+
+    <details open data-kind="steps">
+      <summary>手順（Step形式）</summary>
+      <div class="sec">
+
+        <details open data-kind="steps">
+          <summary>レベル1：Webhookで「Gitイベントを受け取る」</summary>
+          <div class="sec">
+            <p><span class="pill ok">ゴール</span> GitHubの push / pull_request を n8n が受け取れる状態にする</p>
+            <p class="small">ここが通れば後の自動化は全部つながるため、最初にここを完成させます。:contentReference[oaicite:6]{index=6}</p>
+
+            <h3>Step</h3>
+            <ol class="steps">
+              <li>
+                <b>n8n側：Webhookノードを作る</b>
+                <ul>
+                  <li>新規ワークフロー作成 → Webhookノード追加</li>
+                  <li>HTTP Method：<span class="mono">POST</span></li>
+                  <li>Path：例 <span class="mono">github-webhook</span></li>
+                  <li>Response：とりあえず <span class="mono">200 OK</span>（既定でOK）</li>
+                  <li>Test URL をコピー</li>
+                </ul>
+                <p class="small">なぜ：最初は「届いたかどうか」を最短で確認したいので、まずは200を返すだけにします。:contentReference[oaicite:7]{index=7}</p>
+              </li>
+
+              <li>
+                <b>GitHub側：Webhookを登録</b>
+                <ul>
+                  <li>リポジトリ → <span class="mono">Settings → Webhooks</span></li>
+                  <li><span class="mono">Add webhook</span></li>
+                  <li>Payload URL：n8nのWebhook URL</li>
+                  <li>Content type：<span class="mono">application/json</span></li>
+                  <li>Secret：任意（後の署名検証に使う）</li>
+                  <li>Which events：最初は <b>Just the push event</b> 推奨</li>
+                </ul>
+                <p class="small">なぜ：イベントを最小（pushだけ）にすると、まず「疎通確認」に集中できます。:contentReference[oaicite:8]{index=8}</p>
+              </li>
+
+              <li>
+                <b>動作確認</b>
+                <ul>
+                  <li>n8nのWebhookノードを <span class="mono">Listen for test event</span> にする</li>
+                  <li>GitHubリポジトリへ push</li>
+                  <li>n8nの実行ログに payload が入ることを確認</li>
+                </ul>
+                <p class="small">なぜ：学習フェーズでは「何が届くか」を生で見て理解するのがいちばん早いです。:contentReference[oaicite:9]{index=9}</p>
+              </li>
+            </ol>
+
+            <details data-kind="troubles">
+              <summary>詰まりポイント（Q → 原因 → 解決）</summary>
+              <div class="sec">
+                <h3>Q.「GitHubがWebhookに到達できない」</h3>
+                <p><b>なぜこの疑問が自然に出る？</b><br>
+                  n8n側ではURLが見えているのに、GitHub側でDeliveryが失敗すると「何が悪いのか」が見えにくいからです。特に自己ホストは“外から見えるURL”と“自分から見えるURL”がズレがちです。</p>
+                <p><b>原因</b></p>
+                <ul>
+                  <li>自己ホストで外部から届く経路がない（リバースプロキシ/HTTPS/ポート開放など未整備）</li>
+                </ul>
+                <p><b>解決</b></p>
+                <ul>
+                  <li>クラウド版なら公開URLで届きやすい</li>
+                  <li>自己ホストなら「外部から届くようにする」ために、リバースプロキシ or HTTPS or ポート開放を用意する</li>
+                </ul>
+                <p class="small">ポイント：<b>誰の視点で見ているURLなのか</b>を揃える（GitHub視点で到達できる必要がある）。:contentReference[oaicite:10]{index=10} :contentReference[oaicite:11]{index=11}</p>
+
+                <div class="hr"></div>
+
+                <h3>Q.「Content-Typeが合っていないって何が困るの？」</h3>
+                <p><b>なぜこの疑問が自然に出る？</b><br>
+                  Webhookは“とりあえずPOSTが来ればOK”に見えますが、実際にはn8n側がJSONとして読めないと、後段で値が取れずに詰まります。</p>
+                <p><b>原因</b></p>
+                <ul>
+                  <li>GitHub Webhookの設定で Content type が <span class="mono">application/json</span> になっていない</li>
+                </ul>
+                <p><b>解決</b></p>
+                <ul>
+                  <li>GitHub側 Webhooks 設定で Content type を <span class="mono">application/json</span> にする</li>
+                </ul>
+                <p class="small">:contentReference[oaicite:12]{index=12} :contentReference[oaicite:13]{index=13}</p>
+
+                <div class="hr"></div>
+
+                <h3>Q.「Test URLのままって、何が起きるの？」</h3>
+                <p><b>なぜこの疑問が自然に出る？</b><br>
+                  n8nには “Test” と “Production” のURLが出てきて、学習中は違いが直感的に分かりにくいからです。</p>
+                <p><b>原因</b></p>
+                <ul>
+                  <li>GitHubに登録したのが n8nの “Test URL” のまま</li>
+                </ul>
+                <p><b>解決</b></p>
+                <ul>
+                  <li>運用するなら Production URL（本番URL）に切り替える</li>
+                  <li>学習中は「今どっちのURLを貼ってる？」をチェック項目に固定する</li>
+                </ul>
+                <p class="small">:contentReference[oaicite:14]{index=14}</p>
+              </div>
+            </details>
+
+            <details data-kind="verify">
+              <summary>動作確認・成功の証拠</summary>
+              <div class="sec">
+                <ul>
+                  <li><span class="pill ok">成功</span> GitHubへ push した直後に n8nワークフローが起動する</li>
+                  <li><span class="pill ok">成功</span> Webhookノードの実行ログに payload（JSON）が表示される</li>
+                </ul>
+                <p class="small">:contentReference[oaicite:15]{index=15}</p>
+              </div>
+            </details>
+          </div>
+        </details>
+
+        <details data-kind="steps">
+          <summary>レベル2：通知に意味を持たせる（Slack / Email / Teams）</summary>
+          <div class="sec">
+            <p><span class="pill ok">ゴール</span> Gitイベントを読みやすく整形して通知する</p>
+            <p class="small">理由：いきなり自動操作すると事故るので、先に「観測」と「共有」を強くします。:contentReference[oaicite:16]{index=16} :contentReference[oaicite:17]{index=17}</p>
+
+            <h3>代表フロー</h3>
+            <div class="code">Webhook → IF（条件分岐）→ Set（整形）→ Slack</div>
+            <p class="small">:contentReference[oaicite:18]{index=18}</p>
+
+            <h3>Step</h3>
+            <ol class="steps">
+              <li>
+                <b>ブランチで絞る（例：mainのみ）</b>
+                <ul>
+                  <li>Webhookの次に IF ノードを追加</li>
+                  <li>条件例：payload の <span class="mono">ref</span> が <span class="mono">refs/heads/main</span></li>
+                </ul>
+                <p class="small">なぜ：通知が多いと学習中に疲れるので、まずノイズを減らして「意味のある通知」だけ残します。:contentReference[oaicite:19]{index=19}</p>
+              </li>
+              <li>
+                <b>通知文を整形（Set ノード）</b>
+                <ul>
+                  <li><span class="mono">actor</span>（誰）</li>
+                  <li><span class="mono">branch</span>（どこ）</li>
+                  <li><span class="mono">commit_message</span>（何）</li>
+                  <li><span class="mono">compare_url</span>（リンク）</li>
+                </ul>
+                <p class="small">なぜ：「誰が/どこに/何を」が揃うと、受け手が判断しやすくなります。:contentReference[oaicite:20]{index=20}</p>
+              </li>
+              <li>
+                <b>Slackへ送る</b>
+                <ul>
+                  <li>Slack ノード（または Incoming Webhook）を設定</li>
+                  <li>チャンネル指定</li>
+                  <li>メッセージに Set の値を埋め込む</li>
+                </ul>
+                <p class="small">:contentReference[oaicite:21]{index=21}</p>
+              </li>
+            </ol>
+
+            <details data-kind="troubles">
+              <summary>詰まりポイント（Q → 原因 → 解決）</summary>
+              <div class="sec">
+                <h3>Q.「通知を作ったのに、結局“何が起きたか”分からない」</h3>
+                <p><b>なぜこの疑問が自然に出る？</b><br>
+                  「通知＝送れたらOK」と思いやすいのですが、実務で欲しいのは“判断材料”です。</p>
+                <p><b>原因</b></p>
+                <ul>
+                  <li>メッセージに “誰/どこ/何” が揃っていない</li>
+                  <li>フィルタがなくてノイズが多い</li>
+                </ul>
+                <p><b>解決</b></p>
+                <ul>
+                  <li>Setで <span class="mono">actor/branch/commit_message/compare_url</span> を固定で出す</li>
+                  <li>IFでブランチやパス（例：<span class="mono">docs/</span>だけ）に絞る</li>
+                </ul>
+                <p class="small">:contentReference[oaicite:22]{index=22} :contentReference[oaicite:23]{index=23}</p>
+              </div>
+            </details>
+
+            <details data-kind="verify">
+              <summary>動作確認・成功の証拠</summary>
+              <div class="sec">
+                <ul>
+                  <li><span class="pill ok">成功</span> pushした人・ブランチ・コミット内容がSlackに出る</li>
+                  <li><span class="pill ok">成功</span> 絞り込み条件に合うときだけ通知が来る</li>
+                </ul>
+              </div>
+            </details>
+          </div>
+        </details>
+
+        <details data-kind="steps">
+          <summary>レベル3：n8nからGitHub APIを操作する（安全寄り）</summary>
+          <div class="sec">
+            <p><span class="pill ok">ゴール</span> n8nが GitHub を APIで操作できるようにする（Issue/コメント/ラベル等）</p>
+            <p class="small">なぜレベル3が先？：git push より事故りにくく、権限も操作範囲も限定できるためです。:contentReference[oaicite:24]{index=24} :contentReference[oaicite:25]{index=25}</p>
+
+            <h3>事前準備：トークン（まずはPersonal Access TokenでOK）</h3>
+            <ul>
+              <li>最初は Personal Access Token でOK（権限は最小）</li>
+              <li>慣れたら GitHub App も選択肢</li>
+            </ul>
+            <p class="small">:contentReference[oaicite:26]{index=26}</p>
+
+            <h3>Step（例：Issue作成）</h3>
+            <ol class="steps">
+              <li>
+                <b>n8nでHTTP Request（またはGitHubノード）を用意</b>
+                <div class="code">Method: POST
+URL: https://api.github.com/repos/{owner}/{repo}/issues
+Headers:
+  Authorization: Bearer &lt;token&gt;
+  Accept: application/vnd.github+json
+Body (JSON):
+  title
+  body
+  labels</div>
+                <p class="small">:contentReference[oaicite:27]{index=27}</p>
+              </li>
+              <li>
+                <b>payloadから title/body を生成する</b>
+                <ul>
+                  <li>Webhook payload（commit messageなど）を使って</li>
+                  <li>Setノードで <span class="mono">title/body</span> を組み立てる</li>
+                </ul>
+                <p class="small">なぜ：人間が読む文章（Issue本文）にしておくと、あとから追跡が楽になります。:contentReference[oaicite:28]{index=28}</p>
+              </li>
+            </ol>
+
+            <details data-kind="troubles">
+              <summary>詰まりポイント（Q → 原因 → 解決）</summary>
+              <div class="sec">
+                <h3>Q.「トークンって、どれを使えばいいの？」</h3>
+                <p><b>なぜこの疑問が自然に出る？</b><br>
+                  GitHubには複数の認証方式があり、学習中は“正解が1つ”に見えません。</p>
+                <p><b>原因</b></p>
+                <ul>
+                  <li>Personal Access Token / GitHub App の選択で迷う</li>
+                </ul>
+                <p><b>解決</b></p>
+                <ul>
+                  <li>学習フェーズはまず Personal Access Token でOK</li>
+                  <li>ただし権限は最小にする（操作範囲を絞る）</li>
+                </ul>
+                <p class="small">:contentReference[oaicite:29]{index=29} :contentReference[oaicite:30]{index=30}</p>
+              </div>
+            </details>
+
+            <details data-kind="verify">
+              <summary>動作確認・成功の証拠</summary>
+              <div class="sec">
+                <ul>
+                  <li><span class="pill ok">成功</span> 指定リポジトリにIssueが作成される</li>
+                  <li><span class="pill ok">成功</span> Issueのタイトル/本文にpayload由来の情報が入っている</li>
+                </ul>
+              </div>
+            </details>
+          </div>
+        </details>
+
+        <details data-kind="steps">
+          <summary>レベル4：コマンド実行で git add / commit / push（強い権限）</summary>
+          <div class="sec">
+            <p><span class="pill warn">注意</span> これは強力。事故ると main を壊す。必ずブランチ運用 + PR を推奨。</p>
+            <p class="small">:contentReference[oaicite:31]{index=31}</p>
+
+            <h3>事前準備（ここで詰まりやすい）</h3>
+            <ul>
+              <li>n8nが動くマシンに <b>gitがインストール</b>されている</li>
+              <li>認証手段：HTTPS + Token / SSHキー（推奨：Deploy Key）</li>
+            </ul>
+            <p class="small">理由：レベル4は“実行環境依存”が強く、OS/権限/パス/認証で詰まりやすいからです。:contentReference[oaicite:32]{index=32} :contentReference[oaicite:33]{index=33}</p>
+
+            <h3>Step（例：生成物をcommitしてpush）</h3>
+            <ol class="steps">
+              <li>
+                <b>作業ディレクトリにリポジトリを用意</b>
+                <ul>
+                  <li>Execute Command：<span class="mono">git clone ...</span></li>
+                  <li>既にclone済みなら：<span class="mono">git pull</span></li>
+                </ul>
+                <p class="small">:contentReference[oaicite:34]{index=34}</p>
+              </li>
+              <li>
+                <b>ファイル生成（任意）</b>
+                <ul>
+                  <li>Function / Code ノードで作る</li>
+                  <li>または外部コマンドで生成</li>
+                </ul>
+                <p class="small">:contentReference[oaicite:35]{index=35}</p>
+              </li>
+              <li>
+                <b>add/commit/push</b>
+                <div class="code">git add .
+git commit -m "auto: update artifacts"
+git push origin &lt;branch&gt;</div>
+                <p class="small">なぜ：main直pushを避けるため、push先はブランチにしておきます。:contentReference[oaicite:36]{index=36} :contentReference[oaicite:37]{index=37}</p>
+              </li>
+              <li>
+                <b>PR作成（レベル3のAPIを併用）</b>
+                <ul>
+                  <li>pushしたブランチからPRをAPIで作成</li>
+                  <li>最終的に人間がレビューしてmerge</li>
+                </ul>
+                <p class="small">なぜ：自動化の安全弁として「人間レビュー」を残すためです。:contentReference[oaicite:38]{index=38}</p>
+              </li>
+            </ol>
+
+            <details data-kind="troubles">
+              <summary>詰まりポイント（Q → 原因 → 解決）</summary>
+              <div class="sec">
+                <h3>Q.「動かない…これn8nの設定の問題？それともOS？」</h3>
+                <p><b>なぜこの疑問が自然に出る？</b><br>
+                  レベル4は“n8nの中”というより“n8nが動くマシンの中”に依存します。学習中は境界が見えにくいので混乱してOKです。</p>
+                <p><b>原因</b></p>
+                <ul>
+                  <li>実行環境依存（OS/権限/パス）</li>
+                  <li>認証や秘密情報の管理が未整備</li>
+                  <li>失敗時のロールバック設計がない</li>
+                </ul>
+                <p><b>解決</b></p>
+                <ul>
+                  <li>まず「gitが入っているか」「clone/pullが手動で通るか」を確認</li>
+                  <li>認証はSSH（Deploy Key）を優先検討</li>
+                  <li>最初はブランチ運用 + PRで安全弁を作る</li>
+                </ul>
+                <p class="small">:contentReference[oaicite:39]{index=39} :contentReference[oaicite:40]{index=40}</p>
+              </div>
+            </details>
+
+            <details data-kind="verify">
+              <summary>動作確認・成功の証拠</summary>
+              <div class="sec">
+                <ul>
+                  <li><span class="pill ok">成功</span> 指定ブランチにコミットが積まれる</li>
+                  <li><span class="pill ok">成功</span> PRが作成され、人間がレビューできる状態になる</li>
+                </ul>
+              </div>
+            </details>
+          </div>
+        </details>
+
+        <details data-kind="steps">
+          <summary>レベル5：CI/CD的制御（判断付き自動化）</summary>
+          <div class="sec">
+            <p><span class="pill ok">ゴール</span> 「テスト成功ならOK」「失敗なら通知だけ」など判断を伴う自動化にする</p>
+            <p class="small">なぜ最終形がこれ？：実務で効くのは「自動実行」より「自動判断」。ルール化できる部分から人間の負担を減らせます。:contentReference[oaicite:41]{index=41} :contentReference[oaicite:42]{index=42}</p>
+
+            <h3>代表フロー</h3>
+            <div class="code">Webhook（PR）
+→ テスト結果取得（GitHub Actions / CI）
+→ IF
+  - 成功：コメント / マージ
+  - 失敗：Slack通知</div>
+            <p class="small">:contentReference[oaicite:43]{index=43}</p>
+
+            <h3>実装パターン（おすすめ）</h3>
+            <ul>
+              <li><b>パターンA</b>：GitHub Actionsを実行系、n8nをオーケストレーター（推奨）</li>
+              <li><b>パターンB</b>：n8nで全部（小規模なら可能だが運用負荷は上がりがち）</li>
+            </ul>
+            <p class="small">なぜ：実行（テスト/ビルド）はCIに任せ、n8nは通知や判断に寄せると運用が安定しやすいです。:contentReference[oaicite:44]{index=44}</p>
+
+            <details data-kind="troubles">
+              <summary>詰まりポイント（Q → 原因 → 解決）</summary>
+              <div class="sec">
+                <h3>Q.「どこまで自動にしていいの？怖い」</h3>
+                <p><b>なぜこの疑問が自然に出る？</b><br>
+                  自動化が進むほど、失敗時の影響が大きくなるからです。怖さは健全です。</p>
+                <p><b>原因</b></p>
+                <ul>
+                  <li>判断基準（成功/失敗）が明文化されていない</li>
+                  <li>失敗時の通知経路がない</li>
+                </ul>
+                <p><b>解決</b></p>
+                <ul>
+                  <li>まずは「成功ならコメント、失敗なら通知だけ」から始める</li>
+                  <li>特定ラベルが付いたPRだけ自動、など条件を絞る</li>
+                </ul>
+                <p class="small">:contentReference[oaicite:45]{index=45} :contentReference[oaicite:46]{index=46}</p>
+              </div>
+            </details>
+
+            <details data-kind="verify">
+              <summary>動作確認・成功の証拠</summary>
+              <div class="sec">
+                <ul>
+                  <li><span class="pill ok">成功</span> テスト成功時に自動コメントが付く</li>
+                  <li><span class="pill ok">成功</span> テスト失敗時は「実行せず通知だけ」になっている</li>
+                </ul>
+              </div>
+            </details>
+          </div>
+        </details>
+
+      </div>
+    </details>
+
+    <details open data-kind="troubles">
+      <summary>詰まりポイント（まとめ：学習フェーズで“ここがみんな詰まる”）</summary>
+      <div class="sec">
+        <p>このPDFの内容から、特に詰まりやすいのは次の3つです。どれも「認知のズレ」が原因になりやすいので、混乱してOKです。</p>
+
+        <div class="grid cols2">
+          <div class="callout">
+            <h3>1) URLの視点ズレ</h3>
+            <p class="small">「自分から見えるURL」と「GitHubから到達できるURL」は別物になりがち（自己ホストで顕著）。</p>
+            <p class="small">:contentReference[oaicite:47]{index=47} :contentReference[oaicite:48]{index=48}</p>
+          </div>
+          <div class="callout">
+            <h3>2) Test/Productionの混同</h3>
+            <p class="small">n8nのWebhook URLが2種類出て、貼り間違えると「届かない」に見える。</p>
+            <p class="small">:contentReference[oaicite:49]{index=49}</p>
+          </div>
+          <div class="callout">
+            <h3>3) レベル4の境界（n8nの外の問題）</h3>
+            <p class="small">OS/権限/パス/認証…原因がn8n外に散らばるので、切り分けが難しい。</p>
+            <p class="small">:contentReference[oaicite:50]{index=50}</p>
+          </div>
+          <div class="callout">
+            <h3>4) 事故防止の優先順位</h3>
+            <p class="small">最初から完璧を狙うより、まず「観測→共有→限定操作」の順に進めると安全。</p>
+            <p class="small">:contentReference[oaicite:51]{index=51} :contentReference[oaicite:52]{index=52}</p>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <details open data-kind="verify">
+      <summary>動作確認・成功の証拠（レベル別）</summary>
+      <div class="sec">
+        <div class="grid cols2">
+          <div class="callout">
+            <h3>レベル1</h3>
+            <ul>
+              <li><span class="pill ok">成功</span> pushでn8nが起動</li>
+              <li><span class="pill ok">成功</span> payloadがログに出る</li>
+            </ul>
+            <p class="small">:contentReference[oaicite:53]{index=53}</p>
+          </div>
+          <div class="callout">
+            <h3>レベル2</h3>
+            <ul>
+              <li><span class="pill ok">成功</span> 誰/どこ/何 が通知される</li>
+              <li><span class="pill ok">成功</span> 条件に合う時だけ通知</li>
+            </ul>
+            <p class="small">:contentReference[oaicite:54]{index=54}</p>
+          </div>
+          <div class="callout">
+            <h3>レベル3</h3>
+            <ul>
+              <li><span class="pill ok">成功</span> Issue/コメントが作れる</li>
+              <li><span class="pill ok">成功</span> payload由来の本文が入る</li>
+            </ul>
+            <p class="small">:contentReference[oaicite:55]{index=55}</p>
+          </div>
+          <div class="callout">
+            <h3>レベル4〜5</h3>
+            <ul>
+              <li><span class="pill ok">成功</span> ブランチへpush → PR作成 → レビュー</li>
+              <li><span class="pill ok">成功</span> テスト結果で分岐（失敗は通知のみ）</li>
+            </ul>
+            <p class="small">:contentReference[oaicite:56]{index=56} :contentReference[oaicite:57]{index=57}</p>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <details open data-kind="check">
+      <summary>チェックリスト（切り分け順）</summary>
+      <div class="sec">
+        <p class="small">上から順に潰すと「どこが悪いか」を早く特定できます。</p>
+
+        <h2>運用前チェック（PDF付録）</h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox">Webhook URL は外部から到達できる</label></li>
+          <li><label><input type="checkbox">Webhook Secret を設定している（可能なら検証も）</label></li>
+          <li><label><input type="checkbox">トークン権限は最小</label></li>
+          <li><label><input type="checkbox">main直pushを避けている</label></li>
+          <li><label><input type="checkbox">失敗時の通知経路がある（Slack等）</label></li>
+          <li><label><input type="checkbox">実行ログの保存・追跡ができる</label></li>
+        </ul>
+        <p class="small">:contentReference[oaicite:58]{index=58}</p>
+
+        <div class="hr"></div>
+
+        <h2>学習フェーズ用：最短切り分けチェック</h2>
+        <ul class="checklist">
+          <li><label><input type="checkbox">（レベル1）GitHub Webhooks の Delivery が成功している</label></li>
+          <li><label><input type="checkbox">（レベル1）n8nのWebhookが「Listen for test event」になっている</label></li>
+          <li><label><input type="checkbox">（レベル1）貼っているのが Test URL か Production URL か把握している</label></li>
+          <li><label><input type="checkbox">（レベル2）IFでノイズが減っている（main / 特定パスなど）</label></li>
+          <li><label><input type="checkbox">（レベル3）トークンが最小権限で、APIが通る</label></li>
+          <li><label><input type="checkbox">（レベル4）gitが実行環境にあり、clone/pullが通る</label></li>
+        </ul>
+
+        <details data-kind="steps">
+          <summary>次に作ると良い「具体ワークフロー」候補</summary>
+          <div class="sec">
+            <ul>
+              <li>PR作成 → 自動で差分要約 → Slackへ通知</li>
+              <li>mainへのpush → 自動でリリースノート下書き生成 → Notionへ保存</li>
+              <li>特定ディレクトリ（docs/）の更新だけ → GitHub Pages更新通知</li>
+            </ul>
+            <p class="small">:contentReference[oaicite:59]{index=59}</p>
+          </div>
+        </details>
+
+      </div>
+    </details>
+
+    <details data-kind="appendix">
+      <summary>付録：おすすめのレベルアップ順（実務導入向け）</summary>
+      <div class="sec">
+        <ul>
+          <li>レベル1：Webhook受信</li>
+          <li>レベル2：Slack通知（ブランチ/パスで絞る）</li>
+          <li>レベル3：PRへ自動コメント（テンプレ）</li>
+          <li>レベル5：テスト結果で分岐（失敗は通知のみ）</li>
+          <li>レベル4：成果物の自動commit/push（最後に導入）</li>
+        </ul>
+        <p class="small">なぜ：レベル4は強力で事故りやすく、環境依存の詰まりも増えるため「最後」が安全です。:contentReference[oaicite:60]{index=60} :contentReference[oaicite:61]{index=61}</p>
+      </div>
+    </details>
+
+    <footer class="callout">
+      <h3>メモ：学習中は「後でやる」を明示して前に進む</h3>
+      <p class="small">
+        セキュリティや最適化は大事ですが、学習フェーズではまず「Webhookが届く」「通知が読める」「APIが通る」までを合格ラインにして、
+        その先（署名検証/HMAC、権限設計、ロールバック等）は段階的に強化するのが安全です。:contentReference[oaicite:62]{index=62} :contentReference[oaicite:63]{index=63}
+      </p>
+    </footer>
+  </main>
+
+  <script>
+    (function(){
+      const allDetails = () => Array.from(document.querySelectorAll('details'));
+      const setOpen = (els, open) => els.forEach(d => d.open = !!open);
+
+      const isSteps = (d) => d.dataset && d.dataset.kind === "steps";
+      const isTroubles = (d) => d.dataset && d.dataset.kind === "troubles";
+
+      const openAll = () => setOpen(allDetails(), true);
+      const closeAll = () => setOpen(allDetails(), false);
+
+      // 「手順だけ開く」：手順系は開く／それ以外は閉じる（ただし最上位の概念は閉じる）
+      const openSteps = () => {
+        allDetails().forEach(d => {
+          d.open = isSteps(d);
+        });
+      };
+
+      // 「詰まり・トラブルだけ開く」：詰まり系は開く／それ以外は閉じる
+      const openTroubles = () => {
+        allDetails().forEach(d => {
+          d.open = isTroubles(d);
+        });
+      };
+
+      document.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const a = btn.getAttribute('data-action');
+          if(a === 'openAll') openAll();
+          if(a === 'closeAll') closeAll();
+          if(a === 'openSteps') openSteps();
+          if(a === 'openTroubles') openTroubles();
+          // スクロール量を減らす：操作後は先頭へ戻す（モバイルで迷子になりにくい）
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
+
+</body>
+</html>

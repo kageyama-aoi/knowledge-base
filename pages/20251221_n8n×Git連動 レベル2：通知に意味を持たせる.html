@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>n8n レベル2：通知に意味を持たせる_ナレッジ手順書</title>
+</head>
+<body>
+<!-- 20251221 -->
+<h1>n8n レベル2：通知に意味を持たせる_ナレッジ手順書</h1>
+
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>n8n レベル2：通知に意味を持たせる（Slack / Email / Teams）ナレッジ手順書</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --card2:#0f1730;
+      --text:#eef2ff;
+      --muted:#b7c0ff;
+      --line:#2a3560;
+      --accent:#7aa2ff;
+      --ok:#34d399;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", Arial, sans-serif;
+    }
+
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:var(--sans);
+      background: radial-gradient(1200px 800px at 10% 0%, #121a33 0%, var(--bg) 55%, #070a14 100%);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    a{ color:var(--accent); text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 14px 12px 64px; }
+
+    header{ padding: 6px 0 10px; }
+    h1{ font-size: 20px; line-height: 1.35; margin: 10px 0 6px; }
+    .sub{
+      margin:0 0 10px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.65;
+    }
+
+    .callout{
+      border:1px solid var(--line);
+      background: rgba(18,26,51,.65);
+      border-radius:12px;
+      padding:10px 12px;
+      margin:10px 0 12px;
+      font-size:13px;
+      line-height:1.7;
+      color:var(--text);
+    }
+
+    .toolbar{
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border:1px solid var(--line);
+      background: rgba(11,16,32,.92);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      padding:10px;
+      margin: 10px 0 14px;
+    }
+    .toolbar .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .btns{ display:flex; flex-wrap:wrap; gap:8px; }
+    button{
+      border:1px solid var(--line);
+      background: rgba(18,26,51,.95);
+      color:var(--text);
+      padding:10px 11px;
+      border-radius:10px;
+      font-size:13px;
+      cursor:pointer;
+    }
+    button:hover{ border-color:#3b4f93; }
+    button:active{ transform: translateY(1px); }
+    .hint{ color:var(--muted); font-size:12px; line-height:1.5; }
+
+    .toc{
+      border:1px solid var(--line);
+      background: rgba(18,26,51,.55);
+      border-radius:12px;
+      padding:10px 12px;
+      margin: 0 0 14px;
+    }
+    .toc h2{ font-size:14px; margin:0 0 8px; }
+    .toc ol{ margin:0; padding-left:18px; }
+    .toc li{ margin:6px 0; font-size:13px; line-height:1.6; color:var(--text); }
+
+    details{
+      border:1px solid var(--line);
+      background: rgba(18,26,51,.55);
+      border-radius:14px;
+      margin:10px 0;
+      overflow:hidden;
+    }
+    summary{
+      cursor:pointer;
+      padding:12px 12px 12px 14px;
+      list-style:none;
+    }
+    summary::-webkit-details-marker{ display:none; }
+    .sumline{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .tag{
+      display:inline-block;
+      font-size:11px;
+      padding:3px 9px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      line-height:1.2;
+      margin-top:1px;
+      white-space:nowrap;
+    }
+    .tag.ok{ border-color: rgba(52,211,153,.45); color: var(--ok); }
+    .tag.warn{ border-color: rgba(251,191,36,.45); color: var(--warn); }
+    .tag.bad{ border-color: rgba(251,113,133,.45); color: var(--bad); }
+
+    .title{ font-weight:700; font-size:14px; line-height:1.35; margin:0; }
+    .meta{ margin:2px 0 0; color:var(--muted); font-size:12px; line-height:1.45; }
+
+    .content{ padding: 0 14px 14px; }
+    h3{ font-size:13px; margin: 14px 0 6px; }
+    p, li{ font-size:13px; line-height:1.75; margin:6px 0; }
+    ul, ol{ margin:8px 0 0; padding-left:18px; }
+
+    .box{
+      border:1px dashed #3a4a8b;
+      background: rgba(15,23,48,.55);
+      border-radius:12px;
+      padding:10px 12px;
+      margin:10px 0;
+    }
+    .label{ color:var(--muted); font-size:12px; margin:0 0 6px; }
+
+    code{ font-family: var(--mono); font-size: 12.5px; }
+    pre{
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.6;
+      margin: 8px 0;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #070b18;
+      overflow: auto;
+      white-space: pre;
+    }
+
+    .kv{
+      display:grid;
+      grid-template-columns: 140px 1fr;
+      gap: 6px 10px;
+      align-items:start;
+    }
+    .k{ color: var(--muted); font-size:12px; }
+    .pill{
+      display:inline-block;
+      font-size:11px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+    }
+    .pill.ok{ border-color: rgba(52,211,153,.45); color:var(--ok); }
+    .pill.warn{ border-color: rgba(251,191,36,.45); color:var(--warn); }
+
+    footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.65;
+    }
+
+    @media (min-width: 720px){
+      h1{ font-size:22px; }
+      p, li{ font-size:14px; }
+      .kv{ grid-template-columns: 190px 1fr; }
+      .title{ font-size:15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>n8n レベル2：通知に意味を持たせる（Slack / Email / Teams）ナレッジ手順書</h1>
+      <p class="sub">
+        対象：学習フェーズで <b>GitHub Webhook → n8n →（整形）→ 通知</b> を作り、あとから見返して再現できる状態にする。<br/>
+        ゴール：<b>「誰が / どこへ / 何を / どの資材を」</b> が一目で分かる通知を Slack / Email / Teams に送れる。
+      </p>
+      <div class="callout">
+        <b>読み方（スマホ向け）</b>：章は折りたたみです。上のボタンで <b>全部開閉</b>、<b>手順だけ</b>、<b>詰まりだけ</b> を一括切り替えできます。<br/>
+        <span class="pill warn">安心メモ</span> ここで混乱してOKです。Webhookは「視点」が混ざると誰でも迷います。
+      </div>
+    </header>
+
+    <section class="toolbar" aria-label="controls">
+      <div class="row">
+        <div class="btns">
+          <button type="button" id="openAll">すべて開く</button>
+          <button type="button" id="closeAll">すべて閉じる</button>
+          <button type="button" id="openSteps">手順だけ開く</button>
+          <button type="button" id="openTroubles">詰まり・トラブルだけ開く</button>
+        </div>
+        <div class="hint">目次リンクを押すと、その章が自動で開きます</div>
+      </div>
+    </section>
+
+    <nav class="toc" aria-label="目次">
+      <h2>目次</h2>
+      <ol>
+        <li><a href="#sec-overview">全体像（視点整理：localhost問題の正体）</a></li>
+        <li><a href="#sec-levels">レベル2の定義（「通知に意味」を持たせる）</a></li>
+        <li><a href="#sec-prereq">前提（レベル1が通っている状態）</a></li>
+        <li><a href="#sec-step1">手順1：Webhook受信（n8n）</a></li>
+        <li><a href="#sec-step2">手順2：Webhook設定（GitHub側の「どこ？」問題）</a></li>
+        <li><a href="#sec-step3">手順3：ngrok（localhostを公開する仕組み）</a></li>
+        <li><a href="#sec-step4">手順4：IF（mainだけ通す）</a></li>
+        <li><a href="#sec-step5">手順5：Set（通知用DTOを作る）</a></li>
+        <li><a href="#sec-step6">手順6：Slackに送る（推奨）</a></li>
+        <li><a href="#sec-step7">手順7：Emailに送る（選択肢）</a></li>
+        <li><a href="#sec-step8">手順8：Teamsに送る（選択肢）</a></li>
+        <li><a href="#sec-verify">動作確認（成功の証拠）</a></li>
+        <li><a href="#sec-check">チェックリスト（切り分け順）</a></li>
+        <li><a href="#sec-troubles">詰まりポイント（Q→原因→解決）</a></li>
+      </ol>
+    </nav>
+
+    <!-- Overview -->
+    <details id="sec-overview" data-kind="info" open>
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">最初に</span>
+          <div>
+            <div class="title">全体像：誰の視点でURLを見ている？（localhost問題の正体）</div>
+            <div class="meta">「URLは正しいのに届かない」は視点のズレで起きる</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <p>Webhookで一番詰まりやすいのは「URLを<b>誰が</b>見ているか」が混ざることです。登場人物は3つです。</p>
+        <div class="box">
+          <div class="label">登場人物</div>
+          <div class="kv">
+            <div class="k">n8n（あなたのPC）</div><div>受け口（例：<code>http://localhost:5678</code>）</div>
+            <div class="k">ngrok（中継）</div><div>外部公開URLを作り、localhostへ転送する</div>
+            <div class="k">GitHub（外部サーバー）</div><div>Webhookを送る側。GitHubサーバーからHTTP POSTする</div>
+          </div>
+        </div>
+        <p>正しい経路：</p>
+        <pre><code>GitHub（外） → ngrokの公開URL（外） → localhost:5678（内：n8n）</code></pre>
+        <p>
+          <span class="pill warn">ここで混乱してOK</span>
+          「GitHubのWebhookに localhost を入れる」と、GitHubサーバーから見た localhost になり、あなたのPCには届きません。
+        </p>
+      </div>
+    </details>
+
+    <!-- Level definition -->
+    <details id="sec-levels" data-kind="info" open>
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">レベル2</span>
+          <div>
+            <div class="title">レベル2の定義：「通知に意味を持たせる」</div>
+            <div class="meta">ただ届く → 人が判断できる情報になる（DTO化＋整形）</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <p>レベル1は「届いた」だけでも合格です。レベル2はそこに意味を持たせます。</p>
+        <div class="box">
+          <div class="label">レベル2の合格ライン</div>
+          <ul>
+            <li><b>mainだけ通知</b>など、ノイズを減らせる（IF）</li>
+            <li>通知に<b>誰 / ブランチ / メッセージ / 変更資材 / リポジトリ</b>が入る（Set）</li>
+            <li>通知先をSlackに出せる（Slack）</li>
+            <li>余力があれば Email / Teams にも同じDTOで出せる（再利用）</li>
+          </ul>
+        </div>
+        <p>なぜこうするか：通知は「見た人が次に何をするか」を決めるためのものなので、<b>判断材料</b>が入っていないと実務では使いづらいからです。</p>
+      </div>
+    </details>
+
+    <!-- Prereq -->
+    <details id="sec-prereq" data-kind="info">
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">前提</span>
+          <div>
+            <div class="title">前提：レベル1が通っている状態</div>
+            <div class="meta">Webhookがn8nに届き、OUTPUTにheaders/bodyが見える</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <ul>
+          <li>n8n Webhookノードで <code>Listen for test event</code> ができる</li>
+          <li>GitHub pushで Webhookが届き、OUTPUTに <code>headers</code> と <code>body</code> が表示される</li>
+          <li>ngrokで公開URLを作っている（学習フェーズ）</li>
+        </ul>
+        <div class="box">
+          <div class="label">参考：成功の証拠（レベル1）</div>
+          <ul>
+            <li><code>headers</code> に <code>GitHub-Hookshot</code></li>
+            <li><code>x-github-event: push</code></li>
+            <li><code>body.ref: refs/heads/main</code></li>
+          </ul>
+        </div>
+      </div>
+    </details>
+
+    <!-- Step 1 -->
+    <details id="sec-step1" data-kind="step" open>
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">手順</span>
+          <div>
+            <div class="title">手順1：Webhook受信（n8n側）</div>
+            <div class="meta">POST + Path。学習フェーズは最小設定でOK</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <div class="box">
+          <div class="label">推奨設定（学習フェーズ）</div>
+          <div class="kv">
+            <div class="k">HTTP Method</div><div><code>POST</code></div>
+            <div class="k">Path</div><div><code>github-webhook</code>（例）</div>
+            <div class="k">Authentication</div><div><code>None</code></div>
+            <div class="k">Respond</div><div><code>Immediately</code>（200 OKを返す）</div>
+          </div>
+        </div>
+
+        <details data-kind="trouble">
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">詰まり</span>
+              <div>
+                <div class="title">「レスポンス欄がない／Authenticationがない」</div>
+                <div class="meta">UI差があるが、レベル2でも最小設定で進めてOK</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>なぜ疑問が自然に出る？</b> レシピ記事や動画はUIが古いことが多く、項目名や配置が変わって見えるためです。</p>
+            <p><b>原因：</b>n8nのUI/バージョン差で表示が変わる。</p>
+            <p><b>解決：</b>学習フェーズでは「200 OKが返る」ことが大事なので、<code>Respond=Immediately</code> が選べれば十分です。AuthenticationもまずはNoneでOK（署名検証は後で）。</p>
+          </div>
+        </details>
+
+        <div class="box">
+          <div class="label">合格ライン（この手順のOK）</div>
+          <ul>
+            <li>Webhookノードで <code>Listen for test event</code> ができる</li>
+            <li>Test URLが表示される（例：<code>/webhook-test/github-webhook</code> が含まれる）</li>
+          </ul>
+        </div>
+      </div>
+    </details>
+
+    <!-- Step 2 -->
+    <details id="sec-step2" data-kind="step" open>
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">手順</span>
+          <div>
+            <div class="title">手順2：Webhook設定（GitHub側）</div>
+            <div class="meta">「どこにある？」問題を先に潰す：リポジトリ Settings → Webhooks</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <ol>
+          <li>対象リポジトリを開く</li>
+          <li><b>Settings</b></li>
+          <li>左メニュー <b>Webhooks</b></li>
+          <li><b>Add webhook</b></li>
+        </ol>
+
+        <div class="box">
+          <div class="label">推奨設定（pushだけでOK）</div>
+          <div class="kv">
+            <div class="k">Content type</div><div><code>application/json</code></div>
+            <div class="k">Events</div><div><code>Just the push event</code></div>
+            <div class="k">Secret</div><div>空でもOK（後で署名検証するなら設定）</div>
+          </div>
+        </div>
+
+        <details data-kind="trouble">
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">詰まり</span>
+              <div>
+                <div class="title">「GitHub側のWebhookってどこのこと？」</div>
+                <div class="meta">アカウント設定ではなく、リポジトリ単位にある</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>なぜ疑問が自然に出る？</b> GitHubは設定の入口が多く（アカウント/Org/Repo）、同じ「Settings」でも場所が違うためです。</p>
+            <p><b>原因：</b>Webhookは<b>リポジトリ単位</b>の設定。</p>
+            <p><b>解決：</b>必ず「対象リポジトリ」を開いて、Settings → Webhooksへ。</p>
+          </div>
+        </details>
+
+        <details data-kind="trouble" open>
+          <summary>
+            <div class="sumline">
+              <span class="tag bad">詰まり</span>
+              <div>
+                <div class="title">「localhost は public Internet から届かない」</div>
+                <div class="meta">GitHubサーバー視点でlocalhostは“自分自身”になる</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>なぜ疑問が自然に出る？</b> 自分のPCでは localhost が動いているので「貼れば届く」と思いやすいからです。</p>
+            <p><b>原因：</b>GitHubはGitHubサーバーからWebhook URLへPOSTする。あなたのPCのlocalhostは外から見えない。</p>
+            <p><b>解決：</b>学習フェーズは ngrok で公開URLを作り、そのURLを GitHub の Payload URL に貼る。</p>
+          </div>
+        </details>
+      </div>
+    </details>
+
+    <!-- Step 3 -->
+    <details id="sec-step3" data-kind="step" open>
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">手順</span>
+          <div>
+            <div class="title">手順3：ngrok（localhostを公開する）</div>
+            <div class="meta">GitHub → ngrok → n8n の経路を作る</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <p>ngrokは「外部公開URL」を作り、その通信をあなたのPCへ転送します。</p>
+        <pre><code>GitHub → https://xxxx.ngrok-free.dev → http://localhost:5678</code></pre>
+
+        <details data-kind="trouble">
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">詰まり</span>
+              <div>
+                <div class="title">「ngrokって落とさないといけない？ PowerShellで怒られる？」</div>
+                <div class="meta">ローカルで常時接続するクライアントが必要</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>なぜ疑問が自然に出る？</b> “URLを作る”のにアプリが必要だと直感しにくいからです。</p>
+            <p><b>原因：</b>ngrokはあなたのPCからngrokサーバーへ“つなぎっぱなし”の接続を張るため、ローカル実行が必要。</p>
+            <p><b>解決：</b>ngrokをダウンロードして実行します。PowerShell実行で問題ないことが多いです。</p>
+          </div>
+        </details>
+
+        <details data-kind="trouble" open>
+          <summary>
+            <div class="sumline">
+              <span class="tag bad">詰まり</span>
+              <div>
+                <div class="title">ERR_NGROK_4018：verified account / authtoken が必要</div>
+                <div class="meta">無料でも本人紐付けが必須 → token登録で解消</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <ol>
+              <li>ngrokにサインアップ/ログイン</li>
+              <li>ダッシュボードのAuthtokenを取得</li>
+              <li>PowerShellで1回だけ実行</li>
+            </ol>
+            <pre><code>ngrok config add-authtoken YOUR_TOKEN</code></pre>
+          </div>
+        </details>
+
+        <div class="box">
+          <div class="label">起動（5678を公開）</div>
+          <pre><code>ngrok http 5678</code></pre>
+          <p style="margin:6px 0 0">Forwardingに表示された公開URL（例：<code>https://xxxx.ngrok-free.dev</code>）を使います。</p>
+        </div>
+
+        <div class="box">
+          <div class="label">GitHubに貼る Payload URL（重要）</div>
+          <p style="margin:6px 0 0">
+            <span class="pill ok">ポイント</span> n8n側のURLを変える必要はありません。変えるのは <b>GitHubに貼るURL</b> だけです。
+          </p>
+          <pre><code>https://xxxx.ngrok-free.dev/webhook-test/github-webhook</code></pre>
+        </div>
+
+        <details data-kind="trouble">
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">詰まり</span>
+              <div>
+                <div class="title">「n8n側のWebhook URLを変える必要ある？」</div>
+                <div class="meta">URLが2種類出てくるので混乱しやすい</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>なぜ疑問が自然に出る？</b> n8nが表示するのは localhost、GitHubに必要なのは公開URLで、見えるURLが2つになるからです。</p>
+            <p><b>解決：</b>n8nは localhost の受け口で固定。GitHubが叩く先だけをngrokにする、と役割で分ける。</p>
+          </div>
+        </details>
+
+        <div class="box">
+          <div class="label">切り分け用（ngrok管理画面）</div>
+          <pre><code>http://127.0.0.1:4040</code></pre>
+          <p style="margin:6px 0 0">「GitHubから来たPOSTが届いたか」を確認できます。</p>
+        </div>
+      </div>
+    </details>
+
+    <!-- Step 4 IF -->
+    <details id="sec-step4" data-kind="step" open>
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">手順</span>
+          <div>
+            <div class="title">手順4：IF（mainだけ通す）</div>
+            <div class="meta">通知疲れを防ぐ：まずは main のみ</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <div class="box">
+          <div class="label">IF条件（推奨）</div>
+          <div class="kv">
+            <div class="k">Value 1</div><div><code>{{ $json.body.ref }}</code></div>
+            <div class="k">Operation</div><div><code>Equals</code></div>
+            <div class="k">Value 2</div><div><code>refs/heads/main</code></div>
+          </div>
+        </div>
+        <p><span class="pill warn">ここで混乱してOK</span> <code>main</code> ではなく <code>refs/heads/main</code> がGitHubの仕様です。</p>
+
+        <div class="box">
+          <div class="label">合格ライン</div>
+          <ul>
+            <li>main へのpush → True Branchに流れる</li>
+            <li>別ブランチ → False Branchに流れる</li>
+          </ul>
+        </div>
+      </div>
+    </details>
+
+    <!-- Step 5 Set -->
+    <details id="sec-step5" data-kind="step" open>
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">手順</span>
+          <div>
+            <div class="title">手順5：Set（通知用DTOを作る：整形の中心）</div>
+            <div class="meta">Slack/Email/Teamsに共通で使える「小さなJSON」にする</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <p>Setノードは「必要な情報だけ抜き出して、名前を付け直す」場所です。通知先が増えてもここを使い回せます。</p>
+
+        <div class="box">
+          <div class="label">Setの推奨設定</div>
+          <div class="kv">
+            <div class="k">Mode</div><div><code>Manual Mapping</code></div>
+            <div class="k">Include Other Input Fields</div><div><code>OFF</code>（巨大JSONを捨てる）</div>
+          </div>
+        </div>
+
+        <details data-kind="trouble" open>
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">詰まり</span>
+              <div>
+                <div class="title">「Setの手順がよく分からない（Add Field？ Expression？）」</div>
+                <div class="meta">UIが“空”から始まるので不安になりやすい</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>なぜ疑問が自然に出る？</b> Setは「何かが自動で出る」系ではなく、自分で項目を作る方式だからです。</p>
+            <p><b>解決：</b> <code>Add Field</code> を押して、<b>name</b>（項目名）と <b>value</b>（Expression）を1行ずつ作ればOKです。</p>
+          </div>
+        </details>
+
+        <div class="box">
+          <div class="label">作るフィールド（レベル2の最小セット）</div>
+          <ul>
+            <li><b>repository</b>：どのリポジトリ？</li>
+            <li><b>actor</b>：誰？</li>
+            <li><b>branch</b>：どこ？</li>
+            <li><b>commit_message</b>：何？（まずは先頭コミット）</li>
+            <li><b>changed_files</b>：どの資材？（インデント付きで読みやすく）</li>
+            <li><b>compare_url</b>：詳細リンク（「資材名」ではない）</li>
+          </ul>
+        </div>
+
+        <div class="box">
+          <div class="label">Expression例（コピペOK）</div>
+          <pre><code>// repository（例：owner/repo）
+{{ $json.body.repository.full_name }}
+
+// actor（push実行者）
+{{ $json.body.pusher.name }}
+
+// branch（表示用に refs/heads/ を消す）
+{{ $json.body.ref.replace('refs/heads/', '') }}
+
+// commit_message（学習フェーズ：先頭コミット）
+{{ $json.body.commits[0].message }}
+
+// changed_files（先頭コミットの added/modified/removed をまとめてインデント表示）
+{{
+  [
+    ...$json.body.commits[0].added,
+    ...$json.body.commits[0].modified,
+    ...$json.body.commits[0].removed
+  ]
+  .map(file =&gt; `  - ${file}`)
+  .join('\\n')
+}}
+
+// compare_url（差分を見るリンク：資材名そのものではない）
+{{ $json.body.compare }}</code></pre>
+        </div>
+
+        <details data-kind="trouble">
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">詰まり</span>
+              <div>
+                <div class="title">「コミット対象となった資材名って分かんないの？ compare_urlなの？」</div>
+                <div class="meta">“リンク”と“ファイル名”は別物</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>なぜ疑問が自然に出る？</b> compare_urlを開くとファイル一覧が見えるので「これが資材名？」と混ざりやすいからです。</p>
+            <p><b>原因：</b>compare_urlは「差分ページへのリンク」で、ファイル名リストではない。</p>
+            <p><b>解決：</b>ファイル名は <code>body.commits[].added/modified/removed</code> から取り出して、Setで整形して通知に入れる。</p>
+          </div>
+        </details>
+
+        <div class="box">
+          <div class="label">合格ライン</div>
+          <p style="margin:6px 0 0">SetのOUTPUTがこういう小さな形になればOKです：</p>
+          <pre><code>{
+  "repository": "owner/repo",
+  "actor": "name",
+  "branch": "main",
+  "commit_message": "message ...",
+  "changed_files": "  - file1\n  - file2",
+  "compare_url": "https://github.com/..."
+}</code></pre>
+        </div>
+      </div>
+    </details>
+
+    <!-- Step 6 Slack -->
+    <details id="sec-step6" data-kind="step" open>
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">手順</span>
+          <div>
+            <div class="title">手順6：Slackに送る（推奨）</div>
+            <div class="meta">Setで作ったDTOをそのまま埋め込む（Slackは表示に専念）</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <div class="box">
+          <div class="label">Slackノード（推奨設定）</div>
+          <div class="kv">
+            <div class="k">Resource</div><div><code>Message</code></div>
+            <div class="k">Operation</div><div><code>Post</code></div>
+            <div class="k">Channel</div><div>通知先（例：<code>#github-notify</code>）</div>
+          </div>
+        </div>
+
+        <div class="box">
+          <div class="label">メッセージ本文（例：スマホで読みやすい）</div>
+          <pre><code>🟢 GitHub Push
+
+📁 {{ $json.repository }}
+👤 {{ $json.actor }}
+🌿 {{ $json.branch }}
+
+📝 {{ $json.commit_message }}
+
+📦 Changed files
+{{ $json.changed_files }}
+
+🔗 {{ $json.compare_url }}</code></pre>
+        </div>
+
+        <p><span class="pill ok">設計の意図</span> 文字整形（インデントや一覧化）はSetで済ませ、Slackノードは「埋め込んで送るだけ」にします。後でEmail/Teamsに増やしても同じDTOを使い回せます。</p>
+      </div>
+    </details>
+
+    <!-- Step 7 Email -->
+    <details id="sec-step7" data-kind="step">
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">手順</span>
+          <div>
+            <div class="title">手順7：Emailに送る（選択肢）</div>
+            <div class="meta">学習フェーズ：最短はSMTP/メール連携ノードで同じ本文を送る</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <p>レベル2では「同じDTOを別の通知先でも使える」ことが価値です。Emailでもやることは同じです：</p>
+        <ol>
+          <li>Setの後ろに Email系ノード（SMTP等）を追加</li>
+          <li>宛先（To）と件名（Subject）を設定</li>
+          <li>本文に <code>{{ $json.xxx }}</code> を埋め込む</li>
+        </ol>
+
+        <div class="box">
+          <div class="label">件名（例）</div>
+          <pre><code>[GitHub Push] {{ $json.repository }} ({{ $json.branch }}) - {{ $json.actor }}</code></pre>
+        </div>
+
+        <div class="box">
+          <div class="label">本文（例）</div>
+          <pre><code>Repository: {{ $json.repository }}
+Actor: {{ $json.actor }}
+Branch: {{ $json.branch }}
+
+Message:
+{{ $json.commit_message }}
+
+Changed files:
+{{ $json.changed_files }}
+
+Compare:
+{{ $json.compare_url }}</code></pre>
+        </div>
+
+        <p><span class="pill warn">後でやる</span> 実務ではメール送信の認証やセキュリティ要件が絡むので、学習フェーズでは「送れる」ことを優先してOKです。</p>
+      </div>
+    </details>
+
+    <!-- Step 8 Teams -->
+    <details id="sec-step8" data-kind="step">
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">手順</span>
+          <div>
+            <div class="title">手順8：Teamsに送る（選択肢）</div>
+            <div class="meta">Incoming Webhook等で“投稿”する。本文はSet DTOを使い回す</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <p>Teamsも考え方は同じです。「投稿先」と「本文形式」が違うだけで、データはSetで作ったDTOを使います。</p>
+        <ol>
+          <li>Teams側で Incoming Webhook（または連携手段）を用意</li>
+          <li>n8nでHTTP Request（POST）などでWebhook URLに送信</li>
+          <li>本文にDTOを埋め込む</li>
+        </ol>
+
+        <div class="box">
+          <div class="label">本文（シンプル例：テキスト中心）</div>
+          <pre><code>GitHub Push
+
+Repo: {{ $json.repository }}
+Actor: {{ $json.actor }}
+Branch: {{ $json.branch }}
+
+{{ $json.commit_message }}
+
+Changed files:
+{{ $json.changed_files }}
+
+{{ $json.compare_url }}</code></pre>
+        </div>
+
+        <p><span class="pill warn">後でやる</span> Teamsの投稿形式（カード/Adaptive Card等）は後段で整えるとスムーズです。まずは「届く」＋「意味がある」を優先します。</p>
+      </div>
+    </details>
+
+    <!-- Verify -->
+    <details id="sec-verify" data-kind="info" open>
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">確認</span>
+          <div>
+            <div class="title">動作確認：成功の証拠（レベル2）</div>
+            <div class="meta">“届く”だけでなく、“判断できる”通知になっているか</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <div class="box">
+          <div class="label">確認手順</div>
+          <ol>
+            <li>n8n：Webhookを <code>Listen for test event</code> で待機</li>
+            <li>GitHub：mainへpush（空コミット or README編集でもOK）</li>
+            <li>n8n：IF → Set → Slack が順に成功するか確認</li>
+            <li>Slack：通知が届き、必要情報が読めるか確認</li>
+          </ol>
+        </div>
+
+        <div class="box">
+          <div class="label">成功の証拠（最低限）</div>
+          <ul>
+            <li>Slack通知に <b>repository / actor / branch / commit_message / changed_files / compare_url</b> が出る</li>
+            <li><code>changed_files</code> がインデント付きで読める（例：<code>  - file</code>）</li>
+            <li>compare_url を開くと差分ページに飛べる</li>
+          </ul>
+        </div>
+
+        <details data-kind="trouble">
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">詰まり</span>
+              <div>
+                <div class="title">「GitHub側で何かアクションしなくちゃいけない？」</div>
+                <div class="meta">Webhookは“イベントが起きたら送る”ので、待つだけでは来ない</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>なぜ疑問が自然に出る？</b> n8nで待ち受けができると「待てば来る」と思いやすいからです。</p>
+            <p><b>原因：</b>Webhookは push などのイベントが発生した時だけ送られる。</p>
+            <p><b>解決：</b>空コミットやREADME編集で push を発生させてテストする。</p>
+            <pre><code>git commit --allow-empty -m "test webhook"
+git push</code></pre>
+          </div>
+        </details>
+      </div>
+    </details>
+
+    <!-- Checklist -->
+    <details id="sec-check" data-kind="info">
+      <summary>
+        <div class="sumline">
+          <span class="tag ok">チェック</span>
+          <div>
+            <div class="title">チェックリスト（届かない時の切り分け順）</div>
+            <div class="meta">GitHub → ngrok → n8n → Slack の順で見ると迷いにくい</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+        <ol>
+          <li><b>GitHub</b>：Webhookの Deliveries は 200？（失敗なら原因が出る）</li>
+          <li><b>ngrok</b>：<code>http://127.0.0.1:4040</code> にリクエストが来ている？</li>
+          <li><b>n8n</b>：Webhookは <code>Listen for test event</code> で待機中？</li>
+          <li><b>URL</b>：GitHub Payload URL は「ngrokドメイン + n8nのPath」？</li>
+          <li><b>IF</b>：mainにpushしている？（別ブランチだとFalseに流れる）</li>
+          <li><b>Set</b>：<code>Include Other Input Fields</code> OFFでDTOだけになっている？</li>
+          <li><b>Slack</b>：チャンネル指定は正しい？権限は足りている？</li>
+        </ol>
+      </div>
+    </details>
+
+    <!-- Troubles (Q -> cause -> fix) -->
+    <details id="sec-troubles" data-kind="trouble" open>
+      <summary>
+        <div class="sumline">
+          <span class="tag warn">ナレッジ</span>
+          <div>
+            <div class="title">詰まりポイント（Q → 原因 → 解決）</div>
+            <div class="meta">今回の質問を落とさない：そのまま見出し化</div>
+          </div>
+        </div>
+      </summary>
+      <div class="content">
+
+        <details data-kind="trouble" open>
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">Q</span>
+              <div>
+                <div class="title">「GitHub側のWebhookって、どこのこと言ってるの？」</div>
+                <div class="meta">設定の入口が多くて迷うのが自然</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>原因：</b>Webhookは「リポジトリ単位」の設定。アカウント設定にない。</p>
+            <p><b>解決：</b>対象リポジトリ → Settings → Webhooks → Add webhook。</p>
+          </div>
+        </details>
+
+        <details data-kind="trouble" open>
+          <summary>
+            <div class="sumline">
+              <span class="tag bad">Q</span>
+              <div>
+                <div class="title">「localhost がダメって言われる…何が起きてるの？」</div>
+                <div class="meta">自分のPC視点とGitHub視点が混ざる</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>原因：</b>GitHubは外部サーバー。<code>localhost</code> は“GitHub自身のlocalhost”になり、あなたのPCには届かない。</p>
+            <p><b>解決：</b>ngrokで公開URLを作り、GitHubにはそのURLを貼る。</p>
+          </div>
+        </details>
+
+        <details data-kind="trouble">
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">Q</span>
+              <div>
+                <div class="title">「ngrokって落とさないといけないの？ PowerShellで怒られる？」</div>
+                <div class="meta">“URLを作るのにアプリ？”が直感に反する</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>原因：</b>ngrokはPCからサーバーへ常時接続するクライアントが必要。</p>
+            <p><b>解決：</b>ngrokをダウンロードして実行。必要ならauthtoken登録。</p>
+          </div>
+        </details>
+
+        <details data-kind="trouble" open>
+          <summary>
+            <div class="sumline">
+              <span class="tag bad">Q</span>
+              <div>
+                <div class="title">「ERR_NGROK_4018 って何？」</div>
+                <div class="meta">仕様変更で“無料でも本人紐付け”が必要</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>原因：</b>authtoken未登録。</p>
+            <p><b>解決：</b>ngrokアカウント作成→token取得→登録。</p>
+            <pre><code>ngrok config add-authtoken YOUR_TOKEN</code></pre>
+          </div>
+        </details>
+
+        <details data-kind="trouble">
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">Q</span>
+              <div>
+                <div class="title">「n8n側のWebhook URLを変える必要性ある？」</div>
+                <div class="meta">URLが2種類（localhostと公開URL）見えるので混乱しやすい</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>原因：</b>n8nはlocalhost表示、GitHubは公開URLが必要。</p>
+            <p><b>解決：</b>n8nは固定。GitHubに貼る先だけngrokの公開URLにする。</p>
+          </div>
+        </details>
+
+        <details data-kind="trouble" open>
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">Q</span>
+              <div>
+                <div class="title">「n8nでテストしてるけど、GitHub側で何しなくちゃいけない？」</div>
+                <div class="meta">待つだけでは届かない、イベントが必要</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>原因：</b>Webhookはイベント（push等）で送られる。</p>
+            <p><b>解決：</b>pushを発生させる（空コミット、README編集）。</p>
+          </div>
+        </details>
+
+        <details data-kind="trouble" open>
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">Q</span>
+              <div>
+                <div class="title">「Setの手順がよく分かんない（どこをどう触るの？）」</div>
+                <div class="meta">“空の表”から始まるので不安になりやすい</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>原因：</b>Setは自分で項目を作る方式。自動で候補が出ない。</p>
+            <p><b>解決：</b><code>Add Field</code> → name/value → valueはExpression（<code>{{ }}</code>）で埋める。</p>
+          </div>
+        </details>
+
+        <details data-kind="trouble" open>
+          <summary>
+            <div class="sumline">
+              <span class="tag warn">Q</span>
+              <div>
+                <div class="title">「コミット対象の資材名って出せない？ compare_urlのこと？」</div>
+                <div class="meta">リンクとファイル名を分けて考えるのがコツ</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>原因：</b>compare_urlは差分ページへのリンクで、ファイル名そのものではない。</p>
+            <p><b>解決：</b><code>body.commits[].added/modified/removed</code> からファイル名を取り、Setで整形して通知に入れる。</p>
+          </div>
+        </details>
+
+        <details data-kind="trouble">
+          <summary>
+            <div class="sumline">
+              <span class="tag ok">改善</span>
+              <div>
+                <div class="title">「changed_filesをインデントして読みやすくしたい」</div>
+                <div class="meta">Slackで読む前提の“見た目整形”はSetでやる</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>ポイント：</b>Setで <code>.map(file =&gt; `  - ${file}`)</code> を使い、通知側は表示に専念させる。</p>
+          </div>
+        </details>
+
+        <details data-kind="trouble">
+          <summary>
+            <div class="sumline">
+              <span class="tag ok">改善</span>
+              <div>
+                <div class="title">「リポジトリ名も出したい」</div>
+                <div class="meta"><code>repository.full_name</code> をDTOに追加するだけ</div>
+              </div>
+            </div>
+          </summary>
+          <div class="content">
+            <p><b>解決：</b>Setに <code>repository: {{ $json.body.repository.full_name }}</code> を追加。</p>
+          </div>
+        </details>
+
+      </div>
+    </details>
+
+    <footer>
+      <p>
+        この手順書は「操作手順」だけでなく、今回実際に出た疑問を見出し化して、<b>なぜ詰まったか</b>を思い出せる構造にしています。<br/>
+        次の拡張（レベル3）に進むなら、<b>複数commitの集約</b>、<b>added/modified/removedの分類</b>、<b>署名検証（Secret）</b> が自然な流れです。
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    (function(){
+      const all = Array.from(document.querySelectorAll('details'));
+      const byKind = (kind) => Array.from(document.querySelectorAll('details[data-kind="' + kind + '"]'));
+      const setOpen = (nodes, open) => nodes.forEach(d => { d.open = open; });
+
+      const openAll = document.getElementById('openAll');
+      const closeAll = document.getElementById('closeAll');
+      const openSteps = document.getElementById('openSteps');
+      const openTroubles = document.getElementById('openTroubles');
+
+      if(openAll) openAll.addEventListener('click', () => setOpen(all, true));
+      if(closeAll) closeAll.addEventListener('click', () => setOpen(all, false));
+
+      if(openSteps) openSteps.addEventListener('click', () => {
+        setOpen(all, false);
+        setOpen(byKind('step'), true);
+        setOpen(byKind('info'), true);
+      });
+
+      if(openTroubles) openTroubles.addEventListener('click', () => {
+        setOpen(all, false);
+        setOpen(byKind('trouble'), true);
+      });
+
+      // TOC: open section on click
+      Array.from(document.querySelectorAll('.toc a')).forEach(a => {
+        a.addEventListener('click', () => {
+          const id = (a.getAttribute('href') || '').replace('#','');
+          const sec = document.getElementById(id);
+          if(sec && sec.tagName && sec.tagName.toLowerCase() === 'details') sec.open = true;
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
+
+</body>
+</html>

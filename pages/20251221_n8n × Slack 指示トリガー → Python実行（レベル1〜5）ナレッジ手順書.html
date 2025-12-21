@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>n8n × Slack 指示トリガー → Python実行（レベル1〜5）ナレッジ手順書</title>
+</head>
+<body>
+<!-- 20251221 -->
+<h1>n8n × Slack 指示トリガー → Python実行（レベル1〜5）ナレッジ手順書</h1>
+
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>n8n × Slack 指示トリガー → Python実行（レベル1〜5）ナレッジ手順書</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --card:#f9fafb;
+      --accent:#111827;
+      --ok:#065f46;
+      --warn:#92400e;
+      --ng:#991b1b;
+    }
+    html,body{background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif; line-height:1.55;}
+    body{margin:0; padding:14px;}
+    h1{font-size:1.25rem; margin:0 0 10px 0;}
+    h2{font-size:1.05rem; margin:0 0 8px 0;}
+    p{margin:8px 0;}
+    ul,ol{margin:8px 0 8px 1.2em;}
+    .topbar{
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--line);
+      margin: -14px -14px 12px -14px;
+      padding: 10px 14px;
+      z-index: 5;
+    }
+    .btnrow{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+    button{
+      appearance:none;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--accent);
+      padding:10px 12px;
+      border-radius:10px;
+      font-size:0.95rem;
+      font-weight:600;
+      cursor:pointer;
+      flex: 1 1 auto;
+    }
+    button:active{transform: translateY(1px);}
+    .meta{
+      font-size:0.9rem;
+      color:var(--muted);
+      margin-top:6px;
+    }
+    .pill{
+      display:inline-block;
+      border:1px solid var(--line);
+      background:var(--card);
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:0.85rem;
+      color:var(--muted);
+      margin-right:6px;
+    }
+    details{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+      background:#fff;
+      margin:10px 0;
+    }
+    details[open]{background:var(--card);}
+    summary{
+      cursor:pointer;
+      font-weight:800;
+      font-size:1.0rem;
+      list-style:none;
+      outline:none;
+    }
+    summary::-webkit-details-marker{display:none;}
+    .subdetails{margin-top:10px;}
+    .box{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:12px;
+      padding:10px;
+      margin:10px 0;
+    }
+    .hint{color:var(--muted); font-size:0.95rem;}
+    .good{color:var(--ok); font-weight:700;}
+    .warn{color:var(--warn); font-weight:700;}
+    .bad{color:var(--ng); font-weight:700;}
+    pre{
+      white-space:pre-wrap;
+      word-break:break-word;
+      background:#0b1020;
+      color:#e5e7eb;
+      padding:10px;
+      border-radius:12px;
+      overflow:auto;
+      font-size:0.92rem;
+      line-height:1.45;
+      margin:10px 0;
+    }
+    code{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    .hr{height:1px; background:var(--line); margin:10px 0;}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .k{font-weight:800;}
+    .small{font-size:0.92rem; color:var(--muted);}
+    .tight li{margin:6px 0;}
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <h1>n8n × Slack 指示トリガー → Python実行（レベル1〜5）ナレッジ手順書</h1>
+    <div class="meta">
+      <span class="pill">対象：学習フェーズ</span>
+      <span class="pill">目的：再現できる手順化</span>
+      <span class="pill">2025年12月時点の安定版想定</span>
+    </div>
+
+    <div class="btnrow">
+      <button type="button" onclick="openAll()">すべて開く</button>
+      <button type="button" onclick="closeAll()">すべて閉じる</button>
+      <button type="button" onclick="openOnly('procedure')">手順だけ開く</button>
+      <button type="button" onclick="openOnly('trouble')">詰まり・トラブルだけ開く</button>
+    </div>
+    <div class="small">※ どのボタンも「画面内の折りたたみ（details）」だけを操作します。外部ライブラリは使いません。</div>
+  </div>
+
+  <!-- ========== 0. 合格ライン（まずここまで） ========== -->
+  <details open data-kind="overview">
+    <summary>まずここまでできればOK（合格ライン）</summary>
+    <div class="box">
+      <p><span class="k">合格ライン：</span>Slackの特定メッセージ（例：<code>run python</code>）をきっかけに、n8nがPythonを実行し、<span class="good">実行結果（stdout）を確認</span>できること。</p>
+      <p class="hint">セキュリティや最適化は、ここではいったん後回しにします。まずは「配線がつながる」体験を優先します。</p>
+    </div>
+  </details>
+
+  <!-- ========== 1. 全体像 ========== -->
+  <details open data-kind="overview">
+    <summary>全体像（概念・視点整理：どこで何が起きる？）</summary>
+    <div class="box">
+      <h2>登場人物の役割</h2>
+      <ul class="tight">
+        <li><span class="k">Slack</span>：人が指示を出す「操作パネル」。</li>
+        <li><span class="k">n8n</span>：処理の流れをつなぐ「配線係」。トリガー・分岐・通知が得意。</li>
+        <li><span class="k">Python</span>：実際の処理をする「頭脳」。計算・ファイル操作・API連携などを担当。</li>
+      </ul>
+
+      <div class="hr"></div>
+
+      <h2>頭の中の地図（図がなくても浮かぶ説明）</h2>
+      <p>
+        ざっくり言うと、Slackが「合図」を出して、n8nがそれを受け取り、Pythonに「やって」と頼みます。<br/>
+        Pythonは処理して結果を返し、n8nがその結果をSlackに戻したり、ログに残します。
+      </p>
+
+      <div class="box">
+        <p class="k">よくある認知のズレ（ここが混乱ポイントになりやすい）</p>
+        <ul class="tight">
+          <li><span class="k">「誰の視点で見ているURLなのか」</span>：<br/>
+            Slackから見ているのか、ブラウザから見ているのか、n8nコンテナ内部から見ているのかで、<span class="k">同じ “localhost” でも意味が変わる</span>ことがあります。</li>
+          <li><span class="k">「どこの設定？」</span>：<br/>
+            Slack側（アプリ設定）・n8n側（Credential/Workflow）・実行環境（Pythonが動くOS/コンテナ）で設定場所が分かれます。</li>
+        </ul>
+      </div>
+
+      <div class="hr"></div>
+
+      <h2>この手順書の進め方</h2>
+      <p>
+        レベル1から順に進める理由は、「どこで詰まったか」を切り分けやすくするためです。<br/>
+        いきなり全部やると、Slack・n8n・Pythonのどれが原因か分からなくなりがちです。
+      </p>
+    </div>
+  </details>
+
+  <!-- ========== 2. 前提条件 ========== -->
+  <details data-kind="procedure" open>
+    <summary>前提条件（最初にここだけ確認）</summary>
+    <div class="box">
+      <ul class="tight">
+        <li><span class="k">Slack</span>：Bot Token（<code>xoxb-</code> で始まる）を使う想定</li>
+        <li><span class="k">n8n</span>：2025年12月時点の安定版（Docker/Cloudどちらでも）</li>
+        <li><span class="k">Python</span>：n8nが動く環境で <code>python3</code> が実行できる（重要）</li>
+      </ul>
+      <p class="hint">ここでのゴールは「学習フェーズで再現できること」。本番運用向けの細かい最適化はレベル5の後半に回します。</p>
+    </div>
+
+    <details class="subdetails" data-kind="trouble">
+      <summary>詰まりポイント：「Pythonって、どこで動いてるの？」</summary>
+      <div class="box">
+        <p><span class="k">Q：</span>Pythonを実行してるけど、私のPC？それともサーバ？どこ？</p>
+        <p><span class="k">なぜこの疑問が自然に出る？</span><br/>
+          Slackから指示を出しているので、「SlackからPythonが直接動く」ように錯覚しやすいです。実際は、<span class="k">n8nが動いている場所</span>でPythonが動きます。</p>
+        <p><span class="k">原因：</span>実行環境の視点が混ざっている（Slack/ブラウザ/コンテナ）。</p>
+        <p><span class="k">解決：</span>n8nの実行場所を基準に考える。Dockerなら「コンテナ内」。</p>
+        <p class="hint">ここで混乱してOKです。慣れるまで誰でも一回は通ります。</p>
+      </div>
+    </details>
+  </details>
+
+  <!-- ========== 3. レベル別：手順 ========== -->
+  <details open data-kind="procedure">
+    <summary>手順：レベル1（Slackの合図でPythonを1行だけ動かす）</summary>
+
+    <details class="subdetails" open data-kind="procedure">
+      <summary>Step（作業手順）</summary>
+      <div class="box">
+        <ol class="tight">
+          <li>n8nで新規Workflowを作成</li>
+          <li><span class="k">Slack Trigger</span> ノードを追加（イベント：チャンネルメッセージ系）</li>
+          <li>メッセージ本文が <code>run python</code> のときだけ次へ流す（フィルタ/IF）</li>
+          <li><span class="k">Execute Command</span> ノードを追加して、Pythonを実行</li>
+        </ol>
+
+        <pre><code>python3 -c "print('Hello from n8n')"</code></pre>
+
+        <p class="hint">ポイント：ここでは「データを渡す」より前に、まず「動く」を確認します。</p>
+      </div>
+    </details>
+
+    <details class="subdetails" data-kind="trouble" open>
+      <summary>詰まりポイント：Q → 原因 → 解決</summary>
+      <div class="box">
+        <details class="subdetails" data-kind="trouble">
+          <summary>「これってどこの設定？」（Slackのどこ？n8nのどこ？）</summary>
+          <div class="box">
+            <p><span class="k">原因：</span>Slack（アプリ側）とn8n（ワークフロー側）の責務が分かれている。</p>
+            <p><span class="k">解決：</span>
+              <ul class="tight">
+                <li>Slack側：アプリ作成、権限（スコープ）、イベント購読、Bot Token発行</li>
+                <li>n8n側：CredentialにToken登録、Slack Triggerを使う、ワークフローで条件分岐</li>
+              </ul>
+            </p>
+          </div>
+        </details>
+
+        <details class="subdetails" data-kind="trouble">
+          <summary>「Pythonが見つからない（python3: not found）」</summary>
+          <div class="box">
+            <p><span class="k">原因：</span>n8n実行環境にPythonが入っていない / PATHが通っていない。</p>
+            <p><span class="k">解決：</span>
+              <ul class="tight">
+                <li>Dockerの場合：Python入りのイメージを使うか、n8nコンテナにPythonを入れる</li>
+                <li>OS上の場合：<code>python3 --version</code> が通るか確認</li>
+              </ul>
+            </p>
+            <p class="hint">学習フェーズでは「Python入りの環境を用意する」が最短です。最適化は後回しでOK。</p>
+          </div>
+        </details>
+      </div>
+    </details>
+
+    <details class="subdetails" open data-kind="procedure">
+      <summary>動作確認・成功の証拠（何を見たら成功？）</summary>
+      <div class="box">
+        <ul class="tight">
+          <li>n8nの実行ログに <span class="good">Hello from n8n</span> が出る</li>
+          <li>Execute Command の出力（stdout）に同じ文字列が入る</li>
+        </ul>
+        <p class="hint">「Slackから指示 → n8nが反応 → Pythonの出力が見える」まで到達したら合格です。</p>
+      </div>
+    </details>
+  </details>
+
+  <details data-kind="procedure">
+    <summary>手順：レベル2（SlackのメッセージをPythonに渡す）</summary>
+
+    <details class="subdetails" open data-kind="procedure">
+      <summary>Step（作業手順）</summary>
+      <div class="box">
+        <ol class="tight">
+          <li>レベル1のワークフローをコピーしてベースにする</li>
+          <li>Execute Command を以下に置き換える（Slackの本文を埋め込む）</li>
+        </ol>
+
+        <pre><code>python3 - &lt;&lt; 'EOF'
+import sys
+text = """{{$json["event"]["text"]}}"""
+print(f"Slack message: {text}")
+EOF</code></pre>
+
+        <p class="hint">ポイント：この段階は「データが渡る」ことの確認。まだ安全性は深追いしません。</p>
+      </div>
+    </details>
+
+    <details class="subdetails" data-kind="trouble">
+      <summary>詰まりポイント：「{{$json...}} って何？どこで評価されるの？」</summary>
+      <div class="box">
+        <p><span class="k">なぜこの疑問が自然？</span><br/>
+          コマンド欄に突然テンプレート文字列が出てくると、「シェルが解釈するの？Pythonが解釈するの？」と混ざりやすいです。</p>
+        <p><span class="k">原因：</span>テンプレートは <span class="k">n8nが実行前に置換</span> する。</p>
+        <p><span class="k">解決：</span>「n8nが値を埋める → その結果をOSコマンドとして実行 → Pythonが読む」という順序で理解する。</p>
+        <p class="hint">ここで混乱してOKです。順序（誰がいつ解釈するか）を言語化できると、一気にラクになります。</p>
+      </div>
+    </details>
+
+    <details class="subdetails" open data-kind="procedure">
+      <summary>動作確認・成功の証拠</summary>
+      <div class="box">
+        <ul class="tight">
+          <li>Slackに <code>run python</code> 以外の文を送っても、Python出力にその文が表示される</li>
+          <li>出力が空なら、Triggerの取り方（イベント/権限）か参照パス（<code>event.text</code>）を疑う</li>
+        </ul>
+      </div>
+    </details>
+  </details>
+
+  <details data-kind="procedure">
+    <summary>手順：レベル3（コマンド形式で分岐：Slackが簡易CLIになる）</summary>
+
+    <details class="subdetails" open data-kind="procedure">
+      <summary>Step（作業手順）</summary>
+      <div class="box">
+        <p>Slackメッセージ例：</p>
+        <pre><code>py echo hello
+py calc 1+2</code></pre>
+
+        <p>Python例（学習用の簡易版）：</p>
+        <pre><code>text = """{{$json["event"]["text"]}}"""
+cmd = text.split()
+
+if len(cmd) &lt; 2:
+    print("Usage: py &lt;command&gt; ...")
+    raise SystemExit(1)
+
+if cmd[1] == "echo":
+    print(" ".join(cmd[2:]))
+elif cmd[1] == "calc":
+    expr = cmd[2] if len(cmd) &gt; 2 else ""
+    print(eval(expr))
+else:
+    print("Unknown command")</code></pre>
+
+        <p class="warn">注意（学習フェーズ用）：<code>eval</code> は安全ではありません。ここでは「分岐の体験」を優先しています。安全化はレベル5で扱います。</p>
+      </div>
+    </details>
+
+    <details class="subdetails" data-kind="trouble">
+      <summary>詰まりポイント：「Slackに書いたコマンドが、どこでどう解釈される？」</summary>
+      <div class="box">
+        <p><span class="k">原因：</span>Slackはただの文字列。意味付けはPython側で初めて起きる。</p>
+        <p><span class="k">解決：</span>「Slackは入力」「Pythonが解釈」の役割分担を固定する。n8nは配線に徹する。</p>
+      </div>
+    </details>
+
+    <details class="subdetails" open data-kind="procedure">
+      <summary>動作確認・成功の証拠</summary>
+      <div class="box">
+        <ul class="tight">
+          <li><code>py echo hello</code> → stdoutが <span class="good">hello</span></li>
+          <li><code>py calc 1+2</code> → stdoutが <span class="good">3</span></li>
+        </ul>
+      </div>
+    </details>
+  </details>
+
+  <details data-kind="procedure">
+    <summary>手順：レベル4（結果をSlackに返す：操作UI兼ログ画面）</summary>
+
+    <details class="subdetails" open data-kind="procedure">
+      <summary>Step（作業手順）</summary>
+      <div class="box">
+        <ol class="tight">
+          <li>レベル3の後ろに <span class="k">Slack（Post Message）</span> ノードを追加</li>
+          <li>送信テキストにExecute Commandのstdoutを埋め込む</li>
+        </ol>
+
+        <pre><code>処理結果：
+{{$json["stdout"]}}</code></pre>
+
+        <p class="hint">なぜ返す？：返さないと「動いたかどうか」がSlack側で分からず、学習も運用も不安になります。</p>
+      </div>
+    </details>
+
+    <details class="subdetails" data-kind="trouble">
+      <summary>詰まりポイント：「stdoutってどこにあるの？JSONのどこ？」</summary>
+      <div class="box">
+        <p><span class="k">原因：</span>ノードごとに出力JSONの形が変わる。どのノードの出力を見ているかがズレる。</p>
+        <p><span class="k">解決：</span>n8nの実行画面で「直前ノードのOutput」を開き、<span class="k">実際にキー名を目で確認</span>してから参照する。</p>
+        <p class="hint">ここは「推測」より「確認」が強いです。確認すれば迷いが消えます。</p>
+      </div>
+    </details>
+
+    <details class="subdetails" open data-kind="procedure">
+      <summary>動作確認・成功の証拠</summary>
+      <div class="box">
+        <ul class="tight">
+          <li>Slackに結果が返ってくる（成功の可視化）</li>
+          <li>エラー時も何かしら返信が来るようにすると学習効率が上がる</li>
+        </ul>
+      </div>
+    </details>
+  </details>
+
+  <details data-kind="procedure">
+    <summary>手順：レベル5（実務向けの入口：安全・拡張前提）</summary>
+
+    <details class="subdetails" open data-kind="procedure">
+      <summary>ここでやること（学習フェーズのまま、壊れにくくする）</summary>
+      <div class="box">
+        <ul class="tight">
+          <li><span class="k">許可コマンドだけ実行（ホワイトリスト）</span>：想定外の命令を弾く</li>
+          <li><span class="k">ログ</span>：実行内容と結果を残す（後で振り返れる）</li>
+          <li><span class="k">エラー通知</span>：失敗しても「何が起きたか」をSlackへ返す</li>
+        </ul>
+        <p class="hint">ここから先は「安全設計・運用設計」に入るので、学習の合格ライン到達後に着手するのがスムーズです。</p>
+      </div>
+    </details>
+
+    <details class="subdetails" open data-kind="procedure">
+      <summary>Python例（ホワイトリスト）</summary>
+      <div class="box">
+        <pre><code>text = """{{$json["event"]["text"]}}"""
+cmd = text.split()
+
+ALLOWED = {"echo", "calc"}  # 例：最小でOK
+
+if len(cmd) &lt; 2:
+    print("Usage: py &lt;command&gt; ...")
+    raise SystemExit(1)
+
+sub = cmd[1]
+if sub not in ALLOWED:
+    print("Command not allowed")
+    raise SystemExit(1)
+
+if sub == "echo":
+    print(" ".join(cmd[2:]))
+elif sub == "calc":
+    # 学習用の例：安全化は別途（ここでは「許可コマンド化」を優先）
+    expr = cmd[2] if len(cmd) &gt; 2 else ""
+    print(expr)</code></pre>
+
+        <p class="hint">狙い：危ない処理をゼロにするより前に、まず「入口を絞る」だけでも事故率が下がります。</p>
+      </div>
+    </details>
+
+    <details class="subdetails" data-kind="trouble">
+      <summary>詰まりポイント：「セキュリティって今やるべき？後でいい？」</summary>
+      <div class="box">
+        <p><span class="k">結論：</span>学習フェーズでは<span class="k">まず動かす</span>。その後に<span class="k">入口を絞る</span>（レベル5）。</p>
+        <p><span class="k">理由：</span>最初から全部を守ろうとすると、確認箇所が増えすぎて「どこで詰まったか」が分からなくなるからです。</p>
+        <p class="hint">ここで「後でやる」と明示して切り分けるのは、怠けではなく設計です。</p>
+      </div>
+    </details>
+  </details>
+
+  <!-- ========== 4. 詰まりポイント集（まとめ） ========== -->
+  <details open data-kind="trouble">
+    <summary>詰まりポイント集（混乱してOK：Q → 原因 → 解決のまとめ）</summary>
+    <div class="box">
+      <details class="subdetails" data-kind="trouble">
+        <summary>「これってどこの設定？」</summary>
+        <div class="box">
+          <p><span class="k">原因：</span>Slack（アプリ設定）/ n8n（Credential・Workflow）/ 実行環境（Docker/OS）が分離している。</p>
+          <p><span class="k">解決：</span>困ったら「どこで起きてる？」を3択に戻す（Slack / n8n / 実行環境）。</p>
+        </div>
+      </details>
+
+      <details class="subdetails" data-kind="trouble">
+        <summary>「localhostじゃダメなの？」（どの視点のlocalhost？）</summary>
+        <div class="box">
+          <p><span class="k">なぜ疑問が自然？</span><br/>
+            ブラウザで見ている画面と、コンテナ内から見えるネットワークが一致するように感じるためです。</p>
+          <p><span class="k">原因：</span><code>localhost</code> は「そのマシン自身」を指す。Dockerなら「コンテナ自身」。</p>
+          <p><span class="k">解決：</span>「誰の視点のURLか」を言葉にする。<br/>
+            例：<span class="k">“n8nコンテナから見たlocalhost”</span> と <span class="k">“自分のPCブラウザから見たlocalhost”</span> は別物。</p>
+        </div>
+      </details>
+
+      <details class="subdetails" data-kind="trouble">
+        <summary>「動いたか分からない（成功の証拠がない）」</summary>
+        <div class="box">
+          <p><span class="k">原因：</span>Slackに返さない／n8nのstdoutを見ていない。</p>
+          <p><span class="k">解決：</span>レベル4で「結果をSlackに返す」を入れる。学習の安心感が上がる。</p>
+        </div>
+      </details>
+    </div>
+  </details>
+
+  <!-- ========== 5. 切り分けチェックリスト ========== -->
+  <details open data-kind="trouble">
+    <summary>チェックリスト（切り分け順：ここから順に潰す）</summary>
+    <div class="box">
+      <ol class="tight">
+        <li><span class="k">Slack → n8n が届いてる？</span><br/>
+          n8nの実行履歴にTriggerの反応が出るか。</li>
+        <li><span class="k">Triggerのイベント/権限は合ってる？</span><br/>
+          期待するイベント種別（メッセージ等）とスコープが揃っているか。</li>
+        <li><span class="k">条件分岐（run pythonなど）で止めてない？</span><br/>
+          IF/Filterが想定どおりか。</li>
+        <li><span class="k">Pythonは実行環境に存在する？</span><br/>
+          <code>python3 --version</code> が通るか。</li>
+        <li><span class="k">stdout/stderr を見てる？</span><br/>
+          「何が起きたか」はまずログに出る。</li>
+        <li><span class="k">Slackへ返す経路は動く？</span><br/>
+          レベル4を入れて、成功も失敗もSlackに返す。</li>
+      </ol>
+      <p class="hint">コツ：<span class="k">1つずつ</span>確認します。いきなり全部直そうとしないのが、結果的に最短です。</p>
+    </div>
+  </details>
+
+  <!-- ========== 6. 付録：最小テンプレ（コピペ用） ========== -->
+  <details data-kind="procedure">
+    <summary>付録：最小テンプレ（コピペ用：レベル1のPython）</summary>
+    <div class="box">
+      <pre><code>python3 -c "print('Hello from n8n')"</code></pre>
+      <p class="hint">まずこれが通ればOK。ここからレベル2〜へ進めます。</p>
+    </div>
+  </details>
+
+  <script>
+    function allDetails(){
+      return Array.from(document.querySelectorAll('details'));
+    }
+    function setOpen(detailsList, open){
+      detailsList.forEach(d => { d.open = open; });
+    }
+    function openAll(){
+      setOpen(allDetails(), true);
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    function closeAll(){
+      // top-levelだけ残したい気持ちもあるが、要件に素直に「全部閉じる」
+      setOpen(allDetails(), false);
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    function openOnly(kind){
+      const ds = allDetails();
+      ds.forEach(d => {
+        const k = d.getAttribute('data-kind');
+        d.open = (k === kind);
+      });
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+  </script>
+</body>
+</html>
+
+</body>
+</html>
