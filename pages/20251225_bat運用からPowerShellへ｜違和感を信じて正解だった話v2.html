@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>bat運用からPowerShellへ｜違和感を信じて正解だった話</title>
+</head>
+<body>
+<h1>bat運用からPowerShellへ｜違和感を信じて正解だった話</h1>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>bat運用からPowerShellへ｜違和感を信じて正解だった話</title>
+  <link rel="stylesheet" href="knowledge-style.css">
+</head>
+<body>
+
+<div class="wrap">
+
+<h1>📘 bat運用から PowerShell へ。違和感を信じて正解だった話</h1>
+
+<p>
+このドキュメントは、<br>
+「なんとなく不快だった bat 運用」から「PowerShell に寄せた結果、なぜ楽になったのか」を、<br>
+後から読み返しても当時の思考が再生される形でまとめた技術ナレッジです。
+</p>
+
+<p>
+単なる手順書ではなく、<br>
+<strong>判断の背景・迷い・納得に至るプロセス</strong>を残すことを目的にしています。
+</p>
+
+<details id="concept-01" data-kind="info">
+  <summary>全体像・考え方｜問題は「ツール」ではなく「前提のズレ」</summary>
+
+  <p>
+    bat が悪いわけではありません。<br>
+    問題は、<strong>今の開発環境の前提と、bat の前提がズレている</strong>ことでした。
+  </p>
+
+  <ul>
+    <li>VS Code / Python / Git / Web → UTF-8 前提</li>
+    <li>bat → Shift-JIS 前提（しかも暗黙）</li>
+  </ul>
+
+  <p>
+    UTF-8 の世界で作業しているのに、<br>
+    入口だけ昭和仕様。
+  </p>
+
+  <p>
+    その歪みが、<br>
+    「文字コードを気にする」<br>
+    「環境起因のエラーが増える」<br>
+    という形で、じわじわストレスになっていました。
+  </p>
+</details>
+
+<details id="prerequisite-01" data-kind="info">
+  <summary>前提条件｜今回の前提となる環境</summary>
+
+  <ul>
+    <li>Windows 環境</li>
+    <li>Python をローカル実行している</li>
+    <li>エディタは VS Code</li>
+    <li>UTF-8 前提で作業したい</li>
+  </ul>
+
+  <p>
+    この前提がある場合、bat は「動くけど相性が悪い」状態になりやすいです。
+  </p>
+</details>
+
+<details id="step-01" data-kind="step">
+  <summary>手順①｜bat 運用で感じていた違和感を言語化する</summary>
+
+  <p>
+    動いてはいる。<br>
+    でも、気持ちよくはない。
+  </p>
+
+  <ul>
+    <li>保存のたびに文字コードを気にする</li>
+    <li>少し修正すると突然動かなくなる</li>
+    <li>エラー原因がコードではなく環境</li>
+  </ul>
+
+  <p>
+    「まあ、そういうもの」と流していましたが、<br>
+    違和感自体はずっと残っていました。
+  </p>
+</details>
+
+<details id="step-02" data-kind="step">
+  <summary>手順②｜選択肢を並べて PowerShell を試す</summary>
+
+  <p>
+    選択肢はいくつかありました。
+  </p>
+
+  <ul>
+    <li>bat をだましだまし使う</li>
+    <li>ルールで縛る</li>
+    <li>毎回エンコードを確認する</li>
+    <li>別の仕組みに寄せる</li>
+  </ul>
+
+  <p>
+    そこで浮かんだのが PowerShell でした。
+  </p>
+
+  <p>
+    正直、最初は<br>
+    「重そう」「bat で十分では？」<br>
+    という先入観がありました。
+  </p>
+</details>
+
+<details id="step-03" data-kind="step">
+  <summary>手順③｜PowerShell に寄せた瞬間に起きた変化</summary>
+
+  <p>
+    実際に書いてみて、一気に世界が整いました。
+  </p>
+
+  <ul>
+    <li>UTF-8 が前提</li>
+    <li>パス操作が安全</li>
+    <li>Python 実行との相性が良い</li>
+    <li>読み返して意図が分かる</li>
+  </ul>
+
+  <pre><code>Join-Path "error_log" $filename</code></pre>
+
+  <p>
+    スラッシュやクォートを考える必要がなくなり、<br>
+    思考のノイズが消えました。
+  </p>
+</details>
+
+<details id="step-04" data-kind="step">
+  <summary>手順④｜最終的に落ち着いた構成</summary>
+
+  <pre><code>project/
+├─ run.ps1
+├─ run.bat
+├─ main.py
+└─ error_log/</code></pre>
+
+  <p>
+    bat は入口だけ。<br>
+    処理は PowerShell。
+  </p>
+
+  <p>
+    この役割分担が、想像以上に気持ちよく機能しました。
+  </p>
+</details>
+
+<details id="trouble-01" data-kind="trouble">
+  <summary>詰まりポイント｜PowerShell 特有の落とし穴</summary>
+
+  <p><strong>Bash 的な書き方は通らない</strong></p>
+
+  <pre><code>"./error_log/$filename"</code></pre>
+
+  <p>
+    PowerShell では NG。<br>
+    正解は <code>Join-Path</code>。
+  </p>
+
+  <p><strong>.ps1 はそのままではダブルクリックできない</strong></p>
+
+  <p>
+    仕様です。<br>
+    bat から呼ぶか ExecutionPolicy を調整します。
+  </p>
+
+  <p><strong>文字コードは統一しないと壊れる</strong></p>
+
+  <p>
+    最終的に<br>
+    UTF-8 with BOM / CRLF に統一して安定しました。
+  </p>
+</details>
+
+<details id="check-01" data-kind="check">
+  <summary>確認方法｜「人に見せられるコード」になっているか</summary>
+
+  <p>
+    自分の中でのチェック基準はこれでした。
+  </p>
+
+  <ul>
+    <li>数か月後に読んで意味が分かるか</li>
+    <li>意図がコードに残っているか</li>
+    <li>環境要因で壊れにくいか</li>
+  </ul>
+
+  <p>
+    PowerShell 版は、初めて<br>
+    「これは人に見せられる」と感じました。
+  </p>
+</details>
+
+<details id="summary-01" data-kind="info">
+  <summary>まとめ｜無理に慣れなくていい違和感がある</summary>
+
+  <p>
+    bat は手軽ですが、<br>
+    今の UTF-8 前提の開発環境とはズレています。
+  </p>
+
+  <p>
+    その違和感に気づき、<br>
+    一段上の選択肢を試したこと自体が最大の収穫でした。
+  </p>
+
+  <p>
+    結果として、<br>
+    作業が楽になり、<br>
+    納得感が残る構成になりました。
+  </p>
+</details>
+
+<details id="summary-02" data-kind="info">
+  <summary>次にやること｜変換GEMという形で知見を固定化</summary>
+
+  <p>
+    この判断を毎回考え直すのは面倒なので、<br>
+    bat → PowerShell 変換用の GEM を作成しました。
+  </p>
+
+  <p>
+    目的は、<br>
+    思考と判断を自動化することです。
+  </p>
+</details>
+
+</div>
+<script src="knowledge-ui.js"></script>
+</body>
+</html>
+
+</body>
+</html>
