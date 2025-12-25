@@ -94,52 +94,54 @@ jobs:
 - `on.push.paths`: この設定が非常に重要です。`pages`ディレクトリ内のHTMLファイルが変更された`push`の時だけワークフローを実行することで、Actions自身がコミットした際に再度Actionsが起動する**無限ループを防いでいます**。
 - `git diff --cached --quiet || git commit ...`: この一行は、「`git add`された内容（キャッシュ）に差分がなければ何もしない。差分があれば(`||`)、コミットを実行する」という意味です。これにより、目次が更新されなかった場合に不要なコミットが作られるのを防ぎます。
 
-### 一覧生成スクリプト: `tools/build_index.py`
+### UIとデザイン: `pages/knowledge-style.css`, `knowledge-ui.js`
 
-`pages/index.html`を自動生成するPythonスクリプトです。
+今回のアップデートで、モダンなデザインとインタラクションが追加されました。
+
+- **`knowledge-style.css`**: ダークモード対応のレスポンシブなデザインを提供します。変数（CSS Variables）を使用しており、テーマのカスタマイズも容易です。
+- **`knowledge-ui.js`**: クライアントサイドでの動的な機能を提供します。
+    - **インクリメンタルサーチ**: 文字を入力するごとに一覧をフィルタリングします。
+    - **アコーディオン制御**: 検索時に月別アーカイブを自動で開閉します。
+    - **テーマ切り替え**: ライトモード/ダークモードの切り替えを管理します（トグルボタンがある場合）。
+
+`pages/index.html`を自動生成するPythonスクリプトです。ファイル名の先頭6桁（YYYYMM）を見て、月ごとのアーカイブを自動生成します。
 
 ```python
+import re
 from pathlib import Path
+from collections import defaultdict
 
-# 1. 操作対象のディレクトリを定義
+# 1. 設定と準備
 pages_dir = Path("pages")
+index_file = pages_dir / "index.html"
+style_css = "knowledge-style.css"
 
-# 2. `pages`ディレクトリから全HTMLファイルを取得し、ソートする
+# HTMLファイルを取得し、更新日順（ファイル名順）でソート
 html_files = sorted(
-    # リスト内包表記: `pages_dir`内の全HTMLファイルから...
-    [f for f in pages_dir.glob("*.html") if f.name != "index.html"],
-    # `index.html`自身は除外する
-    reverse=True # ファイル名で逆順（新しいものが上）にソート
+    [f for f in pages_dir.glob("*.html") if f.name != "index.html" and f.name != "knowledge-ui.js"],
+    reverse=True
 )
 
-# 3. 生成するHTMLのヘッダー部分を作成
-lines = [
-    "<!doctype html>",
-    "<html><head>",
-    "<meta charset='utf-8'>",
-    "<meta name='viewport' content='width=device-width, initial-scale=1'>",
-    "<title>資料一覧</title>",
-    "</head><body>",
-    "<h1>資料一覧</h1>",
-    "<ul>"
-]
+# 2. データを整理
+# 最新10件を抽出
+latest_files = html_files[:10]
 
-# 4. ファイルリストをループしてリンク(`<li>`)を生成
+# 月別アーカイブ用に分類
+archives = defaultdict(list)
 for f in html_files:
-    # ファイル名から拡張子を除き(`stem`)、アンダースコアをスペースに置換してタイトルにする
-    title = f.stem.replace("_", " ")
-    lines.append(f"<li><a href='{f.name}'>{title}</a></li>")
+    # ファイル名先頭6桁 (YYYYMM) を抽出して年月キーを作成
+    match = re.match(r"(\d{4})(\d{2})", f.name)
+    if match:
+        year, month = match.groups()
+        key = f"{year}年{month}月"
+    else:
+        key = "その他"
+    archives[key].append(f)
 
-# 5. HTMLのフッター部分を追加
-lines += [
-    "</ul>",
-    "</body></html>"
-]
-
-# 6. すべての行を結合し、`pages/index.html`に書き込む
-(pages_dir / "index.html").write_text("\n".join(lines), encoding="utf-8")
+# 3. HTML生成（省略: 検索ボックス、最新リスト、月別リストの生成ロジックなど）
+# ...
 ```
 
-- **`pathlib`**: OS（Windows, Mac, Linux）の違いを吸収してくれるモダンなライブラリです。
-- **`f.stem`**: ファイル名から拡張子を除いた部分（例: `2025-12-16_メモ.html` → `2025-12-16_メモ`）を取得します。
-- **`write_text`**: ファイルへの書き込みを一行で、文字コード(`utf-8`)も指定して安全に行います。
+- **`re.match`**: 正規表現を使ってファイル名から年月を抽出しています。
+- **`defaultdict`**: 月ごとのリストを簡単に作るための便利な辞書型です。
+- **検索機能**: 生成されるHTMLには検索ボックスが含まれており、JavaScriptでリアルタイムフィルタリングが行われます。
