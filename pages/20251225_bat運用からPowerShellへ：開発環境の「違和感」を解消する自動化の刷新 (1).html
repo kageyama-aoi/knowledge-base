@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>bat運用からPowerShellへ：開発環境の「違和感」を解消する自動化の刷新</title>
+</head>
+<body>
+<h1>bat運用からPowerShellへ：開発環境の「違和感」を解消する自動化の刷新</h1>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>bat運用からPowerShellへ：開発環境の「違和感」を解消する自動化の刷新</title>
+  <link rel="stylesheet" href="knowledge-style.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <h1>bat運用からPowerShellへ：開発環境の「違和感」を解消する自動化の刷新</h1>
+  
+  <p class="sub">
+    Python実行や環境構築において、なんとなく使い続けている「.bat」ファイル。現代のUTF-8中心の開発環境と、Shift-JIS前提のbatファイルとの間に生じる「ズレ」を解消し、PowerShell（.ps1）へ移行することで、安全でメンテナンス性の高い自動化環境を構築します。
+  </p>
+
+  <details id="concept" data-kind="info">
+    <summary>
+      <div class="sumline">
+        <span class="tag ok">info</span>
+        <span>全体像：なぜ「bat」に違和感を覚えるのか</span>
+      </div>
+    </summary>
+    <div class="content">
+      <p>現代の開発において、VS CodeやPython、Gitなどはすべて「UTF-8」を前提としています。しかし、Windows標準のbatファイルは「Shift-JIS」を前提（暗黙の了解）として動作するため、ここに決定的なズレが生じます。</p>
+      <ul>
+        <li><strong>文字コードの不一致：</strong> 保存のたびにエンコードを気にする必要がある。</li>
+        <li><strong>パス操作の脆弱性：</strong> スペースを含むパスやスラッシュの扱いに細心の注意が必要。</li>
+        <li><strong>エラーハンドリングの限界：</strong> 標準出力やエラー出力の制御が複雑になりやすい。</li>
+      </ul>
+      <p>PowerShellに寄せることで、入り口（実行環境）から出口（ログ出力）までをUTF-8の世界で統一でき、開発のストレスが激減します。</p>
+    </div>
+  </details>
+
+  <details id="pre-requisites" data-kind="info">
+    <summary>
+      <div class="sumline">
+        <span class="tag ok">info</span>
+        <span>前提条件</span>
+      </div>
+    </summary>
+    <div class="content">
+      <p>本ナレッジを適用するための前提環境は以下の通りです。</p>
+      <ul>
+        <li>Windows 10 / 11 搭載 PC</li>
+        <li>Python インストール済み（`python` コマンドが通ること）</li>
+        <li>VS Code 等のテキストエディタ</li>
+        <li><strong>文字コードの統一：</strong> ファイルは「UTF-8 with BOM」で保存することを推奨。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details id="step-structure" data-kind="step">
+    <summary>
+      <div class="sumline">
+        <span class="tag">step</span>
+        <span>推奨されるプロジェクト構成</span>
+      </div>
+    </summary>
+    <div class="content">
+      <p>「バッチファイルの手軽さ」と「PowerShellの堅牢さ」を両立させるために、以下のような構成で運用します。</p>
+      <pre><code>project/
+├─ run.ps1        ← メインの処理ロジック（PowerShell）
+├─ run.bat        ← ダブルクリック実行用（中身はps1を呼ぶだけ）
+├─ main.py        ← 実行したいPythonプログラム
+└─ error_log/     ← ログ出力先ディレクトリ</code></pre>
+      <p>この分離により、「処理はPowerShellで安全に書き、実行は使い慣れたダブルクリックで行う」という運用が可能になります。</p>
+    </div>
+  </details>
+
+  <details id="step-ps-code" data-kind="step">
+    <summary>
+      <div class="sumline">
+        <span class="tag">step</span>
+        <span>PowerShell（.ps1）の実装例</span>
+      </div>
+    </summary>
+    <div class="content">
+      <p>batでは複雑だったパス結合や日付取得も、PowerShellなら直感的に記述できます。</p>
+      <pre><code># スクリプトの場所をカレントディレクトリに設定
+Set-Location $PSScriptRoot
+
+# 日付付きのログファイル名を生成
+$datetime = Get-Date -Format "yyyyMMdd_HHmmss"
+$filename = "error_$datetime.txt"
+$logPath = Join-Path "error_log" $filename
+
+# Python実行（標準エラー出力をログファイルへ飛ばす）
+python main.py 2> $logPath
+
+Write-Host "処理が完了しました"
+Write-Host "エラーログ: $logPath"
+Pause</code></pre>
+      <p><strong>解説：</strong> `Join-Path` を使うことで、ディレクトリの区切り文字を気にする必要がなくなります。また、`$PSScriptRoot` でスクリプト自身の場所を確実に特定できます。</p>
+    </div>
+  </details>
+
+  <details id="trouble-points" data-kind="trouble">
+    <summary>
+      <div class="sumline">
+        <span class="tag warn">trouble</span>
+        <span>移行時にハマりやすいポイント</span>
+      </div>
+    </summary>
+    <div class="content">
+      <p>PowerShell移行時に直面する代表的な壁とその対策です。</p>
+      <div class="kv">
+        <strong>パスの書き方</strong>
+        <span>Bashのように `"./dir/$file"` と書くと、PowerShellでは意図通りに動かないことがあります。必ず `Join-Path` を使用しましょう。</span>
+      </div>
+      <div class="kv">
+        <strong>実行ポリシー</strong>
+        <span>初期状態では `.ps1` の実行が禁止されている場合があります。`Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` で設定変更が必要です。</span>
+      </div>
+      <div class="kv">
+        <strong>文字コード</strong>
+        <span>日本語を含む場合、BOMなしUTF-8だと文字化けすることがあります。Windows環境のPowerShell 5.1以前を考慮する場合「UTF-8 with BOM」が最も安定します。</span>
+      </div>
+    </div>
+  </details>
+
+  <details id="check-method" data-kind="check">
+    <summary>
+      <div class="sumline">
+        <span class="tag bad">check</span>
+        <span>正常動作の確認方法</span>
+      </div>
+    </summary>
+    <div class="content">
+      <p>移行が完了したら、以下の項目をチェックしてください。</p>
+      <ul>
+        <li>[ ] スクリプトをダブルクリックして、PowerShellウィンドウが立ち上がるか</li>
+        <li>[ ] 日本語を含むメッセージが文字化けせずに表示されているか</li>
+        <li>[ ] `error_log` フォルダに、日付入りのログファイルが正しく生成されているか</li>
+        <li>[ ] Python内の `print` 内容が画面に正しく表示されるか</li>
+      </ul>
+    </div>
+  </details>
+
+  <details id="summary-next" data-kind="info">
+    <summary>
+      <div class="sumline">
+        <span class="tag ok">info</span>
+        <span>まとめと次にやること</span>
+      </div>
+    </summary>
+    <div class="content">
+      <p>「なんとなく動いているからいいや」という違和感を放置せず、一段上のツール（PowerShell）に移行することで、結果としてメンテナンスコストが下がります。これは単なる技術選定ではなく、開発環境全体の「納得感」を高めるための判断です。</p>
+      <p><strong>【付録】bat → PowerShell 変換用プロンプト：</strong><br>
+      手元の古いbatファイルを一括で変換するために、AIを活用しましょう。以下のプロンプトを使用すると、本ナレッジの作法に則ったPowerShellスクリプトが生成されます。</p>
+      <pre><code>あなたは Windows / PowerShell に精通したエンジニアです。
+
+以下に貼り付けられる bat ファイルの内容を、PowerShell（.ps1）用のスクリプトに変換してください。
+
+
+
+【前提】
+
+- ユーザーは bat ファイルの中身をそのまま貼り付けます
+
+- 出力された PowerShell スクリプトは、そのまま保存して実行できる必要があります
+
+- 実行環境は Windows です
+
+- Python 実行・ログ出力・パス操作などが含まれる可能性があります
+
+
+
+【変換ルール（重要）】
+
+- bat の処理内容はすべて保持すること
+
+- PowerShell らしい安全な書き方に変換すること
+
+- cd の代わりに $PSScriptRoot / Set-Location を使うこと
+
+- パス結合は Join-Path を使用すること
+
+- 日付・時刻は Get-Date を使用すること
+
+- エラー出力（2>）は PowerShell で正しく再現すること
+
+- 文字コード問題が起きないように配慮すること
+
+- 初心者でもそのまま実行できる形にすること
+
+
+
+【出力形式】
+
+- 必ず PowerShell のコードのみを「コードブロック」で出力すること
+
+- そのまま保存して使える状態にすること
+
+- 余計な説明文はコードの後にまとめること
+
+
+
+【保存形式（必ず明示すること）】
+
+- ファイル名：run.ps1
+
+- 文字コード：UTF-8 with BOM
+
+- 改行コード：CRLF（Windows 標準）
+
+- 実行方法：ダブルクリック または bat から実行可能
+
+
+
+【入力（ここに bat を貼る）】
+
+--- ここから ---
+
+（ユーザーが bat ファイルの中身を貼る）
+
+--- ここまで ---</code></pre>
+    </div>
+  </details>
+
+  <footer>
+    &copy; 2024 Knowledge Base - From Batch to PowerShell
+  </footer>
+
+</div>
+<script src="knowledge-ui.js"></script>
+</body>
+</html>
+</body>
+</html>
