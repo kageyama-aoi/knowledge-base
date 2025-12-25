@@ -44,6 +44,11 @@ lines = [
     "<h1>📚 資料一覧</h1>",
     "<div class='sub'>自動生成されたドキュメントのインデックスです。</div>",
     "<br>",
+    # --- 検索ボックス ---
+    "<div class='search-box'>",
+    "  <input type='search' id='searchDocs' placeholder='資料を検索...' aria-label='資料を検索'>",
+    "</div>",
+    "<br>",
 ]
 
 # --- 最新の資料セクション ---
@@ -84,6 +89,7 @@ lines += [
     f"<p>最終更新: {Path(__file__).stem} により自動生成</p>",
     "</footer>",
     "</div>", # end wrap
+    f"<script src='knowledge-ui.js'></script>",
     "</body></html>"
 ]
 
