@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Slack（Bot/Event Subscriptions）→ n8n 受信/検証/投稿：ナレッジ手順書</title>
+</head>
+<body>
+<h1>Slack（Bot/Event Subscriptions）→ n8n 受信/検証/投稿：ナレッジ手順書</h1>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slack（Bot/Event Subscriptions）→ n8n 受信/検証/投稿：ナレッジ手順書</title>
+  <meta name="description" content="SlackのBot作成→Event Subscriptions→n8n Webhookでchallenge応答→イベント受信→Slack投稿の一連を、なぜ必要か/しないとどうなるか/どこで何のエラーが出るかまで整理。" />
+  <style>
+    :root{
+      --bg:#0f1216;
+      --panel:#151a21;
+      --panel2:#0b0f14;
+      --text:#e7edf5;
+      --muted:#a9b4c2;
+      --border:#253043;
+      --accent:#7dd3fc;
+      --accent2:#a78bfa;
+      --good:#34d399;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --code:#0b1020;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius2: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    }
+    [data-theme="light"]{
+      --bg:#f6f8fb;
+      --panel:#ffffff;
+      --panel2:#f2f5fb;
+      --text:#0f172a;
+      --muted:#475569;
+      --border:#d7deea;
+      --accent:#0284c7;
+      --accent2:#6d28d9;
+      --good:#059669;
+      --warn:#b45309;
+      --bad:#e11d48;
+      --code:#0b1020;
+      --shadow: 0 10px 25px rgba(2,8,23,.12);
+    }
+
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 800px at 15% 0%, rgba(125,211,252,.14), transparent 45%),
+                  radial-gradient(1000px 700px at 85% 10%, rgba(167,139,250,.12), transparent 45%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.65;
+    }
+    a{color:var(--accent); text-decoration:none;}
+    a:hover{text-decoration:underline;}
+    .wrap{max-width:980px; margin:0 auto; padding:16px 14px 80px;}
+    header{
+      position: sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter: blur(12px);
+      background: color-mix(in oklab, var(--bg) 70%, transparent);
+      border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+    }
+    .head-inner{
+      max-width:980px;
+      margin:0 auto;
+      padding:12px 14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      justify-content:space-between;
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .title h1{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .title .sub{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .toolbar{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .btn{
+      appearance:none;
+      border:1px solid var(--border);
+      background: color-mix(in oklab, var(--panel) 85%, transparent);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:12px;
+      box-shadow: 0 1px 0 rgba(255,255,255,.04);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn:hover{border-color: color-mix(in oklab, var(--accent) 40%, var(--border));}
+    .btn.primary{
+      border-color: color-mix(in oklab, var(--accent) 60%, var(--border));
+      background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 22%, var(--panel)), var(--panel));
+    }
+    .btn.good{
+      border-color: color-mix(in oklab, var(--good) 55%, var(--border));
+      background: linear-gradient(135deg, color-mix(in oklab, var(--good) 18%, var(--panel)), var(--panel));
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      background: color-mix(in oklab, var(--panel) 70%, transparent);
+    }
+
+    .hero{
+      margin-top:14px;
+      padding:18px;
+      background: linear-gradient(180deg, color-mix(in oklab, var(--panel) 92%, transparent), color-mix(in oklab, var(--panel) 82%, transparent));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .hero h2{
+      margin:0 0 10px;
+      font-size:18px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    @media(min-width:860px){
+      .grid{grid-template-columns: 1.2fr .8fr;}
+    }
+    .card{
+      border:1px solid var(--border);
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .card h3{
+      margin:0 0 10px;
+      font-size:15px;
+    }
+    .muted{color:var(--muted);}
+    .callout{
+      border-left:4px solid var(--accent);
+      background: color-mix(in oklab, var(--panel2) 80%, transparent);
+      border:1px solid color-mix(in oklab, var(--border) 70%, transparent);
+      border-radius:14px;
+      padding:12px 12px;
+      margin:10px 0;
+    }
+    .callout.good{border-left-color: var(--good);}
+    .callout.warn{border-left-color: var(--warn);}
+    .callout.bad{border-left-color: var(--bad);}
+    .callout .label{
+      font-weight:700;
+      font-size:12px;
+      letter-spacing:.2px;
+      margin-bottom:6px;
+      display:flex; align-items:center; gap:8px;
+    }
+
+    details{
+      border:1px solid var(--border);
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding:10px 12px;
+      box-shadow: var(--shadow);
+    }
+    details + details{margin-top:12px;}
+    summary{
+      cursor:pointer;
+      list-style:none;
+      font-weight:700;
+      font-size:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    summary::-webkit-details-marker{display:none;}
+    .sum-right{
+      display:flex; align-items:center; gap:8px; flex-shrink:0;
+    }
+    .pill{
+      font-size:11px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      background: color-mix(in oklab, var(--panel2) 70%, transparent);
+    }
+    .section{margin-top:14px;}
+    .section h4{margin:14px 0 8px; font-size:13px;}
+    ul,ol{padding-left:20px;}
+    li{margin:6px 0;}
+    .hr{height:1px; background: color-mix(in oklab, var(--border) 75%, transparent); margin:14px 0;}
+
+    /* Code block with copy */
+    pre{
+      margin:10px 0 0;
+      background: var(--code);
+      color:#e5e7eb;
+      border-radius: var(--radius2);
+      border:1px solid rgba(255,255,255,.08);
+      overflow:auto;
+      padding:12px 12px 12px;
+      font-family:var(--mono);
+      font-size:12px;
+      line-height:1.6;
+      position:relative;
+    }
+    code{font-family:var(--mono);}
+    .codebar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:10px;
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius: var(--radius2);
+      background: color-mix(in oklab, var(--panel2) 70%, transparent);
+      gap:10px;
+    }
+    .codebar .hint{font-size:12px; color:var(--muted); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+    .copy{
+      border:1px solid color-mix(in oklab, var(--accent) 55%, var(--border));
+      background: color-mix(in oklab, var(--accent) 12%, var(--panel));
+      color:var(--text);
+      border-radius:12px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-size:12px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .copy:active{transform: translateY(1px);}
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:20px;
+      transform:translateX(-50%);
+      background: color-mix(in oklab, var(--panel) 88%, transparent);
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding:10px 12px;
+      border-radius: 999px;
+      font-size:12px;
+      color:var(--text);
+      display:none;
+      z-index:999;
+    }
+    .k{
+      display:inline-block;
+      padding:2px 6px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background: color-mix(in oklab, var(--panel2) 70%, transparent);
+      font-family: var(--mono);
+      font-size:11px;
+      color: color-mix(in oklab, var(--text) 90%, var(--muted));
+    }
+    .mini{
+      font-size:12px; color:var(--muted);
+    }
+    .two{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    @media(min-width:860px){
+      .two{grid-template-columns:1fr 1fr;}
+    }
+    .table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius: 14px;
+      border:1px solid var(--border);
+    }
+    .table th,.table td{
+      padding:10px;
+      border-bottom:1px solid color-mix(in oklab, var(--border) 75%, transparent);
+      vertical-align:top;
+      font-size:12px;
+    }
+    .table th{
+      background: color-mix(in oklab, var(--panel2) 70%, transparent);
+      text-align:left;
+      font-size:12px;
+      color: color-mix(in oklab, var(--text) 90%, var(--muted));
+    }
+    .table tr:last-child td{border-bottom:none;}
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:11px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: color-mix(in oklab, var(--panel2) 65%, transparent);
+      color:var(--muted);
+    }
+    .tag.good{border-color: color-mix(in oklab, var(--good) 50%, var(--border)); color: color-mix(in oklab, var(--good) 65%, var(--muted));}
+    .tag.warn{border-color: color-mix(in oklab, var(--warn) 50%, var(--border)); color: color-mix(in oklab, var(--warn) 70%, var(--muted));}
+    .tag.bad{border-color: color-mix(in oklab, var(--bad) 50%, var(--border)); color: color-mix(in oklab, var(--bad) 70%, var(--muted));}
+    .foot{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:12px;
+    }
+  </style>
+</head>
+
+<body data-theme="dark">
+<header>
+  <div class="head-inner">
+    <div class="title">
+      <h1>Slack（Bot/Event Subscriptions）→ n8n 受信/検証/投稿：ナレッジ手順書</h1>
+      <div class="sub">「なぜ必要か／しないとどうなるか／どこで何のエラーが出るか」まで含めて整理</div>
+    </div>
+    <div class="toolbar">
+      <button class="btn" id="btnOpenAll" title="全文を展開">すべて開く</button>
+      <button class="btn" id="btnCloseAll" title="全文を折りたたむ">すべて閉じる</button>
+      <button class="btn primary" id="btnOpenSteps" title="手順だけをざっと表示">手順だけ開く</button>
+      <button class="btn" id="btnTheme" title="テーマ切り替え">🌗 テーマ</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <section class="hero">
+    <h2>この資料でやること</h2>
+    <div class="muted">
+      Slack の <span class="k">Event Subscriptions</span> を使って、Slack からのイベント（例：新規メッセージ）を <span class="k">n8n Webhook</span> に送信し、
+      n8n 側で受信 → 最低限の検証 → Slack へ投稿（動作確認）までの筋書きを作ります。
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>なぜこの資料が必要か（理由）</h3>
+        <ul>
+          <li><b>Slack側は「受け取り口の正当性（challenge）」を最初に厳しく検証</b>します。ここを越えないとイベントが一切来ません。</li>
+          <li><b>n8n側は受信は簡単</b>ですが、Slackイベントは種類が多く、構造（body）も段階的に変わるため、<b>どこを参照すべきかが迷いやすい</b>です。</li>
+          <li>典型エラー（例：<span class="k">challenge_failed</span>, <span class="k">not_in_channel</span>, rate limit）を踏むと、<b>Slack側の設定ミスなのか / n8n側の設定ミスなのか</b>が混ざりやすいです。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>最短ゴール（チェック）</h3>
+        <div class="two">
+          <div class="callout good">
+            <div class="label">✅ Slack側</div>
+            <div class="mini">
+              Event Subscriptions の Request URL が <b>Verified</b> になっている（challengeが返っている）
+            </div>
+          </div>
+          <div class="callout good">
+            <div class="label">✅ n8n側</div>
+            <div class="mini">
+              Webhook が受信して body を見られる。必要なら Slack に投稿できる（ただし bot がチャンネルに居ないと <span class="k">not_in_channel</span>）
+            </div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+        <div class="muted">
+          以降は <b>手順</b> と同時に、各設定の <b>目的</b>／<b>省略時の破綻</b>／<b>出るエラーと場所</b> をセットで書きます。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 0. 全体像 -->
+  <details class="section" open data-kind="overview">
+    <summary>
+      0) 全体像（Slack側／n8n側の責務の切り分け）
+      <span class="sum-right"><span class="pill">最重要</span><span class="pill">迷子防止</span></span>
+    </summary>
+
+    <div class="section">
+      <h4>登場人物（役割）</h4>
+      <ul>
+        <li><b>Slack App（Bot）</b>：Slack内に存在する“アプリ”。イベント購読や、投稿権限（OAuth scopes）を持つ。</li>
+        <li><b>Slack Event Subscriptions</b>：Slackが「イベントを外部URLへHTTP POSTで投げる」仕組み。最初に <span class="k">challenge</span> で受け取り口を検証する。</li>
+        <li><b>n8n Webhook</b>：外部からのHTTPリクエストを受け取る入口。</li>
+        <li><b>n8n Respond to Webhook</b>：Webhookに対するHTTPレスポンスを制御する（Slackの challenge 返却など）。</li>
+        <li><b>n8n Slack node</b>：Slack API を叩いてメッセージ投稿などを行う（Botがチャンネルに居ないと <span class="k">not_in_channel</span>）</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="label">ポイント（なぜ切り分けが難しくなるか）</div>
+        <div>
+          Slackは <b>「イベント送信側」</b>で、n8nは <b>「受信側」</b>。<br/>
+          ただし、Slackは送る前に <b>受信側が本当にそのURLの所有者か</b> を確認したいので、最初に <span class="k">challenge</span> を要求します。<br/>
+          つまり最初は「イベント」ではなく「検証」が来ます（ここで混乱しやすい）。
+        </div>
+      </div>
+
+      <h4>最小フロー（最短で通す）</h4>
+      <ol>
+        <li>Slack App 作成（Bot有効化）</li>
+        <li>Event Subscriptions を ON</li>
+        <li>Request URL に n8n Webhook URL を設定</li>
+        <li>n8n で <span class="k">challenge</span> を返して Verified にする</li>
+        <li>購読イベント（例：message.channels）を追加し、必要Scopeを付与</li>
+        <li>App をワークスペースに再インストール（権限更新）</li>
+        <li>イベントが来る → n8n が受信して処理</li>
+      </ol>
+    </div>
+  </details>
+
+  <!-- 1. Slack App/Bot -->
+  <details class="section" open data-kind="steps">
+    <summary>
+      1) Slack側：App（Bot）を作る
+      <span class="sum-right"><span class="pill">手順</span><span class="pill">Slack</span></span>
+    </summary>
+
+    <div class="section">
+      <h4>手順</h4>
+      <ol>
+        <li>Slack API の管理画面で <b>Create New App</b></li>
+        <li>App名・Workspaceを選んで作成</li>
+        <li><b>Bot User</b> を作成（App内の「Botの人格」）</li>
+      </ol>
+
+      <div class="callout">
+        <div class="label">なぜ必要？</div>
+        <div>
+          Event Subscriptions で受け取ったイベントを <b>APIで投稿/返信</b>したい場合、Botが主体になります。<br/>
+          Botが無いと「受けるだけ」はできても、<b>受信後のアクション（投稿など）が弱い</b>です。
+        </div>
+      </div>
+
+      <div class="callout bad">
+        <div class="label">設定しないとどうなる？</div>
+        <div>
+          後で n8n の Slackノードで投稿しようとすると、Botトークンが無い・権限が無い、などで詰まります。
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- 2. Event Subscriptions -->
+  <details class="section" open data-kind="steps">
+    <summary>
+      2) Slack側：Event Subscriptions を有効化する（Request URL の Verified を通す）
+      <span class="sum-right"><span class="pill">最重要</span><span class="pill">Slack</span></span>
+    </summary>
+
+    <div class="section">
+      <h4>手順（概要）</h4>
+      <ol>
+        <li>Slack App 管理画面 → <b>Event Subscriptions</b></li>
+        <li><b>Enable Events</b> を ON</li>
+        <li><b>Request URL</b> に n8n の Webhook URL を入れる</li>
+        <li>Slackが POST する <span class="k">type=url_verification</span> の body 内の <span class="k">challenge</span> を、n8n が同じ値で返す</li>
+        <li>Slack側で <b>Verified</b> 表示になることを確認</li>
+      </ol>
+
+      <div class="callout">
+        <div class="label">なぜ challenge が必要？（Slackの意図）</div>
+        <div>
+          Slackは「第三者が勝手にURLを登録して、イベントを盗み見する」ことを防ぎたいです。<br/>
+          だから、登録したURLが“本当に受け取れるURL”かを検証するために、まず <span class="k">challenge</span> を送って、
+          <b>同じ値を返せるか</b> を見ます。
+        </div>
+      </div>
+
+      <div class="callout bad">
+        <div class="label">ここが通らないと何が起きる？</div>
+        <div>
+          Verified にならない限り、Slackは <b>実イベントを送信しません</b>。つまり、永遠に何も来ません。<br/>
+          「n8n側で受信ができない」のではなく、<b>Slack側が送っていない</b>状態になります。
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <h4>典型エラー：challenge_failed（どこで起きる？）</h4>
+      <table class="table">
+        <tr>
+          <th style="width:26%;">症状</th>
+          <td>Slack側の Request URL に <span class="k">challenge_failed</span> が出る / Verified にならない</td>
+        </tr>
+        <tr>
+          <th>起きていること</th>
+          <td>Slackが投げた <span class="k">challenge</span> を、受信側が正しい形式で返していない</td>
+        </tr>
+        <tr>
+          <th>見る場所</th>
+          <td>
+            Slack: Event Subscriptions の Request URL の下のログ（Our Request / Your Response）<br/>
+            n8n: Webhook の実行ログ（受信bodyと返却内容）
+          </td>
+        </tr>
+        <tr>
+          <th>よくある原因</th>
+          <td>
+            <ul>
+              <li>返却JSONが違う（キー名が違う、ネストが違う）</li>
+              <li>Content-Type が合ってない（Slackは JSON の想定）</li>
+              <li>n8n側が「テストURL」だけで待機していて、本番URLに来たイベントを受けていない</li>
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </details>
+
+  <!-- 3. n8n Webhook & Respond -->
+  <details class="section" open data-kind="steps">
+    <summary>
+      3) n8n側：Webhookで受ける → Respond to Webhook で challenge を返す
+      <span class="sum-right"><span class="pill">手順</span><span class="pill">n8n</span></span>
+    </summary>
+
+    <div class="section">
+      <h4>最小構成（これだけで Verified を通す）</h4>
+      <ol>
+        <li>n8n で <b>Webhook</b> ノードを追加（HTTP Method: POST）</li>
+        <li>Webhook の <b>Respond</b> を <span class="k">Using “Respond to Webhook” node</span> に設定</li>
+        <li><b>Respond to Webhook</b> ノードを追加して、レスポンスを制御</li>
+        <li>Slackから来る body の <span class="k">challenge</span> を返す JSON を作る</li>
+        <li>Slack の Event Subscriptions で Verified を確認</li>
+      </ol>
+
+      <div class="callout">
+        <div class="label">Variables and context は気にしなくていい？</div>
+        <div>
+          基本は <b>気にしなくてOK</b> です。<br/>
+          Slackから来るのは <b>Webhookの INPUT の中の body</b>（例：<span class="k">$json.body.challenge</span>）。<br/>
+          Variables and context は n8n の実行環境情報（日時やワークフローIDなど）で、Slackイベントの本体ではありません。
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="label">なぜ Respond to Webhook が要る？</div>
+        <div>
+          Slackは「POSTしたら、すぐに正しいレスポンスが返る」ことを期待します。<br/>
+          n8nの処理が長引く（Slack投稿など）と、Slack側がタイムアウトや検証失敗になります。<br/>
+          なのでまず <b>即レス（challenge返却）</b> を Respond to Webhook で作るのが安定です。
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <h4>（重要）challenge 返却用：Respond to Webhook の設定例</h4>
+      <div class="codebar">
+        <div class="hint">Respond to Webhook → Respond With: JSON / Response Body: challenge をそのまま返す</div>
+        <button class="copy" data-copy="#code-challenge">📋 コピー</button>
+      </div>
+      <pre id="code-challenge"><code>{
+  "challenge": "={{$json.body.challenge}}"
+}</code></pre>
+
+      <div class="callout">
+        <div class="label">なぜこの形？</div>
+        <div>
+          Slackは <span class="k">url_verification</span> のとき、受信側に「challenge文字列を返して」と要求します。<br/>
+          n8nでは Webhook が受け取った body が <span class="k">$json.body</span> に入ることが多いので、
+          <span class="k">{{$json.body.challenge}}</span> を返すのが最短です。
+        </div>
+      </div>
+
+      <div class="callout bad">
+        <div class="label">ここでの落とし穴</div>
+        <ul>
+          <li>式が文字列として固定になっている（Expressionモードになっていない）</li>
+          <li><span class="k">$json.challenge</span> を見に行ってしまい、実データは <span class="k">$json.body.challenge</span> に居る</li>
+          <li>Webhook が “Test URL” 待機中なのに、Slackの Request URL は “Production URL” を叩いている</li>
+        </ul>
+      </div>
+
+      <div class="hr"></div>
+
+      <h4>Slackから来る body の例（url_verification）</h4>
+      <div class="codebar">
+        <div class="hint">Slack → n8n に最初に来るのは“イベント”ではなく“検証”</div>
+        <button class="copy" data-copy="#code-urlveri">📋 コピー</button>
+      </div>
+      <pre id="code-urlveri"><code>{
+  "token": "（Slack側の検証用）",
+  "challenge": "Bh8uox4x...（長い文字列）",
+  "type": "url_verification"
+}</code></pre>
+    </div>
+  </details>
+
+  <!-- 4. Slackでイベント購読 -->
+  <details class="section" open data-kind="steps">
+    <summary>
+      4) Slack側：購読イベントを追加する（message.channels など）＋ Scope を付与する
+      <span class="sum-right"><span class="pill">手順</span><span class="pill">Slack</span></span>
+    </summary>
+
+    <div class="section">
+      <h4>手順</h4>
+      <ol>
+        <li>Event Subscriptions → <b>Subscribe to bot events</b></li>
+        <li>例：<span class="k">message.channels</span> を追加（チャンネル投稿のイベント）</li>
+        <li>追加すると Slack が「必要な OAuth scope」を案内/自動追加する</li>
+        <li><b>Scopesを変えたら再インストール</b>（Install App → Reinstall）</li>
+      </ol>
+
+      <div class="callout">
+        <div class="label">なぜ scope が必要？</div>
+        <div>
+          Slackは「アプリが何をできるか」を <b>明示的な権限（scope）</b> で管理します。<br/>
+          たとえば <span class="k">message.channels</span> を購読するなら、
+          Botがチャンネルの履歴にアクセスできる <span class="k">channels:history</span> が必要になります。
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="label">再インストールしないとどうなる？</div>
+        <div>
+          画面上は scope が付いたように見えても、ワークスペース側の同意（トークン再発行）が更新されていません。<br/>
+          結果、n8nのSlackノードが <b>権限不足エラー</b> になります。
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- 5. n8n側：受信確認（軽い動作確認のノード） -->
+  <details class="section" open data-kind="steps">
+    <summary>
+      5) n8n側：受け取りを軽く動作確認する（おすすめノード構成）
+      <span class="sum-right"><span class="pill">手順</span><span class="pill">n8n</span></span>
+    </summary>
+
+    <div class="section">
+      <h4>最初はこれだけで十分（受信確認用）</h4>
+      <ol>
+        <li><b>Webhook</b>（受信）</li>
+        <li><b>Respond to Webhook</b>（challenge返却 or 200応答）</li>
+        <li><b>Set / Edit Fields</b>（見たいフィールドを抜き出して整形）</li>
+        <li><b>（任意）Slack: Send a message</b>（受信内容をSlackに投げ返して確認）</li>
+      </ol>
+
+      <div class="callout">
+        <div class="label">なぜ “Set / Edit Fields” が便利？</div>
+        <div>
+          Slackイベントのbodyは大きいので、まずは必要な項目だけ抽出した方が理解が速いです。<br/>
+          例：eventのtypeやtextだけ取り出す、など。
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="label">注意：url_verification と event_callback は body 構造が違う</div>
+        <div>
+          最初に来る <span class="k">url_verification</span> には <span class="k">body.event</span> が無いです。<br/>
+          実イベント（<span class="k">event_callback</span>）になると <span class="k">body.event</span> が出てきます。<br/>
+          なので <b>「event を参照するノード」は url_verification の時点では必ず空になる</b> のが正常です。
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <h4>（例）Edit Fields で event_type / text を抜き出す</h4>
+      <div class="codebar">
+        <div class="hint">Edit Fields（Manual Mapping）で使う Expression 例</div>
+        <button class="copy" data-copy="#code-editfields">📋 コピー</button>
+      </div>
+      <pre id="code-editfields"><code>// event_callback のとき（実イベント）に存在する想定
+event_type = {{$json.body.event.type}}
+text       = {{$json.body.event.text}}
+
+// url_verification のときは body.event が無いので空になる（正常）</code></pre>
+
+      <div class="callout">
+        <div class="label">なぜ $json.body を見る？</div>
+        <div>
+          n8n の Webhook ノードは、受け取った HTTP body を <span class="k">$json.body</span> 配下に入れる形になりやすいです。<br/>
+          あなたのスクショでも <span class="k">body.token / body.challenge / body.type</span> が見えているので、
+          その延長で <span class="k">body.event</span> を追うのが筋です。
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- 6. Slackへ投稿して確認 -->
+  <details class="section" open data-kind="steps">
+    <summary>
+      6) n8n側：Slackに投稿して「受信→処理→出力」を目視確認する
+      <span class="sum-right"><span class="pill">手順</span><span class="pill">n8n</span></span>
+    </summary>
+
+    <div class="section">
+      <h4>おすすめ：投稿は “まず固定文” → 次に “受信内容を埋め込む”</h4>
+      <ol>
+        <li>Slackノード（Send a message）を追加</li>
+        <li>投稿先チャンネルを指定（例：#98_test）</li>
+        <li>最初は固定文（例：<span class="k">受信しました</span>）で送って疎通を見る</li>
+        <li>疎通できたら、Edit Fields の結果（event_type/text）を埋め込む</li>
+      </ol>
+
+      <div class="callout warn">
+        <div class="label">「Send and Wait for Response」は最初は非推奨（理由）</div>
+        <div>
+          “Wait” 系は、返答待ちで実行が “Waiting” 状態になり、イベント連打で詰まりやすいです。<br/>
+          最初の動作確認は <b>Send（送信のみ）</b> をおすすめします。
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <h4>典型エラー：not_in_channel（どこで起きる？）</h4>
+      <table class="table">
+        <tr>
+          <th style="width:26%;">症状</th>
+          <td>n8n の Slackノードで <span class="k">not_in_channel</span></td>
+        </tr>
+        <tr>
+          <th>起きていること</th>
+          <td>Botがそのチャンネルのメンバーではない（招待されていない）</td>
+        </tr>
+        <tr>
+          <th>見る場所</th>
+          <td>n8n: Execution → Slackノードのエラー詳細</td>
+        </tr>
+        <tr>
+          <th>対処</th>
+          <td>
+            Slackで対象チャンネルに移動し、<span class="k">/invite @あなたのBot名</span> を実行（またはチャンネルのメンバー追加からBotを入れる）
+          </td>
+        </tr>
+      </table>
+
+      <div class="callout good">
+        <div class="label">このエラーは“正しい失敗”</div>
+        <div>
+          受信→処理→投稿まで来て、最後の投稿権限で落ちています。<br/>
+          つまり、前段（Webhook受信や整形）は概ね動いている可能性が高いです。
+        </div>
+      </div>
+
+      <h4>典型エラー：The service is receiving too many requests from you（rate limit）</h4>
+      <table class="table">
+        <tr>
+          <th style="width:26%;">症状</th>
+          <td>Slackノードで「リクエストが多すぎる」系のエラー（連打すると起きやすい）</td>
+        </tr>
+        <tr>
+          <th>起きていること</th>
+          <td>短時間に Slack API を叩きすぎた（n8nのテスト実行連打、イベントループなど）</td>
+        </tr>
+        <tr>
+          <th>見る場所</th>
+          <td>n8n: Slackノードのエラー / 実行履歴が Waiting/Error で増える</td>
+        </tr>
+        <tr>
+          <th>対処</th>
+          <td>
+            <ul>
+              <li>投稿ノードを一旦外して受信確認だけにする</li>
+              <li>“Wait” 系を避ける / 実行連打しない</li>
+              <li>ループ（自分の投稿をトリガーにして再投稿）を防ぐ</li>
+            </ul>
+          </td>
+        </tr>
+      </table>
+
+      <div class="callout warn">
+        <div class="label">ループ対策（最低限）</div>
+        <div>
+          「このBotが投稿したメッセージは無視する」フィルタを入れると事故が減ります。<br/>
+          例：body.event.bot_id がある場合は処理しない、など（イベント種別により差あり）。
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- 7. “筋書き”として再現する（まとめ） -->
+  <details class="section" open data-kind="overview">
+    <summary>
+      7) 筋書き（再現手順まとめ：なぜ/省略時/エラー場所込み）
+      <span class="sum-right"><span class="pill">まとめ</span><span class="pill">再現性</span></span>
+    </summary>
+
+    <div class="section">
+      <h4>筋書き（あなたの今回の学びの流れを“再現手順”に落とす）</h4>
+      <ol>
+        <li>
+          <b>Slack App を新規作成</b><br/>
+          <span class="muted">理由：</span>イベント購読と投稿の主体を作る（Bot）<br/>
+          <span class="muted">省略：</span>後で投稿/権限で詰まる
+        </li>
+        <li>
+          <b>Event Subscriptions を ON</b><br/>
+          <span class="muted">理由：</span>Slackから外部へイベントを送る仕組みを有効化<br/>
+          <span class="muted">省略：</span>そもそもイベントが送られない
+        </li>
+        <li>
+          <b>n8n Webhook を用意（POST）</b><br/>
+          <span class="muted">理由：</span>受け口を作る（SlackはここにPOST）<br/>
+          <span class="muted">省略：</span>Request URL の検証が不可能
+        </li>
+        <li>
+          <b>Respond to Webhook で challenge を返す</b><br/>
+          <span class="muted">理由：</span>Slackの URL 所有確認に答える（Verified）<br/>
+          <span class="muted">省略：</span>Slack側で <span class="k">challenge_failed</span>（Event Subscriptions画面）
+        </li>
+        <li>
+          <b>購読イベントを追加（例：message.channels）</b><br/>
+          <span class="muted">理由：</span>何のイベントを送って欲しいかをSlackに指示<br/>
+          <span class="muted">省略：</span>Verifiedでも何も来ない
+        </li>
+        <li>
+          <b>Scopes を更新 → 再インストール</b><br/>
+          <span class="muted">理由：</span>ワークスペース側の同意（トークン）を更新<br/>
+          <span class="muted">省略：</span>n8nのSlackノードで権限不足
+        </li>
+        <li>
+          <b>n8n で受信 → Edit Fields で見たい項目を抽出</b><br/>
+          <span class="muted">理由：</span>イベント構造を理解しやすくする<br/>
+          <span class="muted">注意：</span>url_verification には event が無い（空で正常）
+        </li>
+        <li>
+          <b>n8n から Slack へ投稿（動作確認）</b><br/>
+          <span class="muted">理由：</span>“受信→処理→出力”を目視できる<br/>
+          <span class="muted">失敗例：</span><span class="k">not_in_channel</span>（Botがチャンネルに居ない）
+        </li>
+      </ol>
+
+      <div class="callout good">
+        <div class="label">いまの状態の評価（あなたの到達点）</div>
+        <div>
+          Slack側で Request URL が <b>Verified</b> になっているなら、最大の関門（challenge）は越えています。<br/>
+          ここから先は「イベント種類」「投稿権限（チャンネル参加）」「ループとレート制限」など、<b>運用寄りの詰まり</b>が中心になります。
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- 8. コピペ用テンプレ（最小構成） -->
+  <details class="section" open data-kind="code">
+    <summary>
+      8) コピペ用テンプレ：最小の n8n 構成（Webhook→Respond→（任意）抽出→投稿）
+      <span class="sum-right"><span class="pill">コピペ</span><span class="pill">最小</span></span>
+    </summary>
+
+    <div class="section">
+      <h4>Respond to Webhook（challenge返し）</h4>
+      <div class="codebar">
+        <div class="hint">Slackの Request URL 検証を通すための最小レスポンス</div>
+        <button class="copy" data-copy="#tpl-respond">📋 コピー</button>
+      </div>
+      <pre id="tpl-respond"><code>{
+  "challenge": "={{$json.body.challenge}}"
+}</code></pre>
+
+      <h4>抽出（Edit Fields / Set）で見る項目（event_callback想定）</h4>
+      <div class="codebar">
+        <div class="hint">実イベントが来たときにだけ埋まる（url_verificationでは空）</div>
+        <button class="copy" data-copy="#tpl-extract">📋 コピー</button>
+      </div>
+      <pre id="tpl-extract"><code>event_type = {{$json.body.event.type}}
+text       = {{$json.body.event.text}}
+channel    = {{$json.body.event.channel}}
+user       = {{$json.body.event.user}}</code></pre>
+
+      <h4>Slackへ投稿（最初は固定文）</h4>
+      <div class="codebar">
+        <div class="hint">疎通確認：まずは固定文 → 次に抽出値を埋め込む</div>
+        <button class="copy" data-copy="#tpl-post">📋 コピー</button>
+      </div>
+      <pre id="tpl-post"><code>✅ n8n 受信しました
+type: {{$json.event_type}}
+text: {{$json.text}}</code></pre>
+
+      <div class="callout warn">
+        <div class="label">補足：なぜ“固定文”から？</div>
+        <div>
+          受信のタイミングや event の形が揺れている段階で、いきなり複雑な埋め込みをすると原因が追いにくいです。<br/>
+          「投稿できる」ことをまず確定させると、次の原因切り分けが楽になります。
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <div class="foot">
+    <div class="badge">更新メモ：この資料は「あなたが実際に踏んだ challenge_failed / not_in_channel / rate limit」を前提に、切り分けが速くなる順で構成しています。</div>
+  </div>
+</div>
+
+<div class="toast" id="toast">コピーしました</div>
+
+<script>
+  // Theme toggle
+  const btnTheme = document.getElementById('btnTheme');
+  btnTheme.addEventListener('click', () => {
+    const root = document.body;
+    root.dataset.theme = root.dataset.theme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('slack-n8n-theme', root.dataset.theme);
+  });
+  (function restoreTheme(){
+    const saved = localStorage.getItem('slack-n8n-theme');
+    if(saved) document.body.dataset.theme = saved;
+  })();
+
+  // Open/Close all details
+  const allDetails = () => Array.from(document.querySelectorAll('details.section'));
+  document.getElementById('btnOpenAll').addEventListener('click', () => {
+    allDetails().forEach(d => d.open = true);
+  });
+  document.getElementById('btnCloseAll').addEventListener('click', () => {
+    allDetails().forEach(d => d.open = false);
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  // Open steps only (collapse others)
+  document.getElementById('btnOpenSteps').addEventListener('click', () => {
+    allDetails().forEach(d => {
+      const kind = d.getAttribute('data-kind');
+      d.open = (kind === 'steps');
+    });
+    const first = document.querySelector('details[data-kind="steps"]');
+    if(first) first.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  // Copy buttons
+  const toast = document.getElementById('toast');
+  function showToast(msg){
+    toast.textContent = msg || 'コピーしました';
+    toast.style.display = 'block';
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.style.display = 'none', 1400);
+  }
+  async function copyText(text){
+    try{
+      await navigator.clipboard.writeText(text);
+      showToast('コピーしました');
+    }catch(e){
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position='fixed';
+      ta.style.left='-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      showToast('コピーしました（fallback）');
+    }
+  }
+  document.querySelectorAll('button.copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sel = btn.getAttribute('data-copy');
+      const el = document.querySelector(sel);
+      if(!el) return showToast('コピー対象が見つかりません');
+      const text = el.innerText.replace(/\n+$/,'');
+      copyText(text);
+    });
+  });
+</script>
+</body>
+</html>
+
+</body>
+</html>
