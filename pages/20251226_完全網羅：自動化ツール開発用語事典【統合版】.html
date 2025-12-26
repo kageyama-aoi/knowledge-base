@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>完全網羅：自動化ツール開発用語事典【統合版】</title>
+</head>
+<body>
+<h1>完全網羅：自動化ツール開発用語事典【統合版】</h1>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>完全網羅：自動化ツール開発用語事典【統合版】</title>
+  <link rel="stylesheet" href="knowledge-style.css">
+</head>
+<body>
+
+<div class="wrap">
+
+<h1>完全網羅：自動化ツール開発用語事典【統合・決定版】</h1>
+
+<p>
+このドキュメントは、Pythonによる業務自動化ツール開発で使われる
+<strong>設計思想・GUI構築・設定管理・Selenium操作</strong>を、
+「初心者が他人に説明できるレベル」まで引き上げることを目的とした
+<strong>再利用可能ナレッジ集</strong>です。
+</p>
+
+<p>
+単なるコード解説ではなく、<br>
+<strong>なぜその設計が必要なのか／なぜその書き方をするのか</strong>を
+言葉として理解できる構成にしています。
+</p>
+
+<!-- ======================= -->
+<details id="concept-overview" data-kind="info">
+<summary>全体像・考え方</summary>
+
+<p>
+自動化ツール開発は「とりあえず動くコード」を書く段階から、
+<strong>壊れにくく・変更に強く・説明できる構造</strong>へ進化させる必要があります。
+</p>
+
+<p>
+本資料では以下を一貫した軸として扱います。
+</p>
+
+<ul>
+  <li>処理を「役割」で分離する</li>
+  <li>直接ライブラリを触らない</li>
+  <li>設定と処理を混ぜない</li>
+  <li>GUIは状態で制御する</li>
+</ul>
+
+<p>
+これらを支えているのが、オブジェクト指向・疎結合・抽象化といった考え方です。
+</p>
+</details>
+
+<!-- ======================= -->
+<details id="prerequisite" data-kind="info">
+<summary>前提条件</summary>
+
+<ul>
+  <li>Pythonの基本文法（関数・クラス）を一度は見たことがある</li>
+  <li>辞書（dict）とfor文の意味が分かる</li>
+  <li>SeleniumやTkinterは「聞いたことがある」レベルでOK</li>
+</ul>
+
+<p>
+理解できない単語は、後半の<strong>用語事典</strong>で必ず回収できる構成です。
+</p>
+</details>
+
+<!-- ======================= -->
+<details id="oop-design" data-kind="step">
+<summary>設計思想①：抽象クラスと疎結合</summary>
+
+<p>
+結論から言うと、<strong>「実行する側は中身を知らなくていい」</strong>状態を作るためです。
+</p>
+
+<p>
+抽象基底クラス（ABC）は、
+「このクラスを使うなら、最低限これだけは実装せよ」
+という<strong>約束</strong>をコードで表現します。
+</p>
+
+<pre><code>
+from abc import ABC, abstractmethod
+
+class BaseHandler(ABC):
+    @abstractmethod
+    def execute(self):
+        pass
+</code></pre>
+
+<p>
+これにより、呼び出し側は
+「executeがあること」だけを信頼すればよくなります。
+</p>
+
+<p>
+結果として、処理の差し替え・追加・削除が安全になります。
+</p>
+</details>
+
+<!-- ======================= -->
+<details id="utility-wrapper" data-kind="step">
+<summary>設計思想②：ユーティリティ化とラッパー関数</summary>
+
+<p>
+ライブラリを直接呼ぶコードが散らばると、
+<strong>変更点が全体に波及</strong>します。
+</p>
+
+<p>
+そこで「意味のある名前」を付けた関数で包みます。
+</p>
+
+<pre><code>
+def input_text(driver, attribute, element, value):
+    find_element(driver, attribute, element).send_keys(value)
+</code></pre>
+
+<p>
+これにより、
+</p>
+
+<ul>
+  <li>処理内容が読める</li>
+  <li>内部実装を隠せる</li>
+  <li>修正箇所が1か所に集約される</li>
+</ul>
+
+<p>
+これが<strong>カプセル化</strong>です。
+</p>
+</details>
+
+<!-- ======================= -->
+<details id="gui-dynamic" data-kind="step">
+<summary>GUI設計：動的生成と状態制御</summary>
+
+<p>
+GUIを固定レイアウトで作ると、
+設定項目が増えた瞬間に破綻します。
+</p>
+
+<p>
+設定データをループで回し、
+<strong>UIをデータから生成</strong>します。
+</p>
+
+<pre><code>
+for key, value in data.items():
+    Label(...)
+    Entry(...)
+</code></pre>
+
+<p>
+さらに、選択状態に応じて
+</p>
+
+<ul>
+  <li>有効（normal）</li>
+  <li>無効（disabled）</li>
+</ul>
+
+<p>
+を切り替えることで、
+「操作できない理由」をUIで表現できます。
+</p>
+</details>
+
+<!-- ======================= -->
+<details id="config-management" data-kind="step">
+<summary>設定管理：YAMLとラウンドトリップ</summary>
+
+<p>
+設定ファイルは<strong>人間が読むもの</strong>です。
+</p>
+
+<p>
+ruamel.yamlを使うことで、
+</p>
+
+<ul>
+  <li>コメント</li>
+  <li>インデント</li>
+  <li>クォート</li>
+</ul>
+
+<p>
+を壊さずに保存できます。
+</p>
+
+<p>
+これは「編集できる設定ファイル」を守るための重要な技術です。
+</p>
+</details>
+
+<!-- ======================= -->
+<details id="selenium-advanced" data-kind="step">
+<summary>Selenium：JSクリックと待機</summary>
+
+<p>
+画面操作が失敗する最大の理由は
+「要素がまだ存在しない」か「物理クリック不可」です。
+</p>
+
+<p>
+JavaScriptクリックは、
+<strong>DOMに直接命令</strong>します。
+</p>
+
+<pre><code>
+driver.execute_script("arguments[0].click();", element)
+</code></pre>
+
+<p>
+これは最後の切り札として覚えておく価値があります。
+</p>
+</details>
+
+<!-- ======================= -->
+<details id="trouble-points" data-kind="trouble">
+<summary>よくある詰まりポイント</summary>
+
+<ul>
+  <li>クラスが増えて全体像が見えなくなる</li>
+  <li>設定と処理が混ざって読めなくなる</li>
+  <li>GUIのstate制御を忘れて操作不能になる</li>
+  <li>Seleniumが「なぜか失敗する」</li>
+</ul>
+
+<p>
+これらはすべて
+<strong>設計不足ではなく、概念不足</strong>が原因です。
+</p>
+</details>
+
+<!-- ======================= -->
+<details id="check-understanding" data-kind="check">
+<summary>理解度チェック</summary>
+
+<ul>
+  <li>抽象クラスを使う理由を説明できるか</li>
+  <li>疎結合とは「何が疎」なのか言えるか</li>
+  <li>ラッパー関数のメリットを他人に説明できるか</li>
+  <li>JSクリックを使う場面を想像できるか</li>
+</ul>
+</details>
+
+<!-- ======================= -->
+<details id="glossary" data-kind="info">
+<summary>完全網羅：自動化ツール開発 用語事典</summary>
+
+<p><strong>オブジェクト指向（OOP）</strong><br>
+処理ではなく「役割を持つモノ」としてプログラムを組み立てる考え方。</p>
+
+<p><strong>クラス／インスタンス</strong><br>
+設計図と実体の関係。newされた瞬間に動き出す。</p>
+
+<p><strong>抽象クラス（ABC）</strong><br>
+最低限のルールだけを定義した未完成クラス。</p>
+
+<p><strong>疎結合</strong><br>
+部品同士が互いを知らなくても動く状態。</p>
+
+<p><strong>カプセル化</strong><br>
+中身を隠し、使い方だけを公開すること。</p>
+
+<p><strong>ロケータ</strong><br>
+画面要素の住所情報。</p>
+
+<p><strong>暗黙的待機</strong><br>
+見つかるまで探し続ける待機方式。</p>
+
+<p><strong>ラウンドトリップ</strong><br>
+読み→編集→保存しても壊れない循環。</p>
+
+<p><strong>マージ</strong><br>
+複数の設定を統合する操作。</p>
+
+<p><strong>エントリーポイント</strong><br>
+プログラムが最初に動く場所。</p>
+</details>
+
+<!-- ======================= -->
+<details id="summary" data-kind="info">
+<summary>まとめ・次にやること</summary>
+
+<p>
+この資料を理解できたなら、
+</p>
+
+<ul>
+  <li>コードの「意味」を説明できる</li>
+  <li>設計の理由を言語化できる</li>
+  <li>他現場でも同じ考え方を使える</li>
+</ul>
+
+<p>
+次のステップは、
+<strong>自分の言葉で設計を語ること</strong>です。
+</p>
+</details>
+
+</div>
+<script src="knowledge-ui.js"></script>
+</body>
+</html>
+
+</body>
+</html>
