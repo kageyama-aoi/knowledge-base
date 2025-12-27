@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Webアプリ公開のための本番環境チェックリスト</title>
+<meta name="description" content="Webアプリケーションを本番環境で安全かつ安定して運用するために必要な、ドメイン設定、SSL証明書、メール配信、セキュリティ対策、バックアップまでの手順を網羅した実践的なハンドブックです。" />
+<style>
+  :root {
+    --bg: #111827; --panel: #0b1220; --paper: #0f172a; --fg: #e5e7eb; --muted: #94a3b8;
+    --brand: #60a5fa; --accent: #34d399; --danger: #f87171; --code-bg: #0b1020; --border: #1f2937; --shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  [data-theme="light"] {
+    --bg: #f8fafc; --panel: #ffffff; --paper: #ffffff; --fg: #0f172a; --muted: #475569;
+    --brand: #2563eb; --accent: #059669; --danger: #dc2626; --code-bg: #0b1220; --border: #e2e8f0; --shadow: 0 2px 10px rgba(2,6,23,.06);
+  }
+  * { box-sizing: border-box; } html, body { height: 100%; } body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif; background: var(--bg); color: var(--fg);}
+  .layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  aside { background: var(--panel); border-right: 1px solid var(--border); padding: 1rem; position: sticky; top: 0; height: 100vh; overflow: auto; }
+  main { min-width: 0; }
+  header.top { position: sticky; top: 0; z-index: 20; padding: .8rem 1rem; background: var(--paper); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  header .title { font-weight: 700; letter-spacing: .2px; }
+  .chip { font-size: .85rem; padding: .15rem .5rem; border: 1px solid var(--border); border-radius: 999px; color: var(--muted);}
+  .container { max-width: 980px; margin: 0 auto; padding: 1rem clamp(1rem, 3vw, 2rem); }
+  section { background: var(--paper); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 1.2rem; margin: 1rem 0 1.5rem;}
+  section h2 { margin-top: .2rem; } .muted { color: var(--muted); } h1, h2, h3 { scroll-margin-top: 80px; } a { color: var(--brand); text-decoration: none; } a:hover { text-decoration: underline; }
+  nav.toc h3 { font-size: 1rem; margin: .2rem 0 .6rem; color: var(--muted);}
+  nav.toc a { display: block; padding: .4rem .4rem; margin: .1rem 0; border-radius: 8px; color: var(--fg);}
+  nav.toc a.active, nav.toc a:hover { background: rgba(96,165,250,.15);}
+  pre { background: var(--code-bg); color: #e2e8f0; padding: 1rem; border-radius: 12px; overflow: auto; border: 1px solid #0b2942;}
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace; font-size: .9rem; }
+  .codebox { position: relative; } .copy { position: absolute; top: 8px; right: 8px; background: rgba(2,6,23,.4); color: #e2e8f0; border: 1px solid rgba(226,232,240,.2); border-radius: 8px; padding: .25rem .5rem; cursor: pointer;}
+  .copy.ok { background: rgba(34,197,94,.3);}
+  .callout { border-left: 4px solid var(--brand); padding: .6rem .8rem; background: rgba(96,165,250,.12); border-radius: 10px;}
+  .callout.warn { border-left-color: var(--danger); background: rgba(248,113,113,.15);}
+  .pill { border: 1px solid var(--border); border-radius: 999px; padding: .1rem .5rem; margin-right: .35rem; font-size: .8rem; color: var(--muted);}
+  footer { color: var(--muted); text-align: center; padding: 2rem 1rem 3rem; }
+  table{border-collapse:collapse; width:100%; margin-top:1rem;} th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;} th{background:var(--panel);}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem">
+      <div style="font-weight:700">目次</div>
+      <button id="theme" class="chip" title="テーマ切替">Light / Dark</button>
+    </div>
+    <nav class="toc" id="toc"></nav>
+    <div style="margin-top:1rem" class="muted">作成: 2025-08-26</div>
+  </aside>
+
+  <main>
+    <header class="top">
+      <div>
+        <div class="title">Webアプリ公開のための本番環境チェックリスト</div>
+        <div class="muted" style="font-size:.9rem">コードの先にある、安定運用のための必須知識</div>
+      </div>
+      <div>
+        <span class="pill">DNS</span>
+        <span class="pill">SSL/TLS</span>
+        <span class="pill">Email</span>
+        <span class="pill">Security</span>
+        <span class="pill">Backup</span>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <section id="s1">
+        <h2>1. はじめに：なぜこの手順書が必要か</h2>
+        <p>Webアプリケーション開発は、コードが完成したら終わりではありません。むしろ、そこからが安定運用のスタートラインです。このハンドブックは、多くの開発者が見落としがちな「開発以外のインフラ設定」に焦点を当て、アプリケーションを安全かつ確実にユーザーへ届けるための必須知識を体系的に解説します。</p>
+        <div class="callout"><strong>この手順書のゴール:</strong> 開発したアプリケーションを、ドメイン設定からセキュリティ対策、バックアップまで含めて、自信を持って本番公開できる状態にすること。</div>
+      </section>
+
+      <section id="s2">
+        <h2>2. ドメイン取得とDNSの基本設定</h2>
+        <p>独自ドメインは、アプリケーションの「住所」です。まずはこの住所を正しく設定し、サーバーと結びつけます。</p>
+        <ol>
+          <li><strong>ドメイン取得:</strong> <a href="https://www.onamae.com/" target="_blank">お名前.com</a>や<a href="https://domains.google/" target="_blank">Google Domains</a>などのレジストラで、希望のドメイン名を取得します。</li>
+          <li><strong>DNSレコード設定:</strong> ドメイン管理画面で、以下の基本的なDNSレコードを設定します。
+            <table>
+              <thead><tr><th>レコード種別</th><th>設定内容</th><th>目的</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>A</strong></td>
+                  <td><code>your-domain.com</code> → <code>[サーバーのIPアドレス]</code></td>
+                  <td>ドメイン名とサーバーのIPアドレスを直接結びつけます。</td>
+                </tr>
+                <tr>
+                  <td><strong>CNAME</strong></td>
+                  <td><code>www.your-domain.com</code> → <code>your-domain.com</code></td>
+                  <td><code>www</code>ありのアクセスを<code>www</code>なしに転送（正規化）します。逆も可能です。</td>
+                </tr>
+              </tbody>
+            </table>
+          </li>
+        </ol>
+        <div class="callout"><strong>ポイント:</strong> DNS設定の変更がインターネット全体に反映される（浸透する）には、数分から最大で72時間程度かかる場合があります。</div>
+      </section>
+
+      <section id="s3">
+        <h2>3. サーバーの基本的なセキュリティ設定</h2>
+        <p>サーバーを外部の脅威から守るための、最低限実施すべきセキュリティ設定です。</p>
+        <ol>
+          <li><strong>SSHのセキュリティ強化:</strong>
+            <ul>
+              <li><strong>鍵認証の利用:</strong> パスワード認証を無効にし、SSH鍵認証のみを許可します。これにより、パスワード総当たり攻撃を防ぎます。</li>
+              <li><strong>rootログインの禁止:</strong> rootユーザーでの直接ログインを禁止し、一般ユーザーでログイン後に<code>sudo</code>を使う運用にします。</li>
+            </ul>
+            <pre><code># /etc/ssh/sshd_config の設定例
+PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes</code></pre>
+          </li>
+          <li><strong>ファイアウォールの設定 (UFW):</strong> 不要なポートを閉じ、許可する通信だけを通すようにします。
+            <pre><code># (Ubuntuの場合)
+sudo ufw allow ssh      # SSH (22)
+sudo ufw allow http     # HTTP (80)
+sudo ufw allow https    # HTTPS (443)
+sudo ufw enable         # ファイアウォールを有効化</code></pre>
+          </li>
+          <li><strong>OSの定期的なアップデート:</strong> 脆弱性を修正するために、OSとパッケージを常に最新の状態に保ちます。
+            <pre><code>sudo apt update && sudo apt upgrade -y</code></pre>
+          </li>
+        </ol>
+      </section>
+
+      <section id="s4">
+        <h2>4. SSL証明書の導入と自動更新 (HTTPS化)</h2>
+        <p>HTTPSは、ユーザーとサーバー間の通信を暗号化し、データの盗聴や改ざんを防ぎます。現代のWebサイトでは必須です。</p>
+        <h3>推奨: Caddyを使う方法 (最も簡単)</h3>
+        <p>Caddyは、設定ファイルにドメイン名を書くだけで、Let's EncryptのSSL証明書を自動で取得・設定・更新してくれるWebサーバーです。</p>
+        <div class="codebox">
+          <button class="copy" data-target="code4-caddy">copy</button>
+<pre id="code4-caddy"><code># Caddyfile
+your-domain.com {
+  # この一行でリバースプロキシとHTTPS化が完了
+  reverse_proxy localhost:8080
+}</code></pre>
+        </div>
+        <h3>標準: Nginx + Certbotを使う方法</h3>
+        <p>広く使われているNginxで手動設定する方法です。</p>
+        <ol>
+          <li><strong>Certbotのインストール:</strong>
+            <pre><code>sudo apt install certbot python3-certbot-nginx -y</code></pre>
+          </li>
+          <li><strong>証明書の取得とNginx設定の更新:</strong>
+            <pre><code>sudo certbot --nginx -d your-domain.com -d www.your-domain.com</code></pre>
+            <p>対話形式でメールアドレスなどを入力すると、証明書が取得され、Nginxの設定ファイルも自動で更新されます。</p>
+          </li>
+          <li><strong>自動更新の確認:</strong> Certbotは証明書の自動更新タスクも設定してくれます。以下のコマンドでテストできます。
+            <pre><code>sudo certbot renew --dry-run</code></pre>
+          </li>
+        </ol>
+      </section>
+
+      <section id="s5">
+        <h2>5. 信頼されるメール配信設定</h2>
+        <p>アプリケーションからの通知メール（会員登録、パスワードリセットなど）が、迷惑メールフォルダに入らないようにするための設定です。自前でメールサーバーを立てるのは非常に困難なため、<a href="https://sendgrid.com/" target="_blank">SendGrid</a>や<a href="https://aws.amazon.com/jp/ses/" target="_blank">Amazon SES</a>などの外部配信サービスを利用することを強く推奨します。</p>
+        <p>サービスを利用する際、以下のDNSレコードを設定してドメインの信頼性を証明します。</p>
+        <table>
+          <thead><tr><th>レコード種別</th><th>目的</th><th>設定例</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>SPF</strong><br>(Sender Policy Framework)</td>
+              <td>「このドメインからメールを送信してよいサーバー」を宣言し、なりすましを防ぐ。</td>
+              <td><code>v=spf1 include:sendgrid.net ~all</code></td>
+            </tr>
+            <tr>
+              <td><strong>DKIM</strong><br>(DomainKeys Identified Mail)</td>
+              <td>メールに電子署名を追加し、送信中に改ざんされていないことを証明する。</td>
+              <td>(各サービスが発行する固有のCNAMEレコードなどを設定)</td>
+            </tr>
+            <tr>
+              <td><strong>DMARC</strong><br>(Domain-based Message Authentication, Reporting, and Conformance)</td>
+              <td>SPFとDKIMの検証に失敗したメールの扱いを指示し、不正なメールを監視する。</td>
+              <td><code>v=DMARC1; p=reject; rua=mailto:reports@your-domain.com</code></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout warn"><strong>注意:</strong> これらの設定は非常に重要です。一つでも欠けていると、主要なメールプロバイダ（Gmail, Outlookなど）にメールが届かなくなる可能性があります。</div>
+      </section>
+
+      <section id="s6">
+        <h2>6. 定期的なバックアップ戦略</h2>
+        <p>サーバー障害、操作ミス、サイバー攻撃など、データが失われるリスクは常に存在します。万一の事態に備え、定期的なバックアップは必須です。</p>
+        <h3>バックアップ対象</h3>
+        <ul>
+          <li><strong>データベース:</strong> アプリケーションの最も重要なデータ。<code>mysqldump</code>や<code>pg_dump</code>でダンプファイルを作成します。</li>
+          <li><strong>ファイル:</strong> ユーザーがアップロードした画像や、設定ファイルなど。</li>
+        </ul>
+        <h3>自動化の例 (cron + シェルスクリプト)</h3>
+        <p>毎日深夜にデータベースとファイルをバックアップし、古いものは削除する簡単なスクリプトの例です。</p>
+        <div class="codebox">
+          <button class="copy" data-target="code6-backup">copy</button>
+<pre id="code6-backup"><code>#!/bin/bash
+
+BACKUP_DIR="/var/backups"
+DATE=$(date +"%Y%m%d")
+
+# データベースのバックアップ (MySQLの例)
+mysqldump -u [user] -p[password] [database_name] | gzip > ${BACKUP_DIR}/db_${DATE}.sql.gz
+
+# ファイルのバックアップ
+tar -czf ${BACKUP_DIR}/files_${DATE}.tar.gz /path/to/your/app/uploads
+
+# 7日以上前のバックアップを削除
+find ${BACKUP_DIR} -type f -mtime +7 -delete</code></pre>
+        </div>
+        <p>このスクリプトを<code>/etc/cron.daily/</code>に配置すれば、毎日自動で実行されます。</p>
+        <div class="callout"><strong>次のステップ:</strong> バックアップファイルは、サーバー自身がダウンした場合に備え、Amazon S3などの外部ストレージに転送することが理想的です。</div>
+      </section>
+      <section id="s7">
+        <h2>7. CI/CDによるデプロイ自動化 (GitHub Actions)</h2>
+        <p>CI/CD（継続的インテグレーション/継続的デリバリー）は、コードの変更を自動的にテストし、本番環境にデプロイするプラクティスです。手動でのデプロイ作業をなくすことで、ヒューマンエラーを減らし、開発サイクルを大幅に高速化します。</p>
+        <p>ここでは、GitHubリポジトリと親和性が高く、無料で始められる<strong>GitHub Actions</strong>を使った具体的な設定例を紹介します。</p>
+        <h3>設定の全体像</h3>
+        <ol>
+          <li><strong>デプロイ専用のSSHキーペアを作成する:</strong> GitHub Actionsがサーバーに安全にアクセスするための鍵を用意します。</li>
+          <li><strong>サーバーに公開鍵を登録する:</strong> サーバーがGitHub Actionsからの接続を許可するように設定します。</li>
+          <li><strong>GitHubリポジトリに秘密鍵を登録する:</strong> GitHub ActionsがSSH接続時に使えるよう、秘密鍵を安全な場所に保管します。</li>
+          <li><strong>ワークフローファイルを作成する:</strong> <code>git push</code>をトリガーに、サーバー上で実行するコマンドを定義します。</li>
+        </ol>
+        <h3>具体的な手順</h3>
+        <ol>
+          <li><strong>デプロイ用SSHキーの作成 (ローカルPCで実行)</strong>
+            <pre><code># パスフレーズは空のままEnter
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f ./deploy_key</code></pre>
+            <p><code>deploy_key</code>（秘密鍵）と<code>deploy_key.pub</code>（公開鍵）が生成されます。</p>
+          </li>
+          <li><strong>公開鍵をサーバーに登録</strong>
+            <p>生成された公開鍵（<code>deploy_key.pub</code>）の内容をコピーし、サーバーの<code>~/.ssh/authorized_keys</code>ファイルに追記します。</p>
+          </li>
+          <li><strong>GitHub Secretsに秘密鍵と接続情報を登録</strong>
+            <p>対象のGitHubリポジトリで <strong>Settings</strong> > <strong>Secrets and variables</strong> > <strong>Actions</strong> を開きます。以下の3つのシークレットを登録します。</p>
+            <ul>
+              <li><code>VPS_SSH_PRIVATE_KEY</code>: <code>deploy_key</code>（秘密鍵）ファイルの中身を貼り付けます。</li>
+              <li><code>VPS_HOST</code>: サーバーのIPアドレスを登録します。</li>
+              <li><code>VPS_USER</code>: SSHログインするユーザー名を登録します。</li>
+            </ul>
+          </li>
+          <li><strong>ワークフローファイルの作成</strong>
+            <p>プロジェクトのルートに <code>.github/workflows/deploy.yml</code> というファイルを作成し、以下を記述します。</p>
+            <div class="codebox">
+              <button class="copy" data-target="code7-workflow">copy</button>
+<pre id="code7-workflow"><code>name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ] # mainブランチへのpushで実行
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd /path/to/your/app
+            git pull origin main
+            # アプリケーションの再起動コマンド (例: Docker Compose)
+            docker compose up -d --build
+            docker image prune -f</code></pre>
+            </div>
+          </li>
+        </ol>
+        <div class="callout"><strong>完了:</strong> これで、ローカルから<code>main</code>ブランチに<code>git push</code>するだけで、自動的にサーバー上のコードが更新され、アプリケーションが再起動するようになりました。</div>
+      </section>
+
+      <section id="s8">
+        <h2>8. アプリケーションの監視 (モニタリング)</h2>
+        <p>アプリケーションを公開したら、それが正常に動作し続けているかを確認する「監視」が不可欠です。問題が発生した際に、ユーザーからの報告を待つのではなく、能動的に検知して対応できる体制を整えます。</p>
+        <h3>何を監視するべきか？</h3>
+        <ul>
+          <li><strong>サーバーリソース:</strong> CPU使用率、メモリ使用量、ディスク空き容量など。リソースが枯渇すると、アプリケーションのパフォーマンス低下や停止に直結します。</li>
+          <li><strong>アプリケーションパフォーマンス (APM):</strong> リクエストの応答時間、スループット（単位時間あたりの処理数）、エラー率など。パフォーマンスの悪化はユーザー体験に直接影響します。</li>
+          <li><strong>死活監視 (Uptime):</strong> 外部から定期的にアプリケーションのURLにアクセスし、正常な応答が返ってくるかを確認します。サーバーダウンやネットワーク障害を検知できます。</li>
+          <li><strong>ログ監視:</strong> アプリケーションやサーバーが出力するログ（特にエラーログ）を収集・監視し、異常なパターンや特定のエラーが多発していないかを確認します。</li>
+        </ul>
+        <h3>代表的な監視ツール</h3>
+        <table>
+          <thead><tr><th>カテゴリ</th><th>ツール例</th><th>特徴</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>コマンドライン</strong></td>
+              <td><code>top</code>, <code>htop</code>, <code>df</code>, <code>tail -f [log_file]</code></td>
+              <td>サーバーに直接ログインして使う基本的なツール。手軽だが、継続的な監視には不向き。</td>
+            </tr>
+            <tr>
+              <td><strong>死活監視</strong></td>
+              <td><a href="https://uptimerobot.com/" target="_blank">UptimeRobot</a>, <a href="https://mackerel.io/" target="_blank">Mackerel</a></td>
+              <td>無料で始められるサービスが多く、設定も簡単。ダウンタイムを即座にメールやSlackで通知してくれます。</td>
+            </tr>
+            <tr>
+              <td><strong>統合監視 (OSS)</strong></td>
+              <td><strong>Prometheus + Grafana</strong></td>
+              <td>メトリクス収集(Prometheus)と可視化(Grafana)を組み合わせる定番構成。柔軟性が高いが、自前で構築・運用するコストがかかる。</td>
+            </tr>
+            <tr>
+              <td><strong>統合監視 (SaaS)</strong></td>
+              <td><a href="https://www.datadoghq.com/" target="_blank">Datadog</a>, <a href="https://newrelic.com/" target="_blank">New Relic</a></td>
+              <td>サーバーにエージェントを導入するだけで、リソースからAPM、ログまで包括的に監視できる。高機能だが、有料。</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout"><strong>最初のステップとして:</strong> まずはUptimeRobotのような外部の死活監視サービスを設定し、サーバーがダウンした際に通知が来るようにすることから始めるのがおすすめです。</div>
+      </section>
+
+      <section id="s9">
+        <h2>9. ログ収集と管理 (ロギング)</h2>
+        <p>ログは、問題発生時の「唯一の手がかり」となる重要な情報源です。アプリケーションが期待通りに動作しているかを確認し、エラーの原因を特定し、セキュリティインシデントを調査するために、ログを適切に収集・管理する仕組みを構築します。</p>
+        <h3>何をログに記録するか？</h3>
+        <ul>
+          <li><strong>アクセスログ:</strong> Webサーバーが記録する、いつ、誰が、どのページにアクセスしたかの記録。パフォーマンス分析や不正アクセスの調査に利用します。</li>
+          <li><strong>アプリケーションログ:</strong> アプリケーション自身が出力するログ。特に、エラー情報（スタックトレースを含む）、警告、重要な処理の開始・終了などを記録します。</li>
+          <li><strong>システムログ:</strong> OSやミドルウェア（データベースなど）が出力するログ。サービス起動の失敗やハードウェア関連の問題を発見するのに役立ちます。</li>
+        </ul>
+        <h3>ログ管理戦略とツール</h3>
+        <table>
+          <thead><tr><th>戦略</th><th>ツール例</th><th>特徴</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>ファイルベース</strong></td>
+              <td><code>tail -f</code>, <code>grep</code>, <code>journalctl</code></td>
+              <td>サーバーに直接ログインしてファイルを確認する最も基本的な方法。手軽だが、複数サーバーにまたがる調査や長期的な分析には不向き。</td>
+            </tr>
+            <tr>
+              <td><strong>ログ収集基盤 (OSS)</strong></td>
+              <td><strong>Fluentd + Elasticsearch + Kibana (EFK)</strong></td>
+              <td>様々なソースからログを収集(Fluentd)し、検索可能な形で保存(Elasticsearch)、可視化(Kibana)する定番構成。非常に強力だが、自前での構築・運用コストが高い。</td>
+            </tr>
+            <tr>
+              <td><strong>ログ管理サービス (SaaS)</strong></td>
+              <td><a href="https://www.datadoghq.com/" target="_blank">Datadog</a>, <a href="https://logtail.com/" target="_blank">Logtail</a>, <a href="https://papertrail.com/" target="_blank">Papertrail</a></td>
+              <td>エージェントを導入するだけでログをクラウドに集約・分析できる。高度な検索やアラート機能を提供。手軽に始められるが、データ量に応じてコストがかかる。</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout"><strong>Docker環境でのベストプラクティス:</strong> アプリケーションログはファイルに書き出すのではなく、<strong>標準出力 (stdout) / 標準エラー出力 (stderr)</strong> に出力するようにします。これにより、Dockerのロギングドライバーがログを自動的に収集し、一元管理が容易になります。</div>
+      </section>
+
+      <section id="s10">
+        <h2>10. おわりに</h2>
+        <p>このハンドブックで解説した項目は、安定したWebアプリケーション運用のための土台です。インフラの世界は奥深く、常に変化しています。この手順書を基礎として、ぜひ継続的な学習を続けていってください。</p>
+      </section>
+
+    </div>
+
+    <footer>
+      &copy; このハンドブックは、すべてのWeb開発者が自信を持ってアプリケーションを公開できるよう願って作成されました。
+    </footer>
+  </main>
+</div>
+
+<script>
+  document.getElementById('theme').onclick = () => {
+    const root = document.documentElement;
+    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  };
+  (function(){ const t = localStorage.getItem('theme'); if(t) document.documentElement.setAttribute('data-theme', t); })();
+
+  const toc = document.getElementById('toc');
+  const sections = Array.from(document.querySelectorAll('main section'));
+  toc.innerHTML = sections.map(s => `<a href="#${s.id}">${s.querySelector('h2').textContent}</a>`).join('');
+  const links = Array.from(toc.querySelectorAll('a'));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting) {
+        links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+      }
+    });
+  }, { rootMargin: "-40% 0px -55% 0px", threshold: 0.01 });
+  sections.forEach(s => io.observe(s));
+
+  Array.from(document.querySelectorAll('.copy')).forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.target;
+      const el = document.getElementById(id);
+      const text = el.innerText;
+      try { await navigator.clipboard.writeText(text); btn.textContent = 'copied!'; btn.classList.add('ok'); setTimeout(()=>{btn.textContent='copy'; btn.classList.remove('ok');}, 1200); }
+      catch (e) { console.error(e); }
+    });
+  });
+</script>
+</body>
+</html>

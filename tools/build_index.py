@@ -48,6 +48,7 @@ lines = [
     "<div class='search-box'>",
     "  <input type='search' id='searchDocs' placeholder='資料を検索...' aria-label='資料を検索'>",
     "</div>",
+    "<div id='search-status' class='search-status'></div>", # 検索結果表示用
     "<br>",
 ]
 
@@ -89,7 +90,7 @@ lines += [
     f"<p>最終更新: {Path(__file__).stem} により自動生成</p>",
     "</footer>",
     "</div>", # end wrap
-    f"<script src='knowledge-ui.js'></script>",
+    f"<script src='knowledge-ui.js?v=2'></script>",
     "</body></html>"
 ]
 

@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Pythonユニットテスト：主要アサート一覧＋Mock/patch例（コード付き）</title>
+</head>
+<body>
+<h1>Pythonユニットテスト：主要アサート一覧＋Mock/patch例（コード付き）</h1>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pythonユニットテスト：主要アサート一覧＋Mock/patch例（コード付き）</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --card2:#0f1730;
+      --text:#eef2ff;
+      --muted:#b7c0ff;
+      --line:#2a3560;
+      --accent:#7aa2ff;
+      --ok:#34d399;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --btn:#1b2550;
+      --btn2:#223067;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f7f8ff;
+        --card:#ffffff;
+        --card2:#f2f5ff;
+        --text:#111827;
+        --muted:#4b5563;
+        --line:#e5e7eb;
+        --accent:#2563eb;
+        --btn:#eef2ff;
+        --btn2:#e0e7ff;
+      }
+    }
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.6;
+    }
+    .container{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    header{
+      background: linear-gradient(180deg, rgba(122,162,255,.18), transparent);
+      border-bottom: 1px solid var(--line);
+    }
+    h1{
+      font-size: 1.25rem;
+      margin: 10px 0 6px;
+    }
+    .sub{
+      color:var(--muted);
+      font-size: .95rem;
+      margin: 0 0 12px;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+      margin: 12px 0;
+    }
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+    button{
+      appearance:none;
+      border:1px solid var(--line);
+      background:var(--btn);
+      color:var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor:pointer;
+      font-weight: 600;
+      font-size: .95rem;
+    }
+    button:hover{ background:var(--btn2); }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--muted);
+      font-size: .85rem;
+      margin-right: 6px;
+    }
+    details{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      background:var(--card);
+      margin: 10px 0;
+      overflow:hidden;
+    }
+    summary{
+      list-style:none;
+      cursor:pointer;
+      padding: 12px 12px;
+      background: linear-gradient(180deg, rgba(122,162,255,.10), transparent);
+      font-weight: 800;
+    }
+    summary::-webkit-details-marker{ display:none; }
+    .details-body{
+      padding: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: var(--card2);
+      font-size: .95rem;
+    }
+    th, td{
+      border-bottom:1px solid var(--line);
+      padding: 10px;
+      vertical-align: top;
+    }
+    th{
+      text-align:left;
+      background: rgba(122,162,255,.10);
+      font-size: .9rem;
+    }
+    tr:last-child td{ border-bottom: none; }
+
+    .code-wrap{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      background: #060a16;
+      overflow:hidden;
+      margin: 12px 0;
+    }
+    @media (prefers-color-scheme: light){
+      .code-wrap{ background:#0b1020; }
+    }
+    .code-topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: rgba(122,162,255,.06);
+      flex-wrap: wrap;
+    }
+    .code-title{
+      font-family:var(--mono);
+      font-size: .9rem;
+      color: var(--muted);
+    }
+    pre{
+      margin:0;
+      padding: 12px;
+      overflow:auto;
+      font-family: var(--mono);
+      font-size: .86rem;
+      color: #e5e7eb;
+      line-height: 1.55;
+    }
+    code{ font-family: var(--mono); }
+    .hint{
+      color: var(--muted);
+      font-size: .92rem;
+      margin: 8px 0 0;
+    }
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(17,24,39,.92);
+      color: white;
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: .9rem;
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 24px rgba(0,0,0,.20);
+      display:none;
+      z-index:9999;
+    }
+    .badge-ok{ color: var(--ok); font-weight: 800; }
+    .badge-bad{ color: var(--bad); font-weight: 800; }
+    .badge-warn{ color: var(--warn); font-weight: 800; }
+    .small{ font-size:.9rem; color:var(--muted); }
+    .grid{
+      display:grid;
+      gap: 10px;
+    }
+    @media (min-width: 860px){
+      .grid{ grid-template-columns: 1fr 1fr; }
+    }
+    .kvs{
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: var(--card2);
+    }
+    .kvs h3{
+      margin: 0 0 6px;
+      font-size: 1rem;
+    }
+    .kvs ul{
+      margin: 0;
+      padding-left: 18px;
+    }
+    .kvs li{ margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Pythonユニットテスト：主要アサート一覧＋Mock/patch例（HTML5・コピペ対応）</h1>
+      <p class="sub">
+        このHTML自体もコピペしやすい構成にしてあります。Pythonコードは各ブロックに「コピー」ボタン付きです。
+      </p>
+
+      <div class="card">
+        <div class="toolbar">
+          <button type="button" data-action="open-all">すべて開く</button>
+          <button type="button" data-action="close-all">すべて閉じる</button>
+          <button type="button" data-action="copy-all-python">Pythonコード全部コピー</button>
+          <button type="button" data-action="copy-this-html">このHTMLをコピー（ページ全文）</button>
+        </div>
+        <p class="hint">
+          失敗例は <span class="badge-warn">@unittest.expectedFailure</span> を付けているため、テスト実行の妨げになりにくい形です（レポート上は expected failure になります）。
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <details open>
+      <summary>1) よく使うアサート一覧（unittest）</summary>
+      <div class="details-body">
+
+        <div class="grid">
+          <div class="kvs">
+            <h3>基本（真偽・同値・None）</h3>
+            <ul>
+              <li><code>assertEqual(a, b)</code> / <code>assertNotEqual(a, b)</code></li>
+              <li><code>assertTrue(x)</code> / <code>assertFalse(x)</code></li>
+              <li><code>assertIsNone(x)</code> / <code>assertIsNotNone(x)</code></li>
+              <li><code>assertIs(a, b)</code> / <code>assertIsNot(a, b)</code></li>
+            </ul>
+          </div>
+          <div class="kvs">
+            <h3>コレクション・型</h3>
+            <ul>
+              <li><code>assertIn(a, b)</code> / <code>assertNotIn(a, b)</code></li>
+              <li><code>assertIsInstance(obj, cls)</code> / <code>assertNotIsInstance(obj, cls)</code></li>
+              <li><code>assertListEqual</code>, <code>assertTupleEqual</code>, <code>assertSetEqual</code>, <code>assertDictEqual</code></li>
+              <li><code>assertCountEqual(a, b)</code>（順不同・重複考慮）</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 style="margin-top:14px;">基本のアサーション（self.assertXxx）</h3>
+        <table>
+          <thead>
+            <tr><th style="width:28%;">アサーション</th><th>意味（何を確認するか）</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>assertEqual(a, b)</code></td><td><code>a == b</code> である</td></tr>
+            <tr><td><code>assertNotEqual(a, b)</code></td><td><code>a != b</code> である</td></tr>
+            <tr><td><code>assertTrue(x)</code></td><td><code>bool(x) is True</code></td></tr>
+            <tr><td><code>assertFalse(x)</code></td><td><code>bool(x) is False</code></td></tr>
+            <tr><td><code>assertIs(a, b)</code></td><td><code>a is b</code>（同一オブジェクト）</td></tr>
+            <tr><td><code>assertIsNot(a, b)</code></td><td><code>a is not b</code></td></tr>
+            <tr><td><code>assertIsNone(x)</code></td><td><code>x is None</code></td></tr>
+            <tr><td><code>assertIsNotNone(x)</code></td><td><code>x is not None</code></td></tr>
+            <tr><td><code>assertIn(a, b)</code></td><td><code>a in b</code></td></tr>
+            <tr><td><code>assertNotIn(a, b)</code></td><td><code>a not in b</code></td></tr>
+            <tr><td><code>assertIsInstance(obj, cls)</code></td><td><code>isinstance(obj, cls)</code></td></tr>
+            <tr><td><code>assertNotIsInstance(obj, cls)</code></td><td><code>not isinstance(obj, cls)</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:14px;">例外</h3>
+        <table>
+          <thead>
+            <tr><th style="width:28%;">アサーション</th><th>意味（何を確認するか）</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>assertRaises(exc, func, *args)</code></td><td>指定例外 <code>exc</code> が発生する</td></tr>
+            <tr><td><code>with assertRaises(exc):</code></td><td>コンテキスト形式で例外発生を確認</td></tr>
+            <tr><td><code>assertRaisesRegex(exc, regex)</code></td><td>例外メッセージが正規表現にマッチ</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:14px;">文字列・テキスト</h3>
+        <table>
+          <thead>
+            <tr><th style="width:28%;">アサーション</th><th>意味（何を確認するか）</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>assertRegex(text, regex)</code></td><td>文字列が正規表現にマッチ</td></tr>
+            <tr><td><code>assertNotRegex(text, regex)</code></td><td>正規表現にマッチしない</td></tr>
+            <tr><td><code>assertMultiLineEqual(a, b)</code></td><td>複数行文字列を差分が分かる形で比較</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:14px;">コレクション</h3>
+        <table>
+          <thead>
+            <tr><th style="width:28%;">アサーション</th><th>意味（何を確認するか）</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>assertListEqual(a, b)</code></td><td>リスト（順序あり）</td></tr>
+            <tr><td><code>assertTupleEqual(a, b)</code></td><td>タプル（順序あり）</td></tr>
+            <tr><td><code>assertSetEqual(a, b)</code></td><td>セット（順不同）</td></tr>
+            <tr><td><code>assertDictEqual(a, b)</code></td><td>辞書（キーと値）</td></tr>
+            <tr><td><code>assertCountEqual(a, b)</code></td><td>順不同＋重複回数も一致</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:14px;">浮動小数</h3>
+        <table>
+          <thead>
+            <tr><th style="width:28%;">アサーション</th><th>意味（何を確認するか）</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>assertAlmostEqual(a, b, places=7)</code></td><td>小数点誤差を許容して近似一致</td></tr>
+            <tr><td><code>assertNotAlmostEqual(a, b, places=7)</code></td><td>近似一致しない</td></tr>
+          </tbody>
+        </table>
+
+      </div>
+    </details>
+
+    <details open>
+      <summary>2) Mock（unittest.mock）でよく使う確認（assert_called 系）</summary>
+      <div class="details-body">
+        <table>
+          <thead>
+            <tr><th style="width:35%;">Mockアサーション/属性</th><th>意味（何を確認するか）</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>mock.assert_called()</code></td><td>少なくとも1回呼ばれた</td></tr>
+            <tr><td><code>mock.assert_called_once()</code></td><td>1回だけ呼ばれた</td></tr>
+            <tr><td><code>mock.assert_called_with(*args, **kwargs)</code></td><td>直近の呼び出しが指定引数</td></tr>
+            <tr><td><code>mock.assert_called_once_with(...)</code></td><td>1回だけ＆その引数で呼ばれた</td></tr>
+            <tr><td><code>mock.assert_has_calls([call(...), ...])</code></td><td>呼び出し履歴が指定の並びで含まれる</td></tr>
+            <tr><td><code>mock.assert_not_called()</code></td><td>呼ばれていない</td></tr>
+            <tr><td><code>mock.call_count</code></td><td>呼び出し回数（値として参照）</td></tr>
+            <tr><td><code>mock.call_args</code></td><td>直近呼び出しの (args, kwargs)</td></tr>
+          </tbody>
+        </table>
+
+        <p class="hint">
+          Mock系は「呼ばれたか」「引数」「回数」「順序」の4点が主戦場です。patchは“外部依存を差し替える”ために使います。
+        </p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>3) 主要サンプル一式（成功/失敗を同時に収録：Pythonコード付き）</summary>
+      <div class="details-body">
+
+        <div class="card">
+          <div class="pill">ファイル名例: <code>test_assertions_and_mock_examples.py</code></div>
+          <div class="pill">実行: <code>python -m unittest -v test_assertions_and_mock_examples.py</code></div>
+          <p class="small" style="margin-top:10px;">
+            <span class="badge-ok">PASS例</span> と <span class="badge-bad">FAIL例</span> を同じ形で並べ、FAIL例は <span class="badge-warn">@expectedFailure</span> で保管しています。
+          </p>
+        </div>
+
+        <div class="code-wrap" data-code-block="python">
+          <div class="code-topbar">
+            <div class="code-title">Python（unittest + unittest.mock）: 主要アサート／Mock／patch の成功・失敗例まとめ</div>
+            <div class="toolbar" style="margin:0;">
+              <button type="button" data-action="copy-code" aria-label="Copy python code">コピー</button>
+            </div>
+          </div>
+          <pre><code class="language-python">import math
+import unittest
+from dataclasses import dataclass
+from unittest.mock import Mock, call, patch
+
+
+# =========================
+# テスト用の小さな対象コード
+# =========================
+
+def add(a, b):
+    return a + b
+
+def divide(a, b):
+    if b == 0:
+        raise ZeroDivisionError("b must not be zero")
+    return a / b
+
+def greet(name: str) -&gt; str:
+    return f"Hello, {name}!"
+
+def get_user_names():
+    # 本当はDBやAPIから取る想定、ここでは固定
+    return ["alice", "bob", "carol"]
+
+def calc_circle_area(r: float) -&gt; float:
+    # 浮動小数点の比較例用
+    return math.pi * r * r
+
+@dataclass
+class User:
+    id: int
+    name: str
+
+class Repo:
+    """外部依存っぽいもの（本当はDBやHTTP）"""
+    def fetch_user(self, user_id: int) -&gt; User:
+        # 実際の処理はテストで呼びたくない想定
+        raise RuntimeError("Do not call real fetch_user in unit tests")
+
+class Service:
+    """Repoに依存しているサービス"""
+    def __init__(self, repo: Repo):
+        self.repo = repo
+
+    def get_upper_name(self, user_id: int) -&gt; str:
+        user = self.repo.fetch_user(user_id)
+        return user.name.upper()
+
+def request_json(http_get, url: str):
+    """
+    http_get: requests.get相当の関数を注入する（DI）。
+    実運用では requests.get を渡す想定。
+    """
+    resp = http_get(url, timeout=3)
+    if resp.status_code != 200:
+        raise ValueError(f"bad status: {resp.status_code}")
+    return resp.json()
+
+
+# =========================
+# 1) 基本アサーション（assertEqual / True / False / None / In etc.）
+# =========================
+
+class TestBasicAssertions(unittest.TestCase):
+    def test_assertEqual__success(self):
+        self.assertEqual(add(2, 3), 5)
+
+    @unittest.expectedFailure
+    def test_assertEqual__failure(self):
+        self.assertEqual(add(2, 3), 6)
+
+    def test_assertNotEqual__success(self):
+        self.assertNotEqual(add(2, 3), 999)
+
+    @unittest.expectedFailure
+    def test_assertNotEqual__failure(self):
+        self.assertNotEqual(add(2, 3), 5)
+
+    def test_assertTrue__success(self):
+        self.assertTrue(10 &gt; 3)
+
+    @unittest.expectedFailure
+    def test_assertTrue__failure(self):
+        self.assertTrue(1 &gt; 3)
+
+    def test_assertFalse__success(self):
+        self.assertFalse(1 &gt; 3)
+
+    @unittest.expectedFailure
+    def test_assertFalse__failure(self):
+        self.assertFalse(10 &gt; 3)
+
+    def test_assertIsNone__success(self):
+        x = None
+        self.assertIsNone(x)
+
+    @unittest.expectedFailure
+    def test_assertIsNone__failure(self):
+        x = 123
+        self.assertIsNone(x)
+
+    def test_assertIsNotNone__success(self):
+        x = 123
+        self.assertIsNotNone(x)
+
+    @unittest.expectedFailure
+    def test_assertIsNotNone__failure(self):
+        x = None
+        self.assertIsNotNone(x)
+
+    def test_assertIn__success(self):
+        self.assertIn("bob", get_user_names())
+
+    @unittest.expectedFailure
+    def test_assertIn__failure(self):
+        self.assertIn("dave", get_user_names())
+
+    def test_assertNotIn__success(self):
+        self.assertNotIn("dave", get_user_names())
+
+    @unittest.expectedFailure
+    def test_assertNotIn__failure(self):
+        self.assertNotIn("alice", get_user_names())
+
+    def test_assertIsInstance__success(self):
+        u = User(id=1, name="alice")
+        self.assertIsInstance(u, User)
+
+    @unittest.expectedFailure
+    def test_assertIsInstance__failure(self):
+        self.assertIsInstance("alice", User)
+
+
+# =========================
+# 2) 同一性（assertIs / assertIsNot）
+# =========================
+
+class TestIdentityAssertions(unittest.TestCase):
+    def test_assertIs__success(self):
+        obj = []
+        alias = obj
+        self.assertIs(obj, alias)
+
+    @unittest.expectedFailure
+    def test_assertIs__failure(self):
+        a = [1, 2]
+        b = [1, 2]
+        self.assertIs(a, b)
+
+    def test_assertIsNot__success(self):
+        a = [1, 2]
+        b = [1, 2]
+        self.assertIsNot(a, b)
+
+    @unittest.expectedFailure
+    def test_assertIsNot__failure(self):
+        obj = []
+        alias = obj
+        self.assertIsNot(obj, alias)
+
+
+# =========================
+# 3) 例外（assertRaises / assertRaisesRegex）
+# =========================
+
+class TestExceptionAssertions(unittest.TestCase):
+    def test_assertRaises__success(self):
+        with self.assertRaises(ZeroDivisionError):
+            divide(10, 0)
+
+    @unittest.expectedFailure
+    def test_assertRaises__failure(self):
+        with self.assertRaises(ZeroDivisionError):
+            divide(10, 2)
+
+    def test_assertRaisesRegex__success(self):
+        with self.assertRaisesRegex(ZeroDivisionError, r"must not be zero"):
+            divide(10, 0)
+
+    @unittest.expectedFailure
+    def test_assertRaisesRegex__failure(self):
+        with self.assertRaisesRegex(ZeroDivisionError, r"NOT_MATCH"):
+            divide(10, 0)
+
+
+# =========================
+# 4) 文字列（assertRegex / assertNotRegex / assertMultiLineEqual）
+# =========================
+
+class TestStringAssertions(unittest.TestCase):
+    def test_assertRegex__success(self):
+        self.assertRegex(greet("alice"), r"Hello, \\w+!")
+
+    @unittest.expectedFailure
+    def test_assertRegex__failure(self):
+        self.assertRegex(greet("alice"), r"^Bye,")
+
+    def test_assertNotRegex__success(self):
+        self.assertNotRegex(greet("alice"), r"^Bye,")
+
+    @unittest.expectedFailure
+    def test_assertNotRegex__failure(self):
+        self.assertNotRegex(greet("alice"), r"Hello")
+
+    def test_assertMultiLineEqual__success(self):
+        a = "line1\\nline2\\nline3"
+        b = "line1\\nline2\\nline3"
+        self.assertMultiLineEqual(a, b)
+
+    @unittest.expectedFailure
+    def test_assertMultiLineEqual__failure(self):
+        a = "line1\\nline2\\nline3"
+        b = "line1\\nlineX\\nline3"
+        self.assertMultiLineEqual(a, b)
+
+
+# =========================
+# 5) コレクション（List / Tuple / Set / Dict / CountEqual）
+# =========================
+
+class TestCollectionAssertions(unittest.TestCase):
+    def test_assertListEqual__success(self):
+        self.assertListEqual([1, 2, 3], [1, 2, 3])
+
+    @unittest.expectedFailure
+    def test_assertListEqual__failure(self):
+        self.assertListEqual([1, 2, 3], [3, 2, 1])
+
+    def test_assertTupleEqual__success(self):
+        self.assertTupleEqual((1, 2), (1, 2))
+
+    @unittest.expectedFailure
+    def test_assertTupleEqual__failure(self):
+        self.assertTupleEqual((1, 2), (2, 1))
+
+    def test_assertSetEqual__success(self):
+        self.assertSetEqual({1, 2, 3}, {3, 2, 1})
+
+    @unittest.expectedFailure
+    def test_assertSetEqual__failure(self):
+        self.assertSetEqual({1, 2, 3}, {1, 2, 999})
+
+    def test_assertDictEqual__success(self):
+        self.assertDictEqual({"a": 1, "b": 2}, {"a": 1, "b": 2})
+
+    @unittest.expectedFailure
+    def test_assertDictEqual__failure(self):
+        self.assertDictEqual({"a": 1, "b": 2}, {"a": 1, "b": 999})
+
+    def test_assertCountEqual__success(self):
+        self.assertCountEqual([1, 2, 2, 3], [2, 1, 3, 2])
+
+    @unittest.expectedFailure
+    def test_assertCountEqual__failure(self):
+        self.assertCountEqual([1, 2, 2, 3], [1, 2, 3, 3])
+
+
+# =========================
+# 6) 浮動小数（assertAlmostEqual / NotAlmostEqual）
+# =========================
+
+class TestFloatAssertions(unittest.TestCase):
+    def test_assertAlmostEqual__success(self):
+        self.assertAlmostEqual(calc_circle_area(1), math.pi, places=7)
+
+    @unittest.expectedFailure
+    def test_assertAlmostEqual__failure(self):
+        self.assertAlmostEqual(calc_circle_area(1), 3.14, places=7)
+
+    def test_assertNotAlmostEqual__success(self):
+        self.assertNotAlmostEqual(calc_circle_area(1), 3.14, places=7)
+
+    @unittest.expectedFailure
+    def test_assertNotAlmostEqual__failure(self):
+        self.assertNotAlmostEqual(calc_circle_area(1), math.pi, places=7)
+
+
+# =========================
+# 7) Mock（呼ばれたか、引数、回数、順序）
+# =========================
+
+class TestMockAssertions(unittest.TestCase):
+    def test_mock_assert_called__success(self):
+        m = Mock()
+        m(1, 2)
+        m.assert_called()
+
+    @unittest.expectedFailure
+    def test_mock_assert_called__failure(self):
+        m = Mock()
+        m.assert_called()
+
+    def test_mock_assert_called_once__success(self):
+        m = Mock()
+        m()
+        m.assert_called_once()
+
+    @unittest.expectedFailure
+    def test_mock_assert_called_once__failure(self):
+        m = Mock()
+        m()
+        m()
+        m.assert_called_once()
+
+    def test_mock_assert_called_with__success(self):
+        m = Mock()
+        m("x", flag=True)
+        m.assert_called_with("x", flag=True)
+
+    @unittest.expectedFailure
+    def test_mock_assert_called_with__failure(self):
+        m = Mock()
+        m("x", flag=True)
+        m.assert_called_with("x", flag=False)
+
+    def test_mock_assert_called_once_with__success(self):
+        m = Mock()
+        m(10)
+        m.assert_called_once_with(10)
+
+    @unittest.expectedFailure
+    def test_mock_assert_called_once_with__failure(self):
+        m = Mock()
+        m(10)
+        m(10)
+        m.assert_called_once_with(10)
+
+    def test_mock_assert_has_calls__success(self):
+        m = Mock()
+        m(1)
+        m(2)
+        m(3)
+        m.assert_has_calls([call(1), call(2), call(3)])
+
+    @unittest.expectedFailure
+    def test_mock_assert_has_calls__failure(self):
+        m = Mock()
+        m(1)
+        m(2)
+        m(3)
+        m.assert_has_calls([call(3), call(2), call(1)])
+
+    def test_mock_assert_not_called__success(self):
+        m = Mock()
+        m.assert_not_called()
+
+    @unittest.expectedFailure
+    def test_mock_assert_not_called__failure(self):
+        m = Mock()
+        m()
+        m.assert_not_called()
+
+
+# =========================
+# 8) patch（外部依存を差し替える）
+# =========================
+
+class TestPatchExamples(unittest.TestCase):
+    def test_patch_dependency__success(self):
+        repo = Repo()
+        service = Service(repo)
+
+        with patch.object(repo, "fetch_user", return_value=User(id=1, name="alice")) as mock_fetch:
+            name = service.get_upper_name(1)
+            self.assertEqual(name, "ALICE")
+            mock_fetch.assert_called_once_with(1)
+
+    @unittest.expectedFailure
+    def test_patch_dependency__failure(self):
+        repo = Repo()
+        service = Service(repo)
+
+        with patch.object(repo, "fetch_user", return_value=User(id=1, name="alice")) as mock_fetch:
+            name = service.get_upper_name(1)
+            self.assertEqual(name, "BOB")
+            mock_fetch.assert_called_once_with(1)
+
+    def test_di_http_get__success(self):
+        fake_resp = Mock()
+        fake_resp.status_code = 200
+        fake_resp.json.return_value = {"ok": True}
+
+        fake_get = Mock(return_value=fake_resp)
+
+        data = request_json(fake_get, "https://example.com/api")
+        self.assertEqual(data, {"ok": True})
+        fake_get.assert_called_once()
+
+        args, kwargs = fake_get.call_args
+        self.assertEqual(args[0], "https://example.com/api")
+        self.assertEqual(kwargs["timeout"], 3)
+
+    @unittest.expectedFailure
+    def test_di_http_get__failure(self):
+        fake_resp = Mock()
+        fake_resp.status_code = 500
+        fake_resp.json.return_value = {"ok": False}
+        fake_get = Mock(return_value=fake_resp)
+
+        request_json(fake_get, "https://example.com/api")
+
+
+if __name__ == "__main__":
+    # 実行:
+    #   python -m unittest -v test_assertions_and_mock_examples.py
+    unittest.main(verbosity=2)</code></pre>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 6px;">このサンプルの狙い（なぜこうしているか）</h3>
+          <ul style="margin:0; padding-left:18px;">
+            <li><b>成功/失敗を同型</b>で並べると「どこが違うと落ちるか」が視覚的に掴めます。</li>
+            <li>失敗例は <code>@expectedFailure</code> を付けて、普段の実行を邪魔しない保管形にしています。</li>
+            <li>Mockは「呼び出し」「引数」「回数」「順序」を網羅。patchは「外部依存の遮断」を体験するための最小例です。</li>
+          </ul>
+        </div>
+
+      </div>
+    </details>
+
+    <details>
+      <summary>4) 使い分けのミニ指針（迷いポイントだけ）</summary>
+      <div class="details-body">
+        <table>
+          <thead>
+            <tr><th style="width:33%;">迷いどころ</th><th>まずこれを選ぶ</th><th>理由（判断軸）</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>値が等しい？</td>
+              <td><code>assertEqual</code></td>
+              <td>もっとも基本。失敗時の差分も分かりやすい</td>
+            </tr>
+            <tr>
+              <td>同じ“モノ”か？（参照）</td>
+              <td><code>assertIs</code></td>
+              <td><code>==</code> ではなく <code>is</code> を見たいとき（同一性）</td>
+            </tr>
+            <tr>
+              <td>例外が出るべき？</td>
+              <td><code>assertRaises</code></td>
+              <td>エラーハンドリングの仕様を固定できる</td>
+            </tr>
+            <tr>
+              <td>順不同で同じ要素？</td>
+              <td><code>assertCountEqual</code></td>
+              <td>順序を無視しつつ、重複回数も見る</td>
+            </tr>
+            <tr>
+              <td>Mockが呼ばれたか？</td>
+              <td><code>assert_called_once_with</code></td>
+              <td>回数と引数を一発で縛れる（強め）</td>
+            </tr>
+            <tr>
+              <td>外部依存を止めたい</td>
+              <td><code>patch</code> / DI</td>
+              <td>ユニットテストの核：外部I/Oを切って対象ロジックに集中</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    function toast(msg){
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.style.display = "block";
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => { el.style.display = "none"; }, 1600);
+    }
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        toast("コピーしました");
+        return true;
+      }catch(e){
+        // フォールバック（古い環境用）
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try{
+          document.execCommand("copy");
+          toast("コピーしました");
+          return true;
+        }catch(_){
+          toast("コピーに失敗しました");
+          return false;
+        }finally{
+          document.body.removeChild(ta);
+        }
+      }
+    }
+
+    function getCodeFromBlock(block){
+      const code = block.querySelector("pre code");
+      return code ? code.textContent : "";
+    }
+
+    function openAllDetails(open){
+      document.querySelectorAll("details").forEach(d => d.open = open);
+    }
+
+    function getAllPythonCode(){
+      const blocks = Array.from(document.querySelectorAll('.code-wrap[data-code-block="python"]'));
+      const parts = blocks.map((b, i) => {
+        const t = b.querySelector(".code-title")?.textContent?.trim() || `Python code block ${i+1}`;
+        return `# ===== ${t} =====\n` + getCodeFromBlock(b).trim() + "\n";
+      });
+      return parts.join("\n");
+    }
+
+    document.addEventListener("click", async (ev) => {
+      const btn = ev.target.closest("button");
+      if(!btn) return;
+
+      const action = btn.getAttribute("data-action");
+
+      if(action === "open-all"){
+        openAllDetails(true);
+        toast("すべて開きました");
+        return;
+      }
+      if(action === "close-all"){
+        openAllDetails(false);
+        toast("すべて閉じました");
+        return;
+      }
+      if(action === "copy-all-python"){
+        const all = getAllPythonCode();
+        await copyText(all);
+        return;
+      }
+      if(action === "copy-this-html"){
+        // ページ全体（HTMLソース）をコピー
+        const html = "<!doctype html>\n" + document.documentElement.outerHTML;
+        await copyText(html);
+        return;
+      }
+      if(action === "copy-code"){
+        const wrap = btn.closest(".code-wrap");
+        const text = getCodeFromBlock(wrap);
+        await copyText(text);
+        return;
+      }
+    });
+  </script>
+</body>
+</html>
+
+</body>
+</html>

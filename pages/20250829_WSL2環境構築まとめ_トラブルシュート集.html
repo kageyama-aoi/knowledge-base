@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WSL2 環境構築まとめ & トラブルシュート集</title>
+  <style>
+    :root{
+      --bg:#ffffff; --fg:#1f2937; --muted:#6b7280; --card:#f9fafb; --border:#e5e7eb; --accent:#2563eb; --ok:#059669; --warn:#b45309; --bad:#dc2626;
+    }
+    .dark{
+      --bg:#0b1020; --fg:#e5e7eb; --muted:#9ca3af; --card:#141a2a; --border:#253046; --accent:#60a5fa; --ok:#34d399; --warn:#f59e0b; --bad:#f87171;
+    }
+    html,body{ height:100%; }
+    body{ margin:0; background:var(--bg); color:var(--fg); font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, Arial, sans-serif; line-height:1.65;}
+    .container{ max-width: 980px; margin:0 auto; padding: 24px; }
+    header{ display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom: 24px; }
+    h1{ font-size: clamp(1.4rem, 3vw, 2rem); margin:0 0 8px; line-height:1.2;}
+    .subtitle{ color:var(--muted); margin-top:-2px; }
+    .toolbar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    button{
+      border:1px solid var(--border); background: var(--card); color: var(--fg);
+      padding:8px 12px; border-radius: 999px; cursor:pointer; font-weight:600;
+      transition: all .2s ease;
+    }
+    button:hover{ border-color: var(--accent); background: color-mix(in srgb, var(--card) 90%, var(--accent)); }
+    .grid{ display:grid; gap:24px; }
+    .card{ background: var(--card); border:1px solid var(--border); border-radius:14px; padding: 20px; }
+    h2{ font-size:1.25rem; margin:0 0 16px; border-left:4px solid var(--accent); padding-left:12px; }
+    h3{ font-size:1.1rem; margin:16px 0 8px; color: var(--accent); }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: color-mix(in srgb, var(--accent) 15%, transparent);
+      padding: .2em .4em;
+      margin: 0;
+      font-size: 85%;
+      border-radius: 6px;
+    }
+    pre {
+      background: #1f2937;
+      color: #f9fafb;
+      padding: 1em;
+      border-radius: 8px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+    }
+    .dark pre {
+      background: #0d1117;
+    }
+    pre > code {
+      background: none;
+      padding: 0;
+      border-radius: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+    .error { color: var(--bad); font-weight: bold; }
+    .fix { color: var(--ok); font-weight: bold; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 0.5em; }
+
+    /* --- Accordion for Troubleshooting --- */
+    details.trouble-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      background: color-mix(in srgb, var(--bg) 50%, var(--card));
+      transition: background .2s;
+    }
+    details.trouble-item[open] {
+      background: var(--card);
+    }
+    details.trouble-item:last-of-type {
+      margin-bottom: 0;
+    }
+    details.trouble-item summary {
+      padding: 14px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    details.trouble-item summary::-webkit-details-marker { display: none; }
+    details.trouble-item summary::before {
+      content: '▶'; font-size: 0.7em; transition: transform .2s ease;
+    }
+    details.trouble-item[open] > summary::before { transform: rotate(90deg); }
+    .trouble-item .content { padding: 0 16px 16px; border-top: 1px solid var(--border); margin-top: 8px; }
+    .trouble-item .content .error { margin-top: 16px; }
+
+    @media print{
+      .toolbar{ display:none !important; }
+      body{ background:#fff; color:#000; }
+      .card{ page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>WSL2 環境構築まとめ & トラブルシュート集</h1>
+        <p class="subtitle">ここまでの学習と実際のエラー体験を整理した資料です。今後の開発環境構築のベースや、再発時の参考にできます。</p>
+      </div>
+      <div class="toolbar">
+        <button id="toggleTheme" aria-label="テーマ切り替え">🌗 ダーク/ライト</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h2>1. 基本の整理</h2>
+        <h3>npm / Node.js</h3>
+        <ul>
+          <li><code>npm install</code> は依存関係をインストールするコマンド。</li>
+          <li>WSL は Windows と別環境。Node/npm は <strong>WSL 内に入れ直す必要あり</strong>。</li>
+          <li><code>fnm</code>（Fast Node Manager）を使うと複数バージョン管理が容易。</li>
+        </ul>
+        <pre><code># LTS版Node.jsを導入
+fnm install --lts
+fnm use --lts
+node -v
+npm -v</code></pre>
+
+        <h3>Git</h3>
+        <ul>
+          <li>Git も WSL 側にインストールして利用する。</li>
+          <li>SSHキーは WSL 側で生成し、GitHubに登録するのが安全。</li>
+        </ul>
+
+        <h3>Docker</h3>
+        <ul>
+          <li>エンジンは Windows の Docker Desktop。</li>
+          <li>WSL から <code>docker</code> / <code>docker compose</code> で操作。</li>
+          <li>プロジェクトは <code>/home/&lt;user&gt;</code> に置いた方が高速。</li>
+        </ul>
+
+        <h3>WSL ユーザー管理</h3>
+        <ul>
+          <li>普段は一般ユーザー＋sudo で作業するのが安全。</li>
+          <li>rootで起動：<code>wsl -d Ubuntu -u root</code></li>
+          <li>デフォルト設定：<code>wsl --set-default Ubuntu</code></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>2. トラブルシュート集</h2>
+        <details class="trouble-item">
+          <summary>Docker エンジン接続エラー</summary>
+          <div class="content">
+            <p class="error">unable to get image 'postgres:15.1' ... dockerDesktopLinuxEngine not found</p>
+            <p class="fix">→ Docker Desktop を起動し、WSL Integration をONにして <code>docker context use desktop-linux</code></p>
+          </div>
+        </details>
+        <details class="trouble-item">
+          <summary>fnm インストール時の依存不足</summary>
+          <div class="content">
+            <p class="error">Not installing fnm due to missing dependencies (unzip)</p>
+            <p class="fix">→ <code>sudo apt install unzip</code> で解決</p>
+          </div>
+        </details>
+        <details class="trouble-item">
+          <summary>sudo 実行時にパスワード要求</summary>
+          <div class="content">
+            <p class="error">sudo: a password is required</p>
+            <p class="fix">→ rootでログインして <code>passwd &lt;ユーザー&gt;</code> で再設定</p>
+          </div>
+        </details>
+        <details class="trouble-item">
+          <summary>GitHub CLI が認識されない</summary>
+          <div class="content">
+            <p class="error">'gh' is not recognized as a command</p>
+            <p class="fix">→ Windowsは <code>winget install --id GitHub.cli</code>、WSLは <code>sudo apt install gh</code></p>
+          </div>
+        </details>
+        <details class="trouble-item">
+          <summary>docker-compose.yml の警告</summary>
+          <div class="content">
+            <p class="error">the attribute `version` is obsolete</p>
+            <p class="fix">→ YAMLから <code>version:</code> 行を削除</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="card">
+        <h2>3. チェックリスト</h2>
+        <ul>
+          <li>WSL内で <code>node -v</code>, <code>npm -v</code>, <code>git --version</code>, <code>docker version</code> が通るか？</li>
+          <li>Docker Desktop が "Engine running" か？</li>
+          <li>プロジェクトは <code>/home/&lt;user&gt;</code> に置かれているか？</li>
+          <li>SSHキーは WSL 内で作って GitHub に登録したか？</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+<script>
+  const toggleBtn = document.getElementById('toggleTheme');
+  function setTheme(mode){
+    if(mode==='dark'){ document.body.classList.add('dark'); }
+    else{ document.body.classList.remove('dark'); }
+    localStorage.setItem('wsl-theme', mode);
+  }
+  toggleBtn.addEventListener('click', ()=>{
+    const isDark = document.body.classList.toggle('dark');
+    localStorage.setItem('wsl-theme', isDark ? 'dark' : 'light');
+  });
+  // 初期テーマ
+  const saved = localStorage.getItem('wsl-theme');
+  if(saved==='dark'){ document.body.classList.add('dark'); }
+</script>
+</body>
+</html>

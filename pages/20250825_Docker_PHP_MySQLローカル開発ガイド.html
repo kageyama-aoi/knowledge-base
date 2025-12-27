@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>[Local Stack] Guide: Docker + PHP + MySQL ローカル開発</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root{
+      --bg:#f1f5f9; --fg:#1e293b; --muted:#64748b; --line:#e2e8f0;
+      --pri:#2563eb; --ok:#16a34a; --warn:#b45309; --err:#b91c1c;
+      --sidebar-bg:#ffffff; --sidebar-width:280px; --header-height:60px;
+    }
+    html[data-theme="dark"]{
+      --bg: #0f172a;            /* メイン背景: 暗いグレー */
+      --fg: #d1d5db;            /* 文字: 明るいグレー */
+      --muted: #9ca3af;         /* 補助文字 */
+      --line: #374151;          /* 罫線 */
+      --pri: #60a5fa;           /* プライマリ */
+      --ok: #34d399;            /* OK */
+      --warn: #f59e0b;          /* 警告 */
+      --err: #f87171;           /* エラー */
+      --sidebar-bg: #1f293b;    /* サイドバー背景: メインより少し明るい */
+    }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; line-height:1.7; margin:0; color:var(--fg); background:var(--bg); transition: background-color .2s, color .2s;}
+    header{height:var(--header-height); background:var(--sidebar-bg); border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 1rem; position:sticky; top:0; z-index:10;}
+    .brand{display:flex; align-items:center; gap:.8rem; flex:1; min-width:0;}
+    .sidebar-toggle{background:transparent; border:1px solid var(--line); border-radius:8px; padding:.4rem .6rem; cursor:pointer; display:inline-flex; align-items:center; gap:.5rem; font-size:.9rem;}
+    .sidebar-toggle-icon{font-size:1.2em; line-height:1; width:1.2em; text-align:center; font-weight:bold;}
+    h1{font-size:clamp(1.1rem, 2.5vw, 1.3rem); margin:0; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+    .theme-toggle{ margin-left: auto; }
+    .switch{display:inline-flex; align-items:center; gap:.5rem; padding:.2rem; border:1px solid var(--line); border-radius:999px; background:var(--bg);}
+    .switch span{font-size:.9rem; line-height:1; padding:0 .2rem;}
+    .switch input{appearance:none; width:38px; height:20px; border-radius:999px; background:var(--muted); position:relative; outline:none; cursor:pointer; transition: background-color .2s;}
+    .switch input:checked{background:var(--pri)}
+    .switch input:after{content:""; position:absolute; width:16px; height:16px; background:var(--sidebar-bg); border-radius:50%; top:2px; left:2px; transition:all .2s ease-in-out;}
+    .switch input:checked:after{transform:translateX(18px);}
+
+    .layout{display:grid; grid-template-columns:var(--sidebar-width) 1fr; transition:grid-template-columns .2s ease;}
+    .layout.sidebar-collapsed{grid-template-columns:0 1fr;}
+
+    nav.sidebar{background:var(--sidebar-bg); border-right:1px solid var(--line); padding:1rem; overflow:auto; height:calc(100vh - var(--header-height)); position:sticky; top:var(--header-height); transition:padding .2s ease, opacity .2s ease; white-space:nowrap;}
+    .layout.sidebar-collapsed nav.sidebar{padding-left:0; padding-right:0; opacity:0; overflow-x:hidden;}
+    .toc-title{font-weight:700; font-size:1rem; margin:.2rem 0 .8rem;}
+    .toc ol{list-style:none; padding:0; margin:0;}
+    .toc li a{display:block; padding:.4rem .6rem; border-radius:6px; text-decoration:none; color:var(--muted); font-size:.9rem; border-left:3px solid transparent; transition: background-color .2s, color .2s;}
+    .toc li a:hover{background:color-mix(in oklab, var(--line) 40%, transparent);}
+    .toc li a.active{font-weight:600; color:var(--pri); border-left-color:var(--pri); background:color-mix(in oklab, var(--pri) 15%, transparent);}
+
+    main{padding:1.5rem 2rem; max-width:960px;}
+    h2{font-size:1.8rem; margin:2.5rem 0 1rem; border-bottom:1px solid var(--line); padding-bottom:.5rem; scroll-margin-top: calc(var(--header-height) + 1rem);}
+    h3{font-size:1.25rem; margin:1.5rem 0 .6rem;}
+    p,li{font-size:1rem;}
+    a{color:var(--pri);} a:hover{text-decoration:none;}
+    hr{border:none; border-top:1px solid var(--line); margin:2rem 0;}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.9em; background:color-mix(in oklab, var(--fg) 8%, transparent); padding:.2em .4em; border-radius:4px;}
+    /* pre の背景は highlight.js のテーマに合わせ、padding は中の code タグに任せる */
+    pre{background:#282c34; border-radius:10px; overflow:auto; max-height:400px;}
+    pre code{background:transparent; padding:0; border-radius:0;}
+    /* highlight.js が適用するスタイル。デフォルトのpaddingを明示 */
+    pre code.hljs { padding: 1em; }
+
+    .code-block{position:relative;margin:1em 0}
+    /* Mermaid.js 用のスタイル */
+    .mermaid {
+      background-color: var(--sidebar-bg); border-radius: 10px; padding: 1rem; text-align: center;
+      transition: background-color .2s;
+    }
+    /* MermaidのテーマをCSS変数で上書き */
+    .mermaid .node { fill: var(--bg); stroke: var(--pri); stroke-width: 2px; }
+    .mermaid .node .nodeLabel { color: var(--fg); }
+    .mermaid .container { fill: var(--sidebar-bg); stroke: var(--line); }
+    .mermaid .container .nodeLabel { color: var(--fg); }
+    .mermaid .file { fill: var(--bg); stroke: var(--line); stroke-dasharray: 5 5; }
+    .mermaid .file .nodeLabel { color: var(--muted); }
+    .mermaid .volume { fill: var(--bg); stroke: var(--line); stroke-dasharray: 2 2; }
+    .mermaid .volume .nodeLabel { color: var(--muted); }
+    /* 矢印のテキスト背景 */
+    .mermaid .edgeLabel {
+      background-color: var(--sidebar-bg) !important;
+      color: var(--fg);
+    }
+    .code-block pre{margin:0}
+    .copy-btn{
+      position:absolute; top:.5rem; right:.5rem; z-index:1;
+      background:var(--sidebar-bg); border:1px solid var(--line); color:var(--muted);
+      border-radius:6px; padding:.2rem .5rem; cursor:pointer; font-size:.8rem;
+      transition:all .2s ease;
+    }
+    .copy-btn:hover{background:var(--pri); color:var(--sidebar-bg);}
+    .copy-btn.copied{background:var(--ok); color:var(--sidebar-bg); border-color:var(--ok);}
+
+    .note, .good, .warn, .bad{padding:.8rem 1rem; border-radius:8px; margin:1em 0; border-left:4px solid; background: var(--bg-soft, transparent);}
+    .note{border-color:var(--pri); background-color: color-mix(in oklab, var(--pri) 15%, transparent);}
+    .good{border-color:var(--ok); background-color: color-mix(in oklab, var(--ok) 15%, transparent);}
+    .warn{border-color:var(--warn); background-color: color-mix(in oklab, var(--warn) 15%, transparent);}
+    .bad{border-color:var(--err); background-color: color-mix(in oklab, var(--err) 15%, transparent);}
+
+    .grid{display:grid; gap:1rem;}
+    .two{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+    .kbd{display:inline-block; padding:.2em .5em; border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; background:color-mix(in oklab, var(--line) 50%, var(--bg)); font-size:.9em;}
+    table{border-collapse:collapse; width:100%; margin:1em 0; font-size:.95rem;}
+    th,td{border:1px solid var(--line); padding:.6rem .8rem; vertical-align:top;}
+    th{background:color-mix(in oklab, var(--line) 30%, var(--sidebar-bg)); text-align:left; font-weight:600;}
+    .small{font-size:.9em; color:var(--muted);}
+
+    @media (max-width: 900px){
+      .layout{grid-template-columns:1fr;}
+      .layout.sidebar-collapsed{grid-template-columns:1fr;}
+      nav.sidebar{position:fixed; inset:var(--header-height) 0 auto 0; height:calc(100vh - var(--header-height)); transform:translateX(-100%); transition:transform .2s ease; z-index:20;}
+      nav.sidebar.open{transform:translateX(0);}
+      main{padding:1rem;}
+      h2{font-size:1.5rem;}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <button class="sidebar-toggle" aria-controls="sidebar" aria-label="目次の開閉">
+        <span class="sidebar-toggle-icon"></span> 目次
+      </button>
+      <h1>Docker + PHP + MySQL ローカル開発ガイド</h1>
+    </div>
+    <div class="theme-toggle">
+      <label class="switch" title="ダークモード切り替え">
+        <span>☀️</span>
+        <input id="themeSwitch" type="checkbox"/>
+        <span>🌙</span>
+      </label>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav id="sidebar" class="sidebar">
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ol>
+          <li><a href="#structure">1. フォルダ構成</a></li>
+          <li><a href="#why-structure">2. この構成の利点</a></li>
+          <li><a href="#architecture">3. アプリケーション構成図</a></li>
+          <li><a href="#env">4. .env（環境変数）</a></li>
+          <li><a href="#compose">5. docker-compose.yml（設計図）</a></li>
+          <li><a href="#discovery">6. コラム：コンテナ間のDB接続の仕組み</a></li>
+          <li><a href="#dockerfile">7. web/Dockerfile（PHP環境）</a></li>
+          <li><a href="#phpmyadmin-config">8. phpmyadmin/config.inc.php（設定）</a></li>
+          <li><a href="#phpini">9. web/php.ini（PHP設定）</a></li>
+          <li><a href="#sql">10. db/init/001_init.sql（初期データ）</a></li>
+          <li><a href="#indexphp">11. public/index.php（CRUDアプリ）</a></li>
+          <li><a href="#run">12. 起動・確認・停止の手順</a></li>
+          <li><a href="#trouble">13. トラブルシューティング</a></li>
+          <li><a href="#concepts">14. 用語集</a></li>
+          <li><a href="#next">15. 次のステップ</a></li>
+        </ol>
+      </div>
+    </nav>
+
+    <main>
+      <p class="small">目的：ローカルで最小構成の Webアプリ（PHP）をDockerで立ち上げ、MySQL と接続して CRUD（追加・編集・削除）まで確認する。</p>
+
+      <h2 id="structure">1. フォルダ構成</h2>
+      <div class="code-block">
+        <button type="button" class="copy-btn" title="コピー">📋</button>
+        <pre><code class="language-plaintext">my-local-stack/
+├─ docker-compose.yml
+├─ .env
+├─ db/
+│  └─ init/
+│     └─ 001_init.sql
+├─ web/
+│  ├─ Dockerfile
+│  └─ php.ini
+├─ phpmyadmin/
+│  └─ config.inc.php
+└─ public/
+   └─ index.php</code></pre>
+      </div>
+
+      <h2 id="why-structure">2. この構成の利点</h2>
+      <ul>
+        <li><strong>役割分離：</strong> 設計図（compose）・環境差分（.env）・DB初期化（db/init）・アプリ（public）・言語設定（web）を分けて迷子を防ぐ。</li>
+        <li><strong>再現性：</strong> <kbd class="kbd">docker compose up -d</kbd> で誰のPCでも同じ状態が起動。</li>
+        <li><strong>安全性：</strong> 公開範囲（public/）と非公開設定（.env, php.ini 等）を分離。</li>
+      </ul>
+      <div class="good"><strong>ポイント：</strong> 後でテストやログを追加しても崩れにくい「器」になっています。</div>
+
+      <h2 id="architecture">3. アプリケーション構成図</h2>
+      <pre class="mermaid">
+        graph TD
+            subgraph "ユーザーPC (localhost)"
+                A["ブラウザ"]:::node
+            end
+
+            subgraph "Docker内部ネットワーク"
+                B["web (Apache/PHP)"]:::container
+                C["phpmyadmin"]:::container
+                D["db (MySQL)"]:::container
+            end
+
+            subgraph "ホストPCのファイル / Volume"
+                F1["public/"]:::file
+                F2["web/php.ini"]:::file
+                F3["db/init/"]:::file
+                F4["phpmyadmin/config.inc.php"]:::file
+                V1["db_data (Volume)"]:::volume
+            end
+
+            A -- ":${WEB_PORT}" --> B
+            A -- ":${PHPMYADMIN_PORT}" --> C
+            B -- "TCP接続 (ホスト名: db)" --> D
+            C -- "TCP接続 (ホスト名: db)" --> D
+
+            B -.-> F1
+            B -.-> F2
+            D -.-> F3
+            C -.-> F4
+            D -.-> V1
+      </pre>
+      <div class="note">この図は、各コンテナがどのように連携し、ホストPC上のどのファイルと同期しているかを示しています。矢印はデータの流れや依存関係を表します。<code>${...}</code> は <code>.env</code> ファイルの値に置き換えられます。</div>
+
+      <h2 id="env">4. <code>.env</code>（環境変数）</h2>
+      <p>パスワードやポートなど、人や環境によって変えたい値を一か所に集約します。</p>
+      <div class="code-block">
+        <button type="button" class="copy-btn" title="コピー">📋</button>
+        <pre><code class="language-ini">MYSQL_DATABASE=myapp
+MYSQL_USER=myuser
+MYSQL_PASSWORD=mypassword
+MYSQL_ROOT_PASSWORD=rootpassword
+
+WEB_PORT=8080
+PHPMYADMIN_PORT=8081
+DB_PORT=3306
+      </code></pre>
+      </div>
+      <div class="note">compose から <code>${変数名}</code> で参照されます。Git には基本的にコミットしない想定（<code>.gitignore</code>）</div>
+
+      <h2 id="compose">5. <code>docker-compose.yml</code>（設計図）</h2>
+      <div class="code-block">
+        <button type="button" class="copy-btn" title="コピー">📋</button>
+        <pre><code class="language-yaml">services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: Asia/Tokyo
+    command: ["mysqld","--character-set-server=utf8mb4","--collation-server=utf8mb4_0900_ai_ci"]
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-hdb", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "${PHPMYADMIN_PORT}:80"
+    volumes:
+      - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php:ro
+    # Windows環境でのパーミッションエラー対策
+    command: >
+      sh -c "
+        echo '==> Changing permissions for config.inc.php...';
+        chmod 644 /etc/phpmyadmin/config.inc.php;
+        echo '==> Permissions after chmod:';
+        ls -l /etc/phpmyadmin/config.inc.php;
+        echo '==> Starting phpMyAdmin...';
+        /docker-entrypoint.sh apache2-foreground
+      "
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./public:/var/www/html
+      - ./web/php.ini:/usr/local/etc/php/php.ini:ro
+    environment:
+      DB_HOST: db
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_USER: ${MYSQL_USER}
+      DB_PASS: ${MYSQL_PASSWORD}
+      TZ: Asia/Tokyo
+    ports:
+      - "${WEB_PORT}:80"
+
+volumes:
+  db_data: {}
+      </code></pre>
+      </div>
+      <ul>
+        <li><strong>db：</strong> 初回起動時に <code>db/init</code> のSQLが自動実行。</li>
+        <li><strong>phpmyadmin：</strong> GUIでDB確認。</li>
+        <li><strong>web：</strong> PHP + Apache。<code>public/</code> をドキュメントルートにマウント。</li>
+        <li><strong>depends_on + healthcheck：</strong> DBが準備完了後に他が起動 → 安定。</li>
+      </ul>
+
+      <h2 id="discovery">6. コラム：コンテナ間のDB接続の仕組み</h2>
+      <p>なぜ<code>web</code>コンテナは、IPアドレスを知らないのに<code>db</code>という名前だけでMySQLに接続できるのでしょうか？<br>
+      これは、Docker Composeが提供する「<strong>仮想ネットワーク</strong>」と「<strong>サービスディスカバリ</strong>」という2つの強力な機能のおかげです。</p>
+      <ol>
+        <li>
+          <strong>専用の仮想ネットワークが作られる</strong><br>
+          <code>docker compose up</code>を実行すると、Composeファイルに定義されたサービス（<code>web</code>, <code>db</code>など）だけが参加できるプライベートなネットワークが自動で作成されます。このネットワーク内では、各コンテナは互いに<strong>TCP/IP通信</strong>が可能です。
+        </li>
+        <li>
+          <strong>サービス名がホスト名として使える（サービスディスカバリ）</strong><br>
+          このネットワークにはDocker内蔵のDNSサーバーが存在します。<code>web</code>コンテナが「<code>db</code>」というホスト名で通信しようとすると、このDNSが自動的に<code>db</code>コンテナの内部IPアドレスに変換（名前解決）してくれます。これにより、私たちはIPアドレスを意識することなく、サービス名で通信先を指定できます。
+        </li>
+        <li>
+          <strong>コンテナ間の直接通信</strong><br>
+          PHPコード（<code>new PDO("mysql:host=db;...")</code>）は、「<code>db</code>というホストの3306番ポート（MySQLの標準ポート）にTCPで接続せよ」という指示を出します。これはDockerネットワーク内で完結する直接的な通信です。
+        </li>
+      </ol>
+      <div class="good"><strong>結論：</strong>Dockerが裏側でネットワーク設定と名前解決を自動で行ってくれるため、私たちはサービス名を指定するだけで、簡単かつ安全にコンテナ間を接続できます。</div>
+      <div class="note"><strong>補足：</strong><code>docker-compose.yml</code>の<code>ports</code>設定（例: <code>"8080:80"</code>）は、ホストPC（外部）からコンテナへの通信を中継するためのものです。コンテナ同士の内部通信には影響しません。</div>
+
+      <h2 id="dockerfile">7. <code>web/Dockerfile</code>（PHP環境）</h2>
+      <div class="code-block">
+        <button type="button" class="copy-btn" title="コピー">📋</button>
+        <pre><code class="language-dockerfile">FROM php:8.2-apache
+
+RUN docker-php-ext-install pdo pdo_mysql
+RUN echo "ServerName localhost" &gt;&gt; /etc/apache2/apache2.conf \
+    &amp;&amp; a2enmod rewrite
+
+WORKDIR /var/www/html
+      </code></pre>
+      </div>
+      <div class="note"><strong>理由：</strong> MySQL接続には <code>pdo_mysql</code> が必須。将来のルーティングに <code>mod_rewrite</code> が便利。</div>
+
+      <h2 id="phpmyadmin-config">8. <code>phpmyadmin/config.inc.php</code>（設定）</h2>
+      <p>phpMyAdminのセキュリティを高め、DBコンテナとの通信を暗号化（SSL化）するための設定ファイルです。</p>
+      <div class="code-block">
+        <button type="button" class="copy-btn" title="コピー">📋</button>
+        <pre><code class="language-php">&lt;?php
+declare(strict_types=1);
+
+// クッキー認証の暗号化キー。32文字以上のランダムな文字列を設定します。
+$cfg['blowfish_secret'] = 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6';
+
+$i = 1;
+$cfg['Servers'][$i]['host'] = 'db';
+$cfg['Servers'][$i]['compress'] = false;
+$cfg['Servers'][$i]['AllowNoPassword'] = false;
+
+// DBコンテナとの通信をSSL化
+$cfg['Servers'][$i]['ssl'] = true;
+$cfg['Servers'][$i]['ssl_verify'] = false; // ローカルなので証明書検証は無効
+      </code></pre>
+      </div>
+      <div class="note">この設定により、phpMyAdminのログイン画面で「SSLは使用されていません」という警告が表示されなくなります。</div>
+
+      <h2 id="phpini">9. <code>web/php.ini</code>（PHP設定）</h2>
+      <div class="code-block">
+        <button type="button" class="copy-btn" title="コピー">📋</button>
+        <pre><code class="language-ini">display_errors=On
+error_reporting=E_ALL
+date.timezone=Asia/Tokyo
+upload_max_filesize=32M
+post_max_size=32M
+memory_limit=256M
+      </code></pre>
+      </div>
+      <div class="warn"><strong>注意：</strong> 本番では <code>display_errors=Off</code> が基本。開発ではエラー見える化が学習効率↑</div>
+
+      <h2 id="sql">10. <code>db/init/001_init.sql</code>（初期データ）</h2>
+      <div class="code-block">
+        <button type="button" class="copy-btn" title="コピー">📋</button>
+        <pre><code class="language-sql">CREATE TABLE IF NOT EXISTS items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  price INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO items (name, price) VALUES
+  ('Apple', 120),
+  ('Banana', 90),
+  ('Orange', 150);
+      </code></pre>
+      </div>
+      <div class="note">ファイル名を <code>001_</code> など連番にすると、複数SQLを順序実行できます。</div>
+
+      <h2 id="indexphp">11. <code>public/index.php</code>（CRUDアプリ）</h2>
+      <p>学習しやすいよう、一覧・追加・編集・削除を1ファイルに収めた最小実装です（PDO＋プリペアド、簡易CSRF、フラッシュメッセージ）。</p>
+      <div class="code-block">
+        <button type="button" class="copy-btn" title="コピー">📋</button>
+        <pre><code class="language-php">&lt;?php
+declare(strict_types=1);
+session_start();
+
+$host = getenv('DB_HOST') ?: 'db';
+$db   = getenv('DB_NAME') ?: 'myapp';
+$user = getenv('DB_USER') ?: 'myuser';
+$pass = getenv('DB_PASS') ?: 'mypassword';
+
+function h(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
+function redirect(string $p): never { header("Location: {$p}"); exit; }
+function flash(string $k, ?string $v=null) {
+  if ($v === null) { $m = $_SESSION['flash'][$k] ?? null; unset($_SESSION['flash'][$k]); return $m; }
+  $_SESSION['flash'][$k] = $v;
+}
+if (empty($_SESSION['csrf'])) { $_SESSION['csrf'] = bin2hex(random_bytes(16)); }
+function csrf_field(): string { return '&lt;input type="hidden" name="csrf" value="'.h($_SESSION['csrf']).'"&gt;'; }
+function assert_csrf(): void {
+  if (!isset($_POST['csrf']) || !hash_equals($_SESSION['csrf'] ?? '', $_POST['csrf'])) {
+    http_response_code(400); echo '&lt;h1&gt;Bad Request&lt;/h1&gt;&lt;p&gt;CSRF token mismatch.&lt;/p&gt;'; exit;
+  }
+}
+
+try {
+  $pdo = new PDO("mysql:host={$host};dbname={$db};charset=utf8mb4", $user, $pass, [
+    PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE =&gt; PDO::FETCH_ASSOC,
+  ]);
+} catch (Throwable $e) {
+  http_response_code(500);
+  echo "&lt;h1&gt;DB接続に失敗しました&lt;/h1&gt;&lt;pre&gt;".h($e-&gt;getMessage())."&lt;/pre&gt;"; exit;
+}
+
+$action = $_GET['action'] ?? 'index';
+
+if ($action === 'store' &amp;&amp; $_SERVER['REQUEST_METHOD'] === 'POST') {
+  assert_csrf();
+  $name = trim($_POST['name'] ?? '');
+  $price = trim($_POST['price'] ?? '');
+  $errors = [];
+  if ($name === '') $errors[] = '名前は必須です';
+  if ($price === '' || !ctype_digit($price) || (int)$price &lt; 0) $errors[] = '価格は0以上の整数で入力してください';
+  if ($errors) { flash('errors', implode('&lt;br&gt;', array_map('h', $errors))); flash('old', json_encode(['name'=>$name,'price'=>$price])); redirect('./?action=create'); }
+  $stmt = $pdo-&gt;prepare('INSERT INTO items(name, price) VALUES(:name, :price)');
+  $stmt-&gt;execute([':name'=>$name, ':price'=>(int)$price]);
+  flash('success', '登録しました'); redirect('./');
+
+} elseif ($action === 'update' &amp;&amp; $_SERVER['REQUEST_METHOD'] === 'POST') {
+  assert_csrf();
+  $id = (int)($_GET['id'] ?? 0);
+  $name = trim($_POST['name'] ?? '');
+  $price = trim($_POST['price'] ?? '');
+  $errors = [];
+  if ($id &lt;= 0) $errors[] = '不正なIDです';
+  if ($name === '') $errors[] = '名前は必須です';
+  if ($price === '' || !ctype_digit($price) || (int)$price &lt; 0) $errors[] = '価格は0以上の整数で入力してください';
+  if ($errors) { flash('errors', implode('&lt;br&gt;', array_map('h', $errors))); redirect('./?action=edit&amp;id='.$id); }
+  $stmt = $pdo-&gt;prepare('UPDATE items SET name=:name, price=:price WHERE id=:id');
+  $stmt-&gt;execute([':name'=>$name, ':price'=>(int)$price, ':id'=>$id]);
+  flash('success', '更新しました'); redirect('./');
+
+} elseif ($action === 'destroy' &amp;&amp; $_SERVER['REQUEST_METHOD'] === 'POST') {
+  assert_csrf();
+  $id = (int)($_GET['id'] ?? 0);
+  if ($id &gt; 0) { $stmt = $pdo-&gt;prepare('DELETE FROM items WHERE id=:id'); $stmt-&gt;execute([':id'=>$id]); }
+  flash('success', '削除しました'); redirect('./');
+
+} else {
+  $success = flash('success'); $errors = flash('errors'); $content = '';
+  if ($action === 'create') {
+    $old = json_decode(flash('old') ?? '{}', true);
+    $content .= '&lt;h2&gt;商品を追加&lt;/h2&gt;'.($errors ? '&lt;div class="alert alert-error"&gt;'.$errors.'&lt;/div&gt;':'' ).'
+      &lt;form method="post" action="?action=store"&gt;'.csrf_field().'
+        &lt;div class="field"&gt;&lt;label&gt;名前&lt;/label&gt;&lt;input type="text" name="name" value="'.h($old['name']??'').'" required&gt;&lt;/div&gt;
+        &lt;div class="field"&gt;&lt;label&gt;価格（整数）&lt;/label&gt;&lt;input type="number" name="price" min="0" step="1" value="'.h($old['price']??'').'" required&gt;&lt;/div&gt;
+        &lt;div class="actions"&gt;&lt;button type="submit"&gt;登録する&lt;/button&gt; &lt;a class="btn" href="./"&gt;戻る&lt;/a&gt;&lt;/div&gt;
+      &lt;/form&gt;';
+  } elseif ($action === 'edit') {
+    $id = (int)($_GET['id'] ?? 0);
+    $stmt = $pdo-&gt;prepare('SELECT * FROM items WHERE id=:id'); $stmt-&gt;execute([':id'=>$id]); $item = $stmt-&gt;fetch();
+    if (!$item) { http_response_code(404); echo '&lt;h1&gt;Not Found&lt;/h1&gt;'; exit; }
+    $content .= '&lt;h2&gt;ID #'.(int)$item['id'].' を編集&lt;/h2&gt;'.($errors ? '&lt;div class="alert alert-error"&gt;'.$errors.'&lt;/div&gt;':'' ).'
+      &lt;form method="post" action="?action=update&amp;id='.(int)$item['id'].'"&gt;'.csrf_field().'
+        &lt;div class="field"&gt;&lt;label&gt;名前&lt;/label&gt;&lt;input type="text" name="name" value="'.h($item['name']).'" required&gt;&lt;/div&gt;
+        &lt;div class="field"&gt;&lt;label&gt;価格（整数）&lt;/label&gt;&lt;input type="number" name="price" min="0" step="1" value="'.h((string)$item['price']).'" required&gt;&lt;/div&gt;
+        &lt;div class="actions"&gt;&lt;button type="submit"&gt;更新する&lt;/button&gt; &lt;a class="btn" href="./"&gt;戻る&lt;/a&gt;&lt;/div&gt;
+      &lt;/form&gt;';
+  } else {
+    $stmt = $pdo-&gt;query('SELECT id, name, price, created_at FROM items ORDER BY id DESC'); $rows = $stmt-&gt;fetchAll();
+    $content .= '&lt;div class="toolbar"&gt;&lt;a class="btn primary" href="?action=create"&gt;＋ 追加&lt;/a&gt;&lt;/div&gt;'
+      .($success ? '&lt;div class="alert alert-ok"&gt;'.$success.'&lt;/div&gt;':'' ).'
+      &lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;ID&lt;/th&gt;&lt;th&gt;名前&lt;/th&gt;&lt;th&gt;価格&lt;/th&gt;&lt;th&gt;作成日時&lt;/th&gt;&lt;th&gt;操作&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;';
+    foreach ($rows as $r) {
+      $content .= '&lt;tr&gt;&lt;td&gt;'.(int)$r['id'].'&lt;/td&gt;&lt;td&gt;'.h($r['name']).'&lt;/td&gt;&lt;td&gt;'.(int)$r['price'].'&lt;/td&gt;&lt;td&gt;'.h((string)$r['created_at']).'&lt;/td&gt;
+        &lt;td class="ops"&gt;&lt;a class="btn" href="?action=edit&amp;id='.(int)$r['id'].'"&gt;編集&lt;/a&gt;
+        &lt;form method="post" action="?action=destroy&amp;id='.(int)$r['id'].'" onsubmit="return confirm(\'本当に削除しますか？\');" style="display:inline"&gt;'.csrf_field().'&lt;button type="submit" class="btn danger"&gt;削除&lt;/button&gt;&lt;/form&gt;&lt;/td&gt;&lt;/tr&gt;';
+    }
+    if (!$rows) { $content .= '&lt;tr&gt;&lt;td colspan="5" style="text-align:center; color:#777"&gt;データがありません&lt;/td&gt;&lt;/tr&gt;'; }
+    $content .= '&lt;/tbody&gt;&lt;/table&gt;';
+  }
+
+  echo '&lt;!doctype html&gt;&lt;html lang="ja"&gt;&lt;meta charset="utf-8"&gt;&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;title&gt;Items CRUD（PHP → MySQL）&lt;/title&gt;
+  &lt;style&gt;:root{--bg:#fff;--fg:#111;--muted:#666;--line:#e5e7eb;--pri:#2563eb}
+  *{box-sizing:border-box} body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:24px;color:var(--fg);background:var(--bg);line-height:1.6}
+  h1{font-size:22px;margin:0 0 12px} h2{font-size:18px;margin:12px 0}
+  table{border-collapse:collapse;width:100%;max-width:900px;margin-top:12px} th,td{border:1px solid var(--line);padding:10px} th{background:#f8fafc;text-align:left}
+  .toolbar{margin:12px 0} .btn{display:inline-block;padding:.45em .8em;border:1px solid var(--line);border-radius:.5em;text-decoration:none;color:var(--fg);background:#f8fafc}
+  .btn.primary{background:#2563eb;border-color:#2563eb;color:#fff} .btn.danger{background:#fee2e2;border-color:#fecaca;color:#b91c1c}
+  .actions{margin-top:12px} .field{margin:8px 0;max-width:420px} input[type=text],input[type=number]{width:100%;padding:.5em;border:1px solid var(--line);border-radius:.4em}
+  .alert{margin:10px 0;padding:.6em .8em;border-radius:.5em} .alert-ok{background:#e6ffed;border:1px solid #b7ebc6} .alert-error{background:#fee2e2;border:1px solid #fecaca}
+  .ops form{display:inline} .meta{color:var(--muted);font-size:12px;margin-top:4px} .wrap{max-width:960px} header{display:flex;gap:8px;margin-bottom:10px;align-items:end}
+  header .meta{margin-left:auto;color:#666;font-size:12px}&lt;/style&gt;
+  &lt;div class="wrap"&gt;&lt;header&gt;&lt;h1&gt;Items CRUD（PHP → MySQL）&lt;/h1&gt;&lt;div class="meta"&gt;接続先：'.h("$host / $db / $user").'&lt;/div&gt;&lt;/header&gt;'.$content.'&lt;/div&gt;';
+}
+      </code></pre>
+      </div>
+
+      <h2 id="run">12. 起動・確認・停止の手順</h2>
+      <ol>
+        <li>上のフォルダ構成でファイルを配置</li>
+        <li><kbd class="kbd">cd my-local-stack</kbd></li>
+        <li><kbd class="kbd">docker compose build</kbd>（初回／Dockerfile変更時）</li>
+        <li><kbd class="kbd">docker compose up -d</kbd>（バックグラウンド起動）</li>
+      </ol>
+      <div class="grid two">
+        <div class="good"><strong>Webアプリ：</strong> <code>http://localhost:8080</code><br>一覧表示 → 「＋追加」→ 編集・削除を確認</div>
+        <div class="note"><strong>phpMyAdmin：</strong> <code>http://localhost:8081</code><br>サーバー：<code>db</code><br>ユーザー：<code>myuser</code><br>パスワード：<code>mypassword</code><br>（<code>.env</code>で設定した値で手動ログイン）</div>
+      </div>
+      <p>停止：<kbd class="kbd">docker compose down</kbd><br>DB初期化からやり直す：<kbd class="kbd">docker compose down -v</kbd> → <kbd class="kbd">up -d</kbd></p>
+
+      <h2 id="trouble">13. トラブルシューティング</h2>
+      <table>
+        <thead><tr><th>症状</th><th>確認ポイント</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Webは開くが「DB接続に失敗」</td>
+            <td>
+              <ul>
+                <li><code>.env</code>の<code>MYSQL_*</code>と<code>web</code>の<code>DB_*</code>が一致しているか</li>
+                <li><kbd class="kbd">docker compose logs db</kbd> でMySQL起動失敗がないか</li>
+                <li>ポート<code>3306</code>が他のMySQLで占有されていないか（必要なら<code>DB_PORT</code>変更）</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td>phpMyAdminで「サーバーが見つからない」</td>
+            <td>
+              <ul>
+                <li><code>PMA_HOST: db</code> になっているか（サービス名に合わせる）</li>
+                <li><code>docker ps</code>でDBが<em>healthy</em>か</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td>初期SQLが流れていない</td>
+            <td>
+              <ul>
+                <li>SQLは<strong>初回起動時のみ</strong>自動実行。やり直すときは <kbd class="kbd">down -v</kbd> → <kbd class="kbd">up -d</kbd></li>
+                <li>ファイル拡張子が<code>.sql</code>、配置が<code>db/init/</code>かを確認</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td>phpMyAdminで「パーミッションが正しくありません」エラー</td>
+            <td>
+              <ul>
+                <li><strong>原因：</strong> Windows環境でDockerを使うと、設定ファイル(<code>config.inc.php</code>)が「誰でも書き込み可能」と誤認されるため。</li>
+                <li><strong>解決策A（推奨）：</strong> <code>docker-compose.yml</code>の<code>phpmyadmin</code>サービスに<code>command</code>を追加し、起動時にパーミッションを強制変更する。（このガイドで採用済みの方法）</li>
+                <li><strong>解決策B（Windows限定）：</strong> <code>config.inc.php</code>のプロパティ → セキュリティ → 詳細設定で「継承の無効化」を行う。</li>
+                <li><strong>重要：</strong> 対策後は<code>docker compose down -v</code>で環境を完全にリセットしてから再起動すること。</li>
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="concepts">14. 用語集</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 25%;">用語</th>
+            <th>説明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>PDO (PHP Data Objects)</strong></td><td>PHPからデータベースへ接続するための共通インターフェース。これを使うと、MySQLからPostgreSQLなどへDBを変更しても、コードの大部分を書き換えずに済みます。</td></tr>
+          <tr><td><strong>プリペアドステートメント</strong></td><td>SQL文の「雛形」を先にDBに送り、後から値を埋め込む方式。SQLインジェクション攻撃を防ぐための基本的な対策です。</td></tr>
+          <tr><td><strong>CSRFトークン</strong></td><td>悪意のある外部サイトから、意図しないリクエスト（例: 勝手に退会処理）を送信されるのを防ぐための「秘密の合言葉」。フォームに埋め込み、サーバー側で検証します。</td></tr>
+          <tr><td><strong>フラッシュメッセージ</strong></td><td>「登録しました」などの通知を、ページをまたいで「1回だけ」表示する仕組み。セッションを利用して実現します。</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="next">15. 次のステップ</h2>
+      <ul>
+        <li>ファイル分割：<code>create.php</code> / <code>edit.php</code> / <code>delete.php</code> へ分けて可読性UP</li>
+        <li>検索・ページング、ソートの追加</li>
+        <li>Xdebugでブレークポイント学習（<code>php.ini</code>とVS Code設定）</li>
+        <li>Nginx + PHP-FPM 構成への変更（実運用に近づける）</li>
+      </ul>
+
+      <hr>
+      <p class="small">© Your Local Notes — この資料はローカル学習用。パスワードなど秘匿情報のコミットは避けましょう。</p>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const layout = document.querySelector('.layout');
+      const sidebar = document.getElementById('sidebar');
+      const toggleBtn = document.querySelector('.sidebar-toggle');
+      const toggleIcon = toggleBtn.querySelector('.sidebar-toggle-icon');
+
+      function updateToggleState() {
+        let isExpanded;
+        if (window.innerWidth > 900) {
+          isExpanded = !layout.classList.contains('sidebar-collapsed');
+          toggleIcon.textContent = isExpanded ? '«' : '☰';
+        } else {
+          isExpanded = sidebar.classList.contains('open');
+          toggleIcon.textContent = isExpanded ? '✕' : '☰';
+        }
+        toggleBtn.setAttribute('aria-expanded', String(isExpanded));
+      }
+
+      toggleBtn.addEventListener('click', () => {
+        if (window.innerWidth > 900) {
+          layout.classList.toggle('sidebar-collapsed');
+        } else {
+          sidebar.classList.toggle('open');
+        }
+        updateToggleState();
+      });
+
+      // --- Scroll Spy ---
+      const sections = document.querySelectorAll('main h2[id]');
+      const tocLinks = document.querySelectorAll('.toc a');
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            tocLinks.forEach(link => {
+              link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+            });
+          }
+        });
+      }, { rootMargin: "-50% 0px -50% 0px" });
+
+      sections.forEach(section => observer.observe(section));
+
+      // --- Smooth Scroll & Close Sidebar on Mobile ---
+      tocLinks.forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          const targetId = link.getAttribute('href');
+          document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+
+          if (window.innerWidth <= 900 && sidebar.classList.contains('open')) {
+            sidebar.classList.remove('open');
+            updateToggleState();
+          }
+        });
+      });
+
+      // --- Copy Button Logic ---
+      document.addEventListener('click', e => {
+        const copyBtn = e.target.closest('.copy-btn');
+        if (!copyBtn) return;
+
+        const block = copyBtn.closest('.code-block');
+        const pre = block?.querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.textContent).then(() => {
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = '✔ Copied';
+            copyBtn.classList.add('copied');
+            setTimeout(() => {
+              copyBtn.textContent = originalText;
+              copyBtn.classList.remove('copied');
+            }, 1500);
+          }).catch(err => { console.error('コピーに失敗しました', err); alert('コピーに失敗しました。'); });
+        }
+      });
+
+      // --- Theme Toggle Logic ---
+      const themeSwitch = document.getElementById('themeSwitch');
+      function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+      function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+          applyTheme(savedTheme);
+          themeSwitch.checked = (savedTheme === 'dark');
+        } else {
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const osTheme = prefersDark ? 'dark' : 'light';
+          applyTheme(osTheme);
+          themeSwitch.checked = prefersDark;
+        }
+      }
+      themeSwitch.addEventListener('change', () => {
+        const theme = themeSwitch.checked ? 'dark' : 'light';
+        applyTheme(theme);
+        localStorage.setItem('theme', theme);
+      });
+
+      // --- Init ---
+      updateToggleState();
+      window.addEventListener('resize', updateToggleState);
+      if (window.hljs) {
+        window.hljs.highlightAll();
+      }
+      mermaid.initialize({ startOnLoad: true, theme: 'base' });
+      initTheme();
+    });
+  </script>
+</body>
+</html>

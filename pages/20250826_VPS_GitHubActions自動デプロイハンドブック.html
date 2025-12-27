@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ConoHa VPS × Docker × GitHub Actions 自動デプロイ実践ハンドブック</title>
+<meta name="description" content="ConoHa VPS上にDockerでWebアプリケーション環境を構築し、GitHub Actionsを使ってGitリポジトリへのpushをトリガーに自動でデプロイするまでの全手順を解説します。" />
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #111827; --panel: #0b1220; --paper: #0f172a; --fg: #e5e7eb; --muted: #94a3b8;
+    --brand: #60a5fa; --accent: #34d399; --danger: #f87171; --code-bg: #0b1020; --border: #1f2937; --shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  [data-theme="light"] {
+    --bg: #f8fafc; --panel: #ffffff; --paper: #ffffff; --fg: #0f172a; --muted: #475569;
+    --brand: #2563eb; --accent: #059669; --danger: #dc2626; --code-bg: #0b1220; --border: #e2e8f0; --shadow: 0 2px 10px rgba(2,6,23,.06);
+  }
+  * { box-sizing: border-box; } html, body { height: 100%; } body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif; background: var(--bg); color: var(--fg);}
+  .layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  aside { background: var(--panel); border-right: 1px solid var(--border); padding: 1rem; position: sticky; top: 0; height: 100vh; overflow: auto; }
+  main { min-width: 0; }
+  header.top { position: sticky; top: 0; z-index: 20; padding: .8rem 1rem; background: var(--paper); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  header .title { font-weight: 700; letter-spacing: .2px; }
+  .chip { font-size: .85rem; padding: .15rem .5rem; border: 1px solid var(--border); border-radius: 999px; color: var(--muted);}
+  .container { max-width: 980px; margin: 0 auto; padding: 1rem clamp(1rem, 3vw, 2rem); }
+  section { background: var(--paper); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 1.2rem; margin: 1rem 0 1.5rem;}
+  section h2 { margin-top: .2rem; } .muted { color: var(--muted); } h1, h2, h3 { scroll-margin-top: 80px; } a { color: var(--brand); text-decoration: none; } a:hover { text-decoration: underline; }
+  nav.toc h3 { font-size: 1rem; margin: .2rem 0 .6rem; color: var(--muted);}
+  nav.toc a { display: block; padding: .4rem .4rem; margin: .1rem 0; border-radius: 8px; color: var(--fg);}
+  nav.toc a.active, nav.toc a:hover { background: rgba(96,165,250,.15);}
+  pre { background: var(--code-bg); color: #e2e8f0; padding: 1rem; border-radius: 12px; overflow: auto; border: 1px solid #0b2942;}
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace; font-size: .9rem; }
+  .codebox { position: relative; } .copy { position: absolute; top: 8px; right: 8px; background: rgba(2,6,23,.4); color: #e2e8f0; border: 1px solid rgba(226,232,240,.2); border-radius: 8px; padding: .25rem .5rem; cursor: pointer;}
+  .copy.ok { background: rgba(34,197,94,.3);}
+  .callout { border-left: 4px solid var(--brand); padding: .6rem .8rem; background: rgba(96,165,250,.12); border-radius: 10px;}
+  .callout.warn { border-left-color: var(--danger); background: rgba(248,113,113,.15);}
+  .pill { border: 1px solid var(--border); border-radius: 999px; padding: .1rem .5rem; margin-right: .35rem; font-size: .8rem; color: var(--muted);}
+  footer { color: var(--muted); text-align: center; padding: 2rem 1rem 3rem; }
+  .kvs { display:grid; grid-template-columns: 160px 1fr; gap:.4rem 1rem; } .kvs div:nth-child(odd) { color: var(--muted);}
+  .grid-2 { display:grid; grid-template-columns: 1fr; gap: 1rem; } @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+  ol li, ul li { margin-bottom: .5rem; }
+  pre.mermaid { background: var(--paper); border: 1px solid var(--border); border-radius: 12px; text-align: center; padding: 1rem; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem">
+      <div style="font-weight:700">目次</div>
+      <button id="theme" class="chip" title="テーマ切替">Light / Dark</button>
+    </div>
+    <nav class="toc" id="toc"></nav>
+    <div style="margin-top:1rem" class="muted">作成: 2025-08-26</div>
+  </aside>
+
+  <main>
+    <header class="top">
+      <div>
+        <div class="title">ConoHa VPS × Docker × GitHub Actions 自動デプロイ実践ハンドブック</div>
+        <div class="muted" style="font-size:.9rem">Git Pushから始めるモダンなWebアプリケーション公開フロー</div>
+      </div>
+      <div>
+        <span class="pill">ConoHa</span>
+        <span class="pill">Docker</span>
+        <span class="pill">GitHub Actions</span>
+        <span class="pill">Caddy</span>
+        <span class="pill">CI/CD</span>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <section id="s1">
+        <h2>1. はじめに：この手順書のゴール</h2>
+        <p>このハンドブックは、ConoHa VPS上にDockerコンテナで動作するWebアプリケーションを構築し、GitHubリポジトリへのpushをトリガーとして本番環境へ自動デプロイ（CI/CD）するまでの一連の流れを解説します。</p>
+        <ul>
+          <li><strong>インフラ</strong>: ConoHa VPS (Ubuntu)</li>
+          <li><strong>コンテナ技術</strong>: Docker, Docker Compose</li>
+          <li><strong>Webサーバー</strong>: Caddy (自動HTTPS化リバースプロキシ)</li>
+          <li><strong>自動化</strong>: GitHub Actions</li>
+        </ul>
+        <div class="callout"><strong>最終目標:</strong> ローカルで開発したコードを <code>git push</code> するだけで、VPS上のアプリケーションが自動で最新版に更新される状態を作る。</div>
+        <h3>完成図</h3>
+<pre class="mermaid">
+graph TD
+    A[開発者] -- "1. git push" --> B[GitHubリポジトリ];
+    B -- "2. Pushを検知" --> C{GitHub Actions};
+    
+    subgraph ConoHa VPS
+        C -- "3. SSH経由でデプロイ" --> D[Docker環境];
+        subgraph D
+            E[Caddy<br>リバースプロキシ] --> F[Webアプリ<br>コンテナ];
+        end
+    end
+
+    G[ユーザー] -- "HTTPSアクセス" --> E;
+</pre>
+      </section>
+
+      <section id="s2">
+        <h2>2. Step 1: ConoHa VPSの初期設定</h2>
+        <ol>
+          <li><strong>VPS契約:</strong> ConoHaにログインし、サーバーを追加します。プランは一番安いもので十分です。イメージタイプは「OS」タブから「Ubuntu 22.04」を選択します。アプリケーションテンプレートは使いません。</li>
+          <li><strong>SSHキーの登録:</strong> 「SSH Key」の「＋」ボタンから、ローカルPCで生成したSSH公開鍵（<code>~/.ssh/id_rsa.pub</code>など）を登録します。</li>
+          <li><strong>サーバー作成:</strong> rootパスワードを設定し、サーバーを作成します。</li>
+          <li><strong>サーバーへSSH接続:</strong>
+            <pre><code># ssh root@[VPSのIPアドレス]</code></pre>
+          </li>
+          <li><strong>一般ユーザー作成とsudo権限付与:</strong>
+            <pre><code># デプロイ用のユーザーを作成 (例: appuser)
+adduser appuser
+
+# sudoグループに追加
+usermod -aG sudo appuser
+
+# 作成したユーザーに切り替え
+su - appuser</code></pre>
+          </li>
+          <li><strong>SSHキーの設置:</strong>
+            <pre><code># (appuserで実行)
+mkdir ~/.ssh
+chmod 700 ~/.ssh
+# ローカルの公開鍵を authorized_keys にコピーする
+echo "ssh-rsa AAAA..." >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys</code></pre>
+          </li>
+          <li><strong>SSHサーバーの設定変更（セキュリティ向上）:</strong>
+            <p class="muted">パスワードを使った総当たり攻撃などを防ぐため、SSHキーでのみログインできるように設定を変更します。</p>
+            <pre><code># 設定ファイルを開く
+sudo nano /etc/ssh/sshd_config</code></pre>
+            <p>ファイル内で以下の行を見つけ、値を<code>no</code>に修正（または行頭の<code>#</code>を削除して有効化）します。</p>
+            <pre><code>PermitRootLogin no
+PasswordAuthentication no</code></pre>
+            <p>設定を保存したら、SSHサービスを再起動して変更を適用します。</p>
+            <pre><code>sudo systemctl restart sshd</code></pre>
+            <div class="callout warn"><strong>重要:</strong> この設定を適用する前に、<strong>必ず別のターミナルを開いて、作成したユーザーでSSHキーを使ってログインできることを確認してください。</strong>確認を怠ると、サーバーにアクセスできなくなる危険があります。</div>
+          </li>
+          <li><strong>ファイアウォール (UFW) 設定:</strong>
+            <pre><code># (rootまたはsudoで実行)
+ufw allow ssh
+ufw allow http
+ufw allow https
+ufw enable</code></pre>
+          </li>
+          <li><strong>OSアップデートと再起動:</strong>
+            <pre><code>sudo apt update && sudo apt upgrade -y</code></pre>
+sudo reboot</code></pre>
+            <p class="muted">カーネルのアップデートなどが適用されるため、一度再起動しておくことを推奨します。</p>
+          </li>
+        </ol>
+      </section>
+
+      <section id="s3">
+        <h2>3. Step 2: Docker環境の構築と手動での動作確認</h2>
+        <ol>
+          <li><strong>Dockerのインストール:</strong>
+            <p class="muted">Dockerをインストールするには、手軽なスクリプトを使う方法と、APTリポジトリを丁寧に追加する方法があります。どちらも公式に提供されている方法です。</p>
+            <div style="margin-top:1rem"><strong>方法A: 公式インストールスクリプトを使う（手軽）</strong></div>
+            <p class="muted" style="margin-top:0">1つのコマンドでDockerの最新版をインストールできる、最も簡単な方法です。この手順書ではこちらを前提に進めます。</p>
+            <pre><code># 公式のインストールスクリプトをダウンロードして実行
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh</code></pre>
+            <div style="margin-top:1rem"><strong>方法B: APTリポジトリ経由でインストールする（確実・丁寧）</strong></div>
+            <p class="muted" style="margin-top:0">Dockerの公式リポジトリをシステムのパッケージソースに追加し、<code>apt</code>コマンドでインストールする方法です。将来のアップデート管理が容易になります。</p>
+            <pre><code># 1. 必要なパッケージをインストール
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+
+# 2. Dockerの公式GPGキーを追加
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# 3. Dockerのリポジトリを設定
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 4. Docker Engineをインストール
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y</code></pre>
+          </li>
+          <li><strong>Dockerをsudoなしで実行できるようにする:</strong>
+            <pre><code># 現在のユーザーをdockerグループに追加
+sudo usermod -aG docker $USER</code></pre>
+            <p class="muted">この設定を有効にするには、一度サーバーからログアウトし、再度SSHでログインする必要があります。</p>
+            <pre><code>exit</code></pre>
+          </li>
+          <li><strong>Gitのインストール:</strong>
+            <p class="muted">再度サーバーにログインしてから、Gitをインストールします。</p>
+            <pre><code>sudo apt install git -y</code></pre>
+          </li>
+          <li><strong>手動デプロイの準備:</strong>
+            <p class="muted">ここからは、ローカルPCで作成したアプリケーションのファイルを、VPS上に展開して動かすための準備です。</p>
+            <p>ローカルで以下のファイル構成を作成し、GitHubにpushします。</p>
+            <pre><code>my-vps-app/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml  (Step 4で作成)
+├── app/
+│   └── server.js     (シンプルなWebサーバー)
+├── Caddyfile
+└── docker-compose.yml</code></pre>
+          </li>
+          <li><strong>サンプルファイル:</strong>
+            <div class="codebox">
+              <button class="copy" data-target="code3-compose">copy</button>
+<pre id="code3-compose"><code># docker-compose.yml
+version: "3.9"
+name: my-app-stack
+services:
+  reverse-proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+  app:
+    image: node:20-alpine
+    restart: unless-stopped
+    working_dir: /app
+    volumes: ["./app:/app"]
+    command: ["node", "server.js"]
+    expose: ["3000"]
+volumes:
+  caddy_data: {}</code></pre>
+            </div>
+            <div class="codebox">
+              <button class="copy" data-target="code3-caddy">copy</button>
+<pre id="code3-caddy"><code># Caddyfile
+your-domain.com {
+  reverse_proxy app:3000
+}</code></pre>
+            </div>
+            <div class="codebox">
+              <button class="copy" data-target="code3-app">copy</button>
+<pre id="code3-app"><code>// app/server.js
+const http = require('http');
+const server = http.createServer((req, res) => {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.end('Hello from VPS! Deployed at: ' + new Date().toISOString());
+});
+server.listen(3000, () => console.log('Server running on port 3000'));</code></pre>
+            </div>
+          </li>
+          <li><strong>手動デプロイ:</strong> VPSにSSH接続し、動作確認をします。
+            <pre><code># (VPS上で実行)
+# GitHubからコードをクローン
+git clone https://github.com/your-username/my-vps-app.git
+cd my-vps-app
+
+# Caddyfileのドメインを自分のものに書き換える
+nano Caddyfile
+
+# Docker Composeで起動
+docker compose up -d</code></pre>
+          </li>
+          <li><strong>動作確認:</strong> ブラウザで <code>https://your-domain.com</code> にアクセスし、メッセージが表示されれば成功です。</li>
+        </ol>
+        <div class="callout" style="margin-top:1.5rem">
+          <h4>💡より高度な自動化について（Ansibleなど）</h4>
+          <p style="margin-top:.4rem; margin-bottom:0;">「サーバーがまっさらな状態から、一連のセットアップを自動で実行したい」という場合、<strong>Ansible</strong>のような<strong>構成管理ツール</strong>が役立ちます。これは、サーバーへのソフトウェアインストールや設定ファイルの配置といった手順を「Playbook」というコードで定義し、何度でも同じ環境を再現できるようにする仕組みです。GitリポジトリでPlaybookを管理すれば、まさに「gitにそんな仕組み」を実現できます。このハンドブックの手順は、そうした自動化への第一歩となります。</p>
+        </div>
+      </section>
+
+      <section id="s4">
+        <h2>4. Step 3: GitHub Actionsによる自動デプロイ</h2>
+        <p>ここがこのハンドブックの核心です。ローカルからの<code>git push</code>を検知して、VPS上で自動的にデプロイコマンドが実行されるように設定します。</p>
+<pre class="mermaid">
+sequenceDiagram
+    participant D as 開発者
+    participant G as GitHub
+    participant A as GitHub Actions
+    participant V as ConoHa VPS
+    
+    D->>G: 1. git push origin main
+    G->>A: 2. Workflowをトリガー
+    A->>V: 3. SSH接続 (Secretsを利用)
+    A->>V: 4. デプロイコマンド実行<br>(git pull, docker compose up)
+</pre>
+        <ol>
+          <li><strong>SSHキーペアの作成（デプロイ専用）:</strong>
+            <pre><code># ローカルPCで実行。パスフレーズは空のままEnter
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f ./deploy_key</code></pre>
+            <p><code>deploy_key</code>（秘密鍵）と<code>deploy_key.pub</code>（公開鍵）が生成されます。コマンドの各オプションの意味は以下の通りです。</p>
+            <div style="margin-top:1rem">
+              <table>
+                <thead><tr><th>オプション</th><th>意味</th><th>解説</th></tr></thead>
+                <tbody>
+                  <tr><td><code>-t ed25519</code></td><td><strong>T</strong>ype (暗号化方式)</td><td>鍵の暗号化アルゴリズムを指定します。<code>ed25519</code>は比較的新しく、強力かつ高速なため現在推奨されています。</td></tr>
+                  <tr><td><code>-C "..."</code></td><td><strong>C</strong>omment (コメント)</td><td>鍵の末尾にコメントを追加します。どの鍵が何のためのものか（例: "github-actions-deploy"）をメモするのに便利です。</td></tr>
+                  <tr><td><code>-f ./deploy_key</code></td><td><strong>F</strong>ile (ファイル名)</td><td>生成する鍵のファイル名を指定します。これを指定しないとデフォルトの<code>~/.ssh/id_rsa</code>などに保存されるため、用途別に鍵を分ける際に必須です。</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li><strong>公開鍵をVPSに登録:</strong>
+            <p>生成した公開鍵（<code>deploy_key.pub</code>）をVPSの<code>~/.ssh/authorized_keys</code>ファイルに登録します。これにはいくつかの方法があります。</p>
+            <div style="margin-top:1rem"><strong>方法A: コマンドを直接実行する方法（推奨）</strong></div>
+            <p class="muted" style="margin-top:0">VPSにSSH接続した状態で、以下のコマンドを実行して公開鍵の内容を追記します。ローカルPCの<code>deploy_key.pub</code>の内容をコピー＆ペーストしてください。</p>
+            <pre><code># (VPS上で実行)
+echo "ssh-ed25519 AAAA... github-actions-deploy" >> ~/.ssh/authorized_keys</code></pre>
+
+            <div style="margin-top:1rem"><strong>方法B: scpコマンドでファイルを転送する方法</strong></div>
+            <p class="muted" style="margin-top:0">ローカルPCから<code>scp</code>コマンドを使って、公開鍵ファイルを直接サーバーに転送します。この方法では、一時的にサーバー側でパスワード認証が許可されている必要があります。</p>
+            <pre><code># (ローカルPCで実行)
+# まず公開鍵ファイルをサーバーに転送（パスワードを求められます）
+scp ./deploy_key.pub appuser@[VPSのIPアドレス]:~/
+
+# 次にVPSにSSH接続して、転送したファイルの内容を追記
+ssh appuser@[VPSのIPアドレス]
+# --- ここからVPS内での操作 ---
+cat ~/deploy_key.pub >> ~/.ssh/authorized_keys
+rm ~/deploy_key.pub # 不要になったファイルを削除</code></pre>
+
+            <div style="margin-top:1rem"><strong>どちらの方法を選ぶべきか？</strong></div>
+            <style>table{border-collapse:collapse; width:100%; margin-top:.5rem;} th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;} th{background:var(--panel);}</style>
+            <table>
+              <thead><tr><th></th><th>方法A (echo)</th><th>方法B (scp)</th></tr></thead>
+              <tbody>
+                <tr><td><strong>メリット</strong></td><td>・手順がシンプルで1コマンドで完結する。<br>・パスワード認証を有効にする必要がないため、より安全。</td><td>・長い鍵文字列をコピー＆ペーストする必要がなく、転送ミスが起きにくい。</td></tr>
+                <tr><td><strong>デメリット</strong></td><td>・長い鍵文字列のコピー＆ペーストでミスが起こる可能性がある。</td><td>・一時的にでもパスワード認証を有効にする必要がある。<br>・手順が少し多くなる。</td></tr>
+              </tbody>
+            </table>
+            <div class="callout" style="margin-top:1rem"><strong>推奨:</strong> セキュリティの観点から、可能な限りパスワード認証を無効にした状態で運用することが望ましいため、<strong>方法A</strong>を推奨します。</div>
+          </li>
+          <li><strong>秘密鍵をGitHubに登録:</strong>
+            <ol>
+              <li>対象のGitHubリポジトリで <strong>Settings</strong> > <strong>Secrets and variables</strong> > <strong>Actions</strong> を開きます。</li>
+              <li><strong>New repository secret</strong> ボタンをクリックします。</li>
+              <li><strong>Name</strong>に<code>VPS_SSH_PRIVATE_KEY</code>と入力します。</li>
+              <li><strong>Secret</strong>に、先ほど生成した<strong>秘密鍵</strong>（<code>deploy_key</code>）の内容をすべて貼り付けます。</li>
+              <li>同様に、<code>VPS_HOST</code>（VPSのIPアドレス）、<code>VPS_USER</code>（デプロイ用ユーザー名、例: appuser）も登録します。</li>
+            </ol>
+          </li>
+          <li><strong>GitHub Actions ワークフロー作成:</strong> プロジェクトの<code>.github/workflows/deploy.yml</code>に以下を記述します。
+            <div class="codebox">
+              <button class="copy" data-target="code4-workflow">copy</button>
+<pre id="code4-workflow"><code># .github/workflows/deploy.yml
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ main ] # mainブランチへのpushで実行
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd ~/my-vps-app
+            git pull origin main
+            docker compose up -d --build
+            docker image prune -f</code></pre>
+            </div>
+          </li>
+          <li><strong>最終テスト:</strong> ローカルで<code>app/server.js</code>のメッセージなどを少し変更し、コミットして<code>main</code>ブランチにpushします。
+            <pre><code>git add .
+git commit -m "Update server message"
+git push origin main</code></pre>
+            <p>GitHubリポジトリの「Actions」タブでワークフローが実行され、成功すれば完了です。数分後、ブラウザをリロードしてVPS上の表示が変わっていることを確認してください。</p>
+          </li>
+        </ol>
+      </section>
+
+      <section id="s5">
+        <h2>5. Step 4: データベース(MySQL)の導入とバックアップ自動化</h2>
+        <p>多くのWebアプリケーションはデータベースを必要とします。ここでは、<code>docker-compose.yml</code>にMySQLサービスを追加し、重要なデータを守るための日次バックアップを自動化する手順を解説します。</p>
+        
+        <h3>1. <code>.env</code>ファイルによる機密情報の管理</h3>
+        <p>データベースのパスワードなどの機密情報を直接<code>docker-compose.yml</code>に書き込むのは避けるべきです。代わりに<code>.env</code>ファイルを使用し、Gitの管理対象から除外します。</p>
+        <ol>
+          <li><strong><code>.gitignore</code>に<code>.env</code>を追加:</strong>
+            <pre><code># .gitignore
+# ...
+.env</code></pre>
+          </li>
+          <li><strong><code>.env</code>ファイルを作成:</strong> プロジェクトのルートに以下の内容で<code>.env</code>ファイルを作成します。
+            <div class="codebox">
+              <button class="copy" data-target="code5-env">copy</button>
+<pre id="code5-env"><code># .env
+MYSQL_DATABASE=myapp
+MYSQL_USER=myuser
+MYSQL_PASSWORD=your_strong_password
+MYSQL_ROOT_PASSWORD=your_very_strong_root_password</code></pre>
+            </div>
+          </li>
+        </ol>
+
+        <h3>2. <code>docker-compose.yml</code>の更新</h3>
+        <p>MySQLサービスを追加し、<code>.env</code>ファイルから環境変数を読み込むように設定します。</p>
+        <div class="codebox">
+          <button class="copy" data-target="code5-compose">copy</button>
+<pre id="code5-compose"><code># docker-compose.yml
+version: "3.9"
+name: my-app-stack
+services:
+  reverse-proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+  app:
+    image: node:20-alpine
+    restart: unless-stopped
+    working_dir: /app
+    volumes: ["./app:/app"]
+    command: ["node", "server.js"]
+    expose: ["3000"]
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    expose: ["3306"]
+volumes:
+  caddy_data: {}
+  db_data: {}</code></pre>
+        </div>
+        <p class="muted"><code>app</code>サービスに<code>environment</code>を追加し、アプリケーションからデータベースに接続できるようにします。<code>depends_on</code>で<code>db</code>サービスが先に起動することを保証します。</p>
+        
+        <h3>3. バックアップの自動化</h3>
+        <p>サーバー上で定期的にバックアップスクリプトを実行する<code>cron</code>ジョブを設定します。</p>
+        <ol>
+          <li><strong>バックアップスクリプトの作成:</strong> プロジェクトのルートに<code>backup.sh</code>を作成します。
+            <div class="codebox">
+              <button class="copy" data-target="code5-backup">copy</button>
+<pre id="code5-backup"><code>#!/bin/bash
+set -eu
+
+# バックアップ先ディレクトリ
+BACKUP_DIR=~/backups
+# プロジェクトのディレクトリ
+PROJECT_DIR=~/my-vps-app
+# 何日前のバックアップを削除するか
+RETENTION_DAYS=7
+
+# 環境変数を読み込む
+source ${PROJECT_DIR}/.env
+
+# バックアップファイル名
+DATE=$(date +"%Y%m%d_%H%M%S")
+FILENAME="${MYSQL_DATABASE}_${DATE}.sql.gz"
+FILEPATH="${BACKUP_DIR}/${FILENAME}"
+
+# ディレクトリがなければ作成
+mkdir -p ${BACKUP_DIR}
+
+# mysqldumpを実行してバックアップ
+echo "Starting backup for ${MYSQL_DATABASE}..."
+docker compose -f ${PROJECT_DIR}/docker-compose.yml exec -T db \
+  mysqldump -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE} | gzip > ${FILEPATH}
+
+echo "Backup created: ${FILEPATH}"
+
+# 古いバックアップを削除
+echo "Deleting backups older than ${RETENTION_DAYS} days..."
+find ${BACKUP_DIR} -type f -name "*.sql.gz" -mtime +${RETENTION_DAYS} -delete
+echo "Done."</code></pre>
+            </div>
+          </li>
+          <li><strong>スクリプトに実行権限を付与:</strong>
+            <pre><code>chmod +x backup.sh</code></pre>
+          </li>
+          <li><strong>cronジョブの設定:</strong> <code>crontab -e</code>を実行し、以下の行を追記して毎日深夜3時にスクリプトが実行されるようにします。
+            <pre><code>0 3 * * * /home/appuser/my-vps-app/backup.sh > /dev/null 2>&1</code></pre>
+            <p class="muted">パスは実際のユーザー名やディレクトリ構成に合わせてください。</p>
+          </li>
+        </ol>
+
+        <h3>4. GitHub Actionsワークフローの更新</h3>
+        <p><code>.env</code>ファイルはGitで管理しないため、デプロイ時にGitHub Secretsから生成するステップをワークフローに追加します。</p>
+        <ol>
+          <li><strong>GitHub Secretsに<code>.env</code>の内容を追加:</strong> リポジトリのSettings > Secrets and variables > Actionsで、<code>ENV_FILE</code>という名前の新しいシークレットを作成し、ローカルの<code>.env</code>ファイルの内容をすべて貼り付けます。</li>
+          <li><strong><code>deploy.yml</code>を更新:</strong>
+            <div class="codebox">
+              <button class="copy" data-target="code5-workflow">copy</button>
+<pre id="code5-workflow"><code># .github/workflows/deploy.yml
+# ... (変更なし)
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd ~/my-vps-app
+            git pull origin main
+            echo "${{ secrets.ENV_FILE }}" > .env
+            docker compose up -d --build
+            docker image prune -f</code></pre>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section id="s6">
+        <h2>6. トラブルシューティング</h2>
+        <dl>
+          <dt><strong>GitHub ActionsでSSH接続に失敗する</strong></dt>
+          <dd>秘密鍵・公開鍵のペアが正しいか、公開鍵がVPSの<code>authorized_keys</code>に正しく追記されているか、GitHub Secretsの登録内容（特に秘密鍵のコピーミス）を確認してください。</dd>
+          <dt><strong>CaddyがSSL証明書を取得できない</strong></dt>
+          <dd>DNSのAレコードがVPSのIPアドレスに正しく向いているか、UFWで80/443ポートが開いているかを確認します。DNSの浸透には時間がかかる場合があります。</dd>
+          <dt><strong><code>docker compose</code>コマンドが見つからないと怒られる</strong></dt>
+          <dd>GitHub Actionsの実行ユーザーの環境でパスが通っていない可能性があります。<code>/usr/local/bin/docker-compose</code>のようにフルパスで指定するか、<code>appleboy/ssh-action</code>がログインシェルを模倣するため、通常は問題なく動作します。</dd>
+        </dl>
+      </section>
+
+      <section id="s7">
+        <h2>7. 次のステップ</h2>
+        <p>これでデータベースを含む基本的な自動デプロイ環境が完成しました。ここからさらに発展させるためのアイデアです。</p>
+        <ul>
+          <li><strong>テストの組み込み:</strong> デプロイ前に、GitHub Actionsで自動テスト（ユニットテストやE2Eテスト）を実行するステップを追加し、デプロイの品質を高めます。</li>
+          <li><strong>監視の導入:</strong> サーバーのリソースやアプリケーションのパフォーマンスを監視するツール（Prometheus, Grafana, Mackerelなど）を導入し、安定運用を目指します。</li>
+          <li><strong>バックアップの外部保存:</strong> バックアップファイルをサーバー自身がダウンした場合に備え、Amazon S3などの外部ストレージに転送する仕組みを追加します。</li>
+        </ul>
+      </section>
+
+    </div>
+
+    <footer>
+      &copy; このハンドブックは、モダンなWeb開発の第一歩を踏み出すあなたのために作成されました。
+    </footer>
+  </main>
+</div>
+
+<script>
+  document.getElementById('theme').onclick = () => {
+    const root = document.documentElement;
+    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  };
+  (function(){ const t = localStorage.getItem('theme'); if(t) document.documentElement.setAttribute('data-theme', t); })();
+
+  const toc = document.getElementById('toc');
+  const sections = Array.from(document.querySelectorAll('main section'));
+  toc.innerHTML = sections.map(s => `<a href="#${s.id}">${s.querySelector('h2').textContent}</a>`).join('');
+  const links = Array.from(toc.querySelectorAll('a'));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting) {
+        links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+      }
+    });
+  }, { rootMargin: "-40% 0px -55% 0px", threshold: 0.01 });
+  sections.forEach(s => io.observe(s));
+  mermaid.run();
+
+  Array.from(document.querySelectorAll('.copy')).forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.target;
+      const el = document.getElementById(id);
+      const text = el.innerText;
+      try { await navigator.clipboard.writeText(text); btn.textContent = 'copied!'; btn.classList.add('ok'); setTimeout(()=>{btn.textContent='copy'; btn.classList.remove('ok');}, 1200); }
+      catch (e) { console.error(e); }
+    });
+  });
+</script>
+</body>
+</html>

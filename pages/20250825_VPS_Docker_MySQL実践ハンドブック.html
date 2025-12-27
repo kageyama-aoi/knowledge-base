@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VPS × Docker × MySQL 実践ハンドブック（チャット要約版）</title>
+<meta name="description" content="このチャットで学んだ内容を、VPS/Docker/MySQLの実務視点で丁寧に再構成したHTML5ハンドブック。ポートの考え方、リバースプロキシ、バックアップ、yaml選定基準など。" />
+<style>
+  :root {
+    --bg: #111827; --panel: #0b1220; --paper: #0f172a; --fg: #e5e7eb; --muted: #94a3b8;
+    --brand: #60a5fa; --accent: #34d399; --danger: #f87171; --code-bg: #0b1020; --border: #1f2937; --shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  [data-theme="light"] {
+    --bg: #f8fafc; --panel: #ffffff; --paper: #ffffff; --fg: #0f172a; --muted: #475569;
+    --brand: #2563eb; --accent: #059669; --danger: #dc2626; --code-bg: #0b1220; --border: #e2e8f0; --shadow: 0 2px 10px rgba(2,6,23,.06);
+  }
+  * { box-sizing: border-box; } html, body { height: 100%; } body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif; background: var(--bg); color: var(--fg);}
+  .layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  aside { background: var(--panel); border-right: 1px solid var(--border); padding: 1rem; position: sticky; top: 0; height: 100vh; overflow: auto; }
+  main { min-width: 0; }
+  header.top { position: sticky; top: 0; z-index: 20; padding: .8rem 1rem; background: var(--paper); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  header .title { font-weight: 700; letter-spacing: .2px; }
+  .chip { font-size: .85rem; padding: .15rem .5rem; border: 1px solid var(--border); border-radius: 999px; color: var(--muted);}
+  .container { max-width: 980px; margin: 0 auto; padding: 1rem clamp(1rem, 3vw, 2rem); }
+  section { background: var(--paper); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 1.2rem; margin: 1rem 0 1.5rem;}
+  section h2 { margin-top: .2rem; } .muted { color: var(--muted); } h1, h2, h3 { scroll-margin-top: 80px; } a { color: var(--brand); text-decoration: none; } a:hover { text-decoration: underline; }
+  nav.toc h3 { font-size: 1rem; margin: .2rem 0 .6rem; color: var(--muted);}
+  nav.toc a { display: block; padding: .4rem .4rem; margin: .1rem 0; border-radius: 8px; color: var(--fg);}
+  nav.toc a.active, nav.toc a:hover { background: rgba(96,165,250,.15);}
+  pre { background: var(--code-bg); color: #e2e8f0; padding: 1rem; border-radius: 12px; overflow: auto; border: 1px solid #0b2942;}
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace; font-size: .9rem; }
+  .codebox { position: relative; } .copy { position: absolute; top: 8px; right: 8px; background: rgba(2,6,23,.4); color: #e2e8f0; border: 1px solid rgba(226,232,240,.2); border-radius: 8px; padding: .25rem .5rem; cursor: pointer;}
+  .copy.ok { background: rgba(34,197,94,.3);}
+  .callout { border-left: 4px solid var(--brand); padding: .6rem .8rem; background: rgba(96,165,250,.12); border-radius: 10px;}
+  .callout.warn { border-left-color: var(--danger); background: rgba(248,113,113,.15);}
+  .pill { border: 1px solid var(--border); border-radius: 999px; padding: .1rem .5rem; margin-right: .35rem; font-size: .8rem; color: var(--muted);}
+  footer { color: var(--muted); text-align: center; padding: 2rem 1rem 3rem; }
+  .kvs { display:grid; grid-template-columns: 160px 1fr; gap:.4rem 1rem; } .kvs div:nth-child(odd) { color: var(--muted);}
+  .grid-2 { display:grid; grid-template-columns: 1fr; gap: 1rem; } @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem">
+      <div style="font-weight:700">目次</div>
+      <button id="theme" class="chip" title="テーマ切替">Light / Dark</button>
+    </div>
+    <nav class="toc" id="toc"></nav>
+    <div style="margin-top:1rem" class="muted">更新: 2025-08-24 13:22</div>
+  </aside>
+
+  <main>
+    <header class="top">
+      <div>
+        <div class="title">VPS × Docker × MySQL 実践ハンドブック</div>
+        <div class="muted" style="font-size:.9rem">このチャットで学んだ内容を、丁寧に・溢れすぎない粒度で再整理</div>
+      </div>
+      <div>
+        <span class="pill">HTTPS</span>
+        <span class="pill">Reverse Proxy</span>
+        <span class="pill">Backup</span>
+        <span class="pill">Ports</span>
+        <span class="pill">Compose</span>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <section id="s1">
+        <h2>1. Gitページ公開のリスクと原則（要点のみ）</h2>
+        <ul>
+          <li><strong>秘密情報の露出</strong>：APIキー・.env・過去コミット履歴に注意。誤公開時は <code>git filter-repo</code> で履歴ごと削除 + 即ローテーション。</li>
+          <li><strong>.git配信ミス</strong>：自前サーバで <code>/.git</code> を公開しない。配布先はビルド成果物のみ。</li>
+          <li><strong>個人情報/ライセンス</strong>：作者名・メール、画像/フォントの権利確認。</li>
+          <li class="muted">原則：<em>秘密はフロントに置かない。履歴も監査。ビルド成果物のみ公開。</em></li>
+        </ul>
+      </section>
+
+      <section id="s2">
+        <h2>2. 「動的ページ」が必要になる条件</h2>
+        <div class="grid-2">
+          <div>
+            <div class="callout">
+              <strong>サーバ側が必須：</strong> 秘密キーが必要な外部API、ユーザー権限制御、DB書き込み、レート制限/監査。
+            </div>
+            <p>フロントはサーバのAPIを叩く構成に。秘密（APIキー等）は <strong>サーバの環境変数</strong> にのみ置く。</p>
+          </div>
+          <div class="kvs">
+            <div>構成A</div><div>静的フロント → 自前API（Express等） → 外部API/DB</div>
+            <div>構成B</div><div>静的フロント → サーバレスFunctions（Vercel/Netlify/Workers） → 外部API/DB</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s3">
+        <h2>3. 安価にDBを持つ選択肢（個人用途）</h2>
+        <ul>
+          <li><strong>自前VPS + MySQL</strong>（最安・自由度高いが運用は自分）</li>
+          <li>マネージド/サーバレス（Supabase/Neon/Cloudflare D1/Turso など）も無料枠から始めやすい</li>
+          <li class="muted">学習→小規模本番は「VPS + Docker + MySQL」で十分。将来マネージドへ移行も可。</li>
+        </ul>
+      </section>
+
+      <section id="s4">
+        <h2>4. ローカル（学習）→ VPS（本番）の違い</h2>
+        <div class="grid-2">
+          <div>
+            <h3>ローカル</h3>
+            <ul>
+              <li>app: <code>8080</code> / phpMyAdmin: <code>8081</code> / MySQL: <code>3306</code>（開発用に公開してOK）</li>
+              <li>Docker で学習：<em>db</em>・<em>phpmyadmin</em>・<em>app</em>の3サービス</li>
+            </ul>
+          </div>
+          <div>
+            <h3>VPS</h3>
+            <ul>
+              <li><strong>公開は 80/443 のみ</strong>（HTTPS）。<strong>3306/3000 は公開しない</strong>（内部ネットワーク専用）。</li>
+              <li>入口は <strong>reverse-proxy</strong>。TLS終端・振り分け・共通ヘッダー。</li>
+              <li>バックアップは <strong>cron入りコンテナ</strong>で毎日自動（7日ローテ）。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="s5">
+        <h2>5. ポートの考え方（公開/非公開）</h2>
+        <ul>
+          <li>公開：<code>80</code>（HTTPリダイレクト） / <code>443</code>（HTTPS）</li>
+          <li>内部専用：<code>3000</code>（アプリ） / <code>3306</code>（MySQL） / <code>8080/8081</code>（開発用）</li>
+          <li><code>ports:</code> は外部公開、<code>expose:</code> は内部公開の宣言。</li>
+          <li>外からDBを一時操作 → <strong>SSHトンネル</strong>：<code>ssh -NL 3307:localhost:3306 user@your-vps</code></li>
+        </ul>
+        <div class="callout"><strong>結論：</strong>ポートは「内部で普通に使える」。公開するかは別問題。</div>
+      </section>
+
+      <section id="s6">
+        <h2>6. Reverse Proxy と Load Balancer の位置づけ</h2>
+        <h3>Forward vs Reverse</h3>
+        <ul>
+          <li><strong>Forward</strong>＝クライアントの代理（社内→外）。</li>
+          <li><strong>Reverse</strong>＝サーバの代理（外→内部アプリ）。TLS終端・振り分け・ヘッダー強化。</li>
+        </ul>
+        <h3>ロードバランサは「リバースプロキシの一種」</h3>
+        <ul>
+          <li>複数アプリへ <em>ラウンドロビン/最小接続/IPハッシュ/重み付き</em> で配分。</li>
+          <li>TLS/ログ/圧縮/認証を一箇所に集約。</li>
+        </ul>
+      </section>
+
+      <section id="s7">
+        <h2>7. アーキテクチャ図（VPS最小構成）</h2>
+        <div class="callout">公開は80/443のみ。app:3000 / db:3306は<strong>内部だけ</strong>。</div>
+        <div style="overflow:auto;border:1px solid var(--border);border-radius:12px">
+          <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1024 480">
+            <style>
+              .box { fill: var(--paper); stroke: var(--border); stroke-width:1.2; rx:10; }
+              .title { font: 600 16px system-ui, 'Noto Sans JP', sans-serif; fill: var(--fg); }
+              .text  { font: 14px system-ui, 'Noto Sans JP', sans-serif; fill: var(--muted); }
+              .arrow { stroke: var(--fg); stroke-width:1.4; marker-end:url(#m); fill:none; }
+            </style>
+            <defs>
+              <marker id="m" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="currentColor"/>
+              </marker>
+            </defs>
+            <rect x="32" y="40" width="240" height="80" class="box"/>
+            <text x="48" y="70" class="title">Internet / Users</text>
+            <text x="48" y="95" class="text">HTTPS 443</text>
+
+            <rect x="312" y="20" width="680" height="440" class="box"/>
+            <text x="328" y="45" class="title">VPS</text>
+            <text x="328" y="65" class="text">UFW: 80/443 開放、他は閉鎖</text>
+
+            <rect x="344" y="120" width="280" height="120" class="box"/>
+            <text x="360" y="150" class="title">Reverse Proxy</text>
+            <text x="360" y="175" class="text">TLS終端 / 80→443 / 振り分け</text>
+
+            <rect x="654" y="120" width="280" height="120" class="box"/>
+            <text x="670" y="150" class="title">Web App</text>
+            <text x="670" y="175" class="text">HTTP :3000（内部専用）</text>
+
+            <rect x="654" y="270" width="280" height="120" class="box"/>
+            <text x="670" y="300" class="title">MySQL</text>
+            <text x="670" y="325" class="text">:3306（内部専用）</text>
+
+            <path d="M272,80 L344,180" class="arrow"/>
+            <path d="M624,180 L654,180" class="arrow"/>
+            <path d="M794,240 L794,270" class="arrow"/>
+          </svg>
+        </div>
+      </section>
+
+      <section id="s8">
+        <h2>8. ローカル用 compose（MySQL + phpMyAdmin + サンプルAPI）</h2>
+        <div class="codebox">
+          <button class="copy" data-target="code8">copy</button>
+<pre id="code8"><code>version: "3.9"
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass_here
+      MYSQL_DATABASE: appdb
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass_here
+      TZ: Asia/Tokyo
+    command: ["mysqld","--character-set-server=utf8mb4","--collation-server=utf8mb4_0900_ai_ci"]
+    ports:
+      - "3306:3306"   # ローカル学習用
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports: ["8081:80"]   # http://localhost:8081
+    # PMA_USER, PMA_PASSWORD を設定するとログイン画面が省略されます。
+    # ログイン画面で認証する場合は、以下の environment は PMA_HOST のみ設定します。
+    # (User: appuser, Pass: apppass_here でログイン)
+    environment:
+      PMA_HOST: db
+    # config.inc.php を読み込ませてSSL接続を有効化します。
+    # :ro を付けて読み取り専用にし、パーミッションエラーを防ぎます。
+    volumes:
+      - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php:ro
+    # Windows環境で発生するパーミッションエラーの対策として、
+    # コンテナ起動時に設定ファイルのパーミッションを強制的に変更します。
+    command: >
+      sh -c "
+        echo '==> Changing permissions for config.inc.php...';
+        chmod 644 /etc/phpmyadmin/config.inc.php;
+        echo '==> Permissions after chmod:';
+        ls -l /etc/phpmyadmin/config.inc.php;
+        /docker-entrypoint.sh apache2-foreground
+      "
+    depends_on: [db]
+
+  app:
+    image: node:20-alpine
+    working_dir: /app
+    command: ["node","server.js"]
+    ports: ["8080:3000"]  # http://localhost:8080
+    volumes: ["./app:/app"]
+    depends_on: [db]
+
+volumes: { dbdata: {} }</code></pre>
+        </div>
+      </section>
+
+      <section id="s9">
+        <h2>9. VPS用 compose（Caddy + App + MySQL + Backup）</h2>
+        <p class="muted">公開は80/443のみ。DBは公開せず内部ネットワーク。</p>
+        <div class="codebox">
+          <button class="copy" data-target="code9">copy</button>
+<pre id="code9"><code>version: "3.9"
+name: vps-stack
+networks: { appnet: {} }
+volumes: { dbdata: {}, caddy_data: {}, caddy_config: {} }
+
+services:
+  reverse-proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80","443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [appnet]
+
+  app:
+    image: node:20-alpine
+    working_dir: /app
+    command: ["sh","-c","node -e \"require('http').createServer((q,r)=>r.end('ok '+Date.now())).listen(3000)\""]
+    expose: ["3000"]
+    networks: [appnet]
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: change_me_root
+      MYSQL_DATABASE: appdb
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: change_me_app
+      TZ: Asia/Tokyo
+    command: ["mysqld","--character-set-server=utf8mb4","--collation-server=utf8mb4_0900_ai_ci"]
+    volumes: ["dbdata:/var/lib/mysql"]
+    networks: [appnet]
+
+  backup:
+    image: alpine:3.20
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: change_me_app
+      MYSQL_DATABASE: appdb
+      TZ: Asia/Tokyo
+      BACKUP_DIR: /backups/mysql
+      RETAIN_DAYS: "7"
+      SCHEDULE: "30 3 * * *"
+    volumes: ["./backups:/backups"]
+    entrypoint: ["/bin/sh","-c"]
+    command: |
+      set -eu
+      apk add --no-cache mariadb-client tzdata coreutils
+      mkdir -p "$BACKUP_DIR"
+      cat >/backup.sh <<'SH'
+      #!/bin/sh
+      set -eu
+      TS="$(date +%F_%H%M%S)"
+      FILE="$BACKUP_DIR/${MYSQL_DATABASE}_$TS.sql.gz"
+      mysqldump -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" --databases "$MYSQL_DATABASE"         --single-transaction --quick --skip-lock-tables         | gzip -9 > "$FILE"
+      echo "Created: $FILE"
+      find "$BACKUP_DIR" -type f -name '*.sql.gz' -mtime +${RETAIN_DAYS} -print -delete || true
+      SH
+      chmod +x /backup.sh
+      echo "$SCHEDULE root /backup.sh >> /var/log/cron.log 2>&1" > /etc/crontabs/root
+      crond -f -l 8
+    networks: [appnet]</code></pre>
+        </div>
+
+        <h3>Caddyfile（例）</h3>
+        <div class="codebox">
+          <button class="copy" data-target="code9c">copy</button>
+<pre id="code9c"><code>your-domain.example {
+  reverse_proxy app:3000
+  encode zstd gzip
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    X-Content-Type-Options "nosniff"
+  }
+}
+
+:8080 {
+  reverse_proxy app:3000
+}</code></pre>
+        </div>
+      </section>
+
+      <section id="s10">
+        <h2>10. Dockerイメージの選定基準（compose設計の要）</h2>
+        <ul>
+          <li><strong>公式/保守</strong>：library系・ベンダー公式を優先（Node/MySQL/Caddy）。</li>
+          <li><strong>バージョン固定</strong>：<code>latest</code>を避け、LTS系（例：<code>node:20</code>, <code>mysql:8.4</code>）。</li>
+          <li><strong>ベース選択</strong>：軽さなら <em>alpine</em>、互換性なら <em>slim</em>。</li>
+          <li><strong>セキュリティ</strong>：非root、公開ポート最小、最小依存（cap_drop等）。</li>
+          <li><strong>運用</strong>：volumesで永続化、healthcheckで異常検知、TZを指定。</li>
+        </ul>
+
+        <h3>提案composeにどう反映したか</h3>
+        <ul>
+          <li><code>caddy:2-alpine</code> / <code>node:20-alpine</code> / <code>mysql:8.4</code>：公式・LTS・軽量。</li>
+          <li>DBは<strong>未公開</strong>（<code>ports:</code> なし、内部ネットワークのみ）。</li>
+          <li>データは<strong>ボリューム永続化</strong>。</li>
+          <li>バックアップは<strong>コンテナ化+cron</strong>で再現性確保。</li>
+          <li><code>TZ=Asia/Tokyo</code>でログ/バックアップのタイムスタンプを統一。</li>
+        </ul>
+      </section>
+
+      <section id="s11">
+        <h2>11. コラム：サービス名がホスト名になる魔法（サービスディスカバリ）</h2>
+        <p class="muted">
+          なぜ<code>web</code>コンテナは、IPアドレスを知らないのに<code>db</code>という名前だけでMySQLコンテナに接続できるのでしょうか？その秘密はDocker Composeが提供する「内部ネットワーク」と「サービスディスカバリ」にあります。
+        </p>
+        <ol>
+          <li>
+            <strong>専用の内部ネットワークが作られる</strong><br>
+            <code>docker compose up</code>を実行すると、コンテナ達だけが参加できるプライベートな仮想ネットワークが自動で作成されます。
+          </li>
+          <li>
+            <strong>サービス名が「住所」になる（サービスディスカバリ）</strong><br>
+            このネットワーク内では、<code>docker-compose.yml</code>に書いたサービス名（例: <code>db</code>, <code>app</code>）が、そのままホスト名（コンピュータ名）として使えます。これにより、IPアドレスを意識することなくコンテナ間で通信できます。
+          </li>
+          <li>
+            <strong>環境変数で接続情報を渡す</strong><br>
+            各コンテナには、環境変数を通じて「どのホストに、どの認証情報で接続するか」を教えます。
+<div class="codebox">
+<pre><code># webサービスの例
+environment:
+  DB_HOST: db  # ← 接続先のホスト名として 'db' を指定
+  DB_USER: appuser
+  DB_PASS: apppass_here
+</code></pre>
+</div>
+          </li>
+          <li>
+            <strong><code>depends_on</code>で起動順序を保証する</strong><br>
+            <code>db</code>コンテナの準備が整う前に<code>app</code>コンテナが起動すると接続に失敗します。<code>depends_on</code>と<code>healthcheck</code>を組み合わせることで、「<code>db</code>が完全に準備OKになるまで、<code>app</code>の起動を待つ」という制御ができ、安定性が向上します。
+          </li>
+        </ol>
+        <div class="callout">
+          <strong>結論：</strong>これらの機能が連携することで、私たちは複雑なネットワーク設定を一切書かずに、サービス名を頼りにコンテナ間を安全かつ確実に接続させることができるのです。
+        </div>
+      </section>
+
+      <section id="s12">
+        <h2>12. トラブルシューティング：phpMyAdminのパーミッションエラー</h2>
+        <div class="callout warn">
+          <strong>症状：</strong> <code>phpMyAdmin - エラー 設定ファイルのパーミッションが正しくありません。誰でも書き込み可能になっています！</code>
+        </div>
+        <p class="muted">
+          これは特にWindows環境でDockerを利用する際によく発生する問題です。
+        </p>
+        <h3>原因：WindowsとDocker(Linux)のパーミッション解釈の違い</h3>
+        <p>
+          Windowsのファイルシステム（NTFS）は、複雑なアクセス制御リスト（ACL）で権限を管理しています。一方、Dockerコンテナ内のLinuxは、シンプルな「所有者・グループ・その他」のモデルで権限を解釈します。<br>
+          この「翻訳」の過程で、Windows上のファイルがコンテナからは「誰でも書き込み可能（<code>rwxrwxrwx</code> / <code>777</code>）」に見えてしまうことがあります。phpMyAdminはこれをセキュリティリスクと判断し、起動を停止します。
+        </p>
+
+        <h3>解決策A：<code>command</code>でパーミッションを強制変更（推奨）</h3>
+        <p>
+          環境に依存しない最も堅牢な解決策は、コンテナ起動時に<code>chmod</code>コマンドを実行し、パーミッションを強制的に安全な値（<code>644</code>）に設定することです。
+        </p>
+        <div class="codebox">
+          <button class="copy" data-target="code11a">copy</button>
+<pre id="code11a"><code># docker-compose.yml の phpmyadmin サービスに追加
+command: >
+  sh -c "
+    chmod 644 /etc/phpmyadmin/config.inc.php && /docker-entrypoint.sh apache2-foreground
+  "
+</code></pre>
+        </div>
+        <p><strong>重要：</strong> この設定を適用するには、<code>docker compose down -v</code>で古いコンテナとボリュームを完全に削除してから再起動する必要があります。</p>
+
+        <h3>解決策B：Windowsの「継承の無効化」（Windows限定）</h3>
+        <p>
+          Windowsホスト側で直接パーミッションを修正する方法です。
+        </p>
+        <ol>
+          <li>対象ファイル（<code>config.inc.php</code>）を右クリック → <strong>プロパティ</strong></li>
+          <li><strong>セキュリティ</strong> タブ → <strong>詳細設定</strong> ボタン</li>
+          <li>左下の「<strong>継承の無効化</strong>」ボタンをクリック</li>
+          <li>「このオブジェクトから継承されたアクセス許可をすべて削除します」を選択して適用</li>
+        </ol>
+        <p>
+          これにより、親フォルダから引き継がれた複雑なACLがリセットされ、Dockerがパーミッションを正しく解釈できるようになります。
+        </p>
+      </section>
+
+      <section id="s13">
+        <h2>13. VPS導入の手順（最短）</h2>
+        <ol>
+          <li>OS更新：<code>sudo apt update && sudo apt upgrade -y</code></li>
+          <li>Docker導入：<code>curl -fsSL https://get.docker.com | sudo sh</code>（再ログインで<code>docker</code>グループ反映）</li>
+          <li>UFW設定：<code>sudo ufw allow 80,443/tcp && sudo ufw enable</code></li>
+          <li>DNSでドメインをVPS IPへ → <code>Caddyfile</code>を書き換え</li>
+          <li><code>docker compose up -d</code> → <code>https://your-domain</code> で確認</li>
+          <li>バックアップは <code>docker compose exec backup sh -lc /backup.sh</code> で手動検証（以後自動）</li>
+        </ol>
+      </section>
+
+      <section id="s14">
+        <h2>14. チートシート</h2>
+        <div class="grid-2">
+          <div>
+            <h3>公開ポート</h3>
+            <ul>
+              <li><code>80</code>：HTTPリダイレクト/証明書取得</li>
+              <li><code>443</code>：HTTPS本番</li>
+            </ul>
+            <h3>内部ポート</h3>
+            <ul>
+              <li><code>3000</code>：アプリ</li>
+              <li><code>3306</code>：MySQL</li>
+              <li><code>8080/8081</code>：開発用途</li>
+            </ul>
+          </div>
+          <div>
+            <h3>DB一時操作（SSHトンネル）</h3>
+            <pre><code>ssh -NL 3307:localhost:3306 user@your-vps
+# → 手元から 127.0.0.1:3307 で接続</code></pre>
+            <h3>mysqldump</h3>
+            <pre><code>mysqldump -uappuser -papppass_here appdb | gzip &gt; backups/appdb_$(date +%F).sql.gz</code></pre>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <footer>
+      &copy; まとめ by ChatGPT（あなた専用ハンドブック） / シンプルに始めて、必要になったら拡張する方針で設計しています。
+    </footer>
+  </main>
+</div>
+
+<script>
+  document.getElementById('theme').onclick = () => {
+    const root = document.documentElement;
+    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  };
+  (function(){ const t = localStorage.getItem('theme'); if(t) document.documentElement.setAttribute('data-theme', t); })();
+
+  const toc = document.getElementById('toc');
+  const sections = Array.from(document.querySelectorAll('main section'));
+  toc.innerHTML = sections.map(s => `<a href="#${s.id}">${s.querySelector('h2').textContent}</a>`).join('');
+  const links = Array.from(toc.querySelectorAll('a'));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting) {
+        links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+      }
+    });
+  }, { rootMargin: "-40% 0px -55% 0px", threshold: 0.01 });
+  sections.forEach(s => io.observe(s));
+
+  Array.from(document.querySelectorAll('.copy')).forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.target;
+      const el = document.getElementById(id);
+      const text = el.innerText;
+      try { await navigator.clipboard.writeText(text); btn.textContent = 'copied!'; btn.classList.add('ok'); setTimeout(()=>{btn.textContent='copy'; btn.classList.remove('ok');}, 1200); }
+      catch (e) { console.error(e); }
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学習ログ｜phpMyAdmin 設定とパーミッション問題（整理版）</title>
+<style>
+  :root{--fg:#111;--bg:#fff;--muted:#6b7280;--line:#e5e7eb;--pri:#3949ab;--ok:#16a34a;--warn:#b45309;--err:#b91c1c}
+  *{box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; line-height:1.7; margin:28px; color:var(--fg); background:var(--bg)}
+  h1{font-size:26px;margin:.2em 0 .6em}
+  h2{font-size:22px;margin:1.2em 0 .4em}
+  h3{font-size:18px;margin:1em 0 .4em}
+  code,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.95em}
+  pre{background:#0b1020; color:#e5e7eb; padding:14px 16px; border-radius:10px; overflow:auto; border:1px solid #0e1726}
+  a{color:var(--pri); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .toc{border:1px solid var(--line); border-radius:10px; padding:14px; background:#f8fafc}
+  .note{border-left:4px solid var(--pri); background:#eef2ff; padding:10px 12px; border-radius:6px; margin:.6em 0}
+  .good{border-left:4px solid var(--ok); background:#ecfdf5; padding:10px 12px; border-radius:6px; margin:.6em 0}
+  .warn{border-left:4px solid var(--warn); background:#fffbeb; padding:10px 12px; border-radius:6px; margin:.6em 0}
+  .bad{border-left:4px solid var(--err); background:#fef2f2; padding:10px 12px; border-radius:6px; margin:.6em 0}
+  hr{border:none; border-top:1px solid var(--line); margin:22px 0}
+  table{border-collapse:collapse; width:100%}
+  th,td{border:1px solid var(--line); padding:8px 10px}
+  th{background:#f8fafc; text-align:left}
+  .small{font-size:.94em; color:var(--muted)}
+  .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:.2em .7em;background:#fff;color:#333;margin-right:.3em}
+  .grid{display:grid; gap:10px}
+  .two{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .kbd{display:inline-block; padding:.2em .5em; border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; background:#f9fafb}
+  .pill{display:inline-flex;align-items:center;gap:.45em;background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;border-radius:999px;padding:.2em .65em;font-size:.9em}
+  .footer{margin-top:28px;color:#666;font-size:.9em}
+</style>
+</head>
+<body>
+
+<h1>学習ログ：phpMyAdmin 設定とパーミッション問題（整理版）</h1>
+<p class="small">日付：2025-08-25　/　環境：Windows + Docker Desktop　/　対象：phpMyAdmin・MySQL・PHP（Docker Compose）</p>
+
+<div class="toc">
+  <strong>目次</strong>
+  <ol>
+    <li><a href="#summary">要約（今回の結論）</a></li>
+    <li><a href="#input">インプット（取り組んだこと）</a></li>
+    <li><a href="#learnings">学び（理解できたこと）</a></li>
+    <li><a href="#insights">気づき（発見）</a></li>
+    <li><a href="#actions">次のアクション</a></li>
+    <li><a href="#refs">参考：ログコマンド／設定断片</a></li>
+  </ol>
+</div>
+
+<hr>
+
+<h2 id="summary">1. 要約（今回の結論）</h2>
+<ul>
+  <li><span class="pill">ログイン挙動</span> phpMyAdmin の認証周りは <code>docker-compose.yml</code> の設定次第で変わる。不要な自動ログイン系設定は抜く。</li>
+  <li><span class="pill">SSL 学習</span> ローカルでも学習目的で SSL 接続を有効化し、エラーを解消する流れを踏むと本番想定の理解が深まる。</li>
+  <li><span class="pill">権限エラー</span> Windows の「継承の有効化」に起因して <code>phpmyadmin/config.inc.php</code> が「誰でも書き込み可能」と誤認されるケースあり。</li>
+  <li><span class="pill">対処の要点</span> 起動時 <code>chmod</code> で権限を上書きする“コンテナ内対処”が再現性・自動化の観点で有効。</li>
+</ul>
+<div class="good"><strong>結論：</strong> OS 依存の権限モデル差異を踏まえ、Compose 側の <em>起動フック（command）</em> で権限を整えるのが安全・確実。</div>
+
+<hr>
+
+<h2 id="input">2. インプット（取り組んだこと）</h2>
+<ul>
+  <li>phpMyAdmin 導入とログイン挙動の確認（パスワード入力の有無を検証）</li>
+  <li>ローカルであえて SSL 接続を試し、エラー解消までを学習</li>
+  <li><code>config.inc.php</code> 追加後の「パーミッションが正しくありません」エラーの調査</li>
+  <li><code>docker compose down</code>／<code>down -v</code> の運用差分を検証</li>
+  <li><code>docker exec</code> でコンテナ内に入り、権限状態の実測確認</li>
+  <li>Windows 側の「継承の有効化／無効化」の影響を検証</li>
+</ul>
+
+<hr>
+
+<h2 id="learnings">3. 学び（理解できたこと）</h2>
+<ol>
+  <li><strong>ログイン時のパスワード有無は Compose 設定に依存。</strong><br>
+    不要な自動ログイン系の環境変数や設定は削り、通常のログインフローに統一することで挙動が明瞭になる。</li>
+  <li><strong>ローカルでも SSL 設定を通してみる価値。</strong><br>
+    実運用に近い状態を体験することで、証明書検証のオプションや接続エラー時の切り分け手順を身につけられる。</li>
+  <li><strong>Windows × Docker の権限モデル差分。</strong><br>
+    ホスト側 NTFS の権限・継承が、コンテナ内から「ワールド書き込み」に見えることがある。
+    コンテナ起動時に <code>chmod 644</code> などで明示上書きすると安定する。</li>
+  <li><strong><code>down</code> と <code>down -v</code> の役割の違い。</strong><br>
+    <code>-v</code> はボリューム破棄で DB を含む永続データを消すが、マウント中のファイルの実権限（ホスト由来）まではリセットできない。</li>
+  <li><strong>「中から見る」習慣。</strong><br>
+    <code>docker exec -it pma sh</code> → <code>ls -l /etc/phpmyadmin/config.inc.php</code> のように、実際のパーミッションを現地で確認するのが早い。</li>
+</ol>
+
+<hr>
+
+<h2 id="insights">4. 気づき（発見）</h2>
+<ul>
+  <li>「動く」だけでなく「なぜ動かないか」を構造で捉えると、再現性のあるノウハウになる。</li>
+  <li>セキュリティ系は“最小でもよし”ではなく、“<em>最小の中で安全</em>”を作る視点が重要。</li>
+  <li>OS 依存の落とし穴（継承）は、<em>起動時の確定処理</em>で潰すとチームでも安定。</li>
+</ul>
+
+<hr>
+
+<h2 id="actions">5. 次のアクション</h2>
+<div class="grid two">
+  <div class="good">
+    <strong>1) Compose 側で権限を整える</strong>
+    <pre><code>phpmyadmin:
+  # ...
+  volumes:
+    - ./phpmyadmin/config.inc.php:/etc/phpmyadmin/config.inc.php:ro
+  command: >
+    sh -c "
+      chmod 644 /etc/phpmyadmin/config.inc.php
+      exec /docker-entrypoint.sh apache2-foreground
+    "</code></pre>
+  </div>
+  <div class="note">
+    <strong>2) Windows 側の継承を見直す</strong>
+    <p>対象ファイルのプロパティ → セキュリティ → 詳細設定から「継承の無効化」を検討。</p>
+  </div>
+</div>
+<ul>
+  <li>Xdebug を入れてステップ実行で設定値の流れ（環境変数→PHP）を可視化</li>
+  <li>Nginx + PHP-FPM 構成で本番寄りの理解を追加</li>
+  <li>設定値を <code>.env</code> と <code>config</code> 層に整理し「責務分離」を強化</li>
+</ul>
+
+<hr>
+
+<h2 id="refs">6. 参考：ログコマンド／設定断片</h2>
+<table>
+  <thead><tr><th>目的</th><th>コマンド／設定</th><th>メモ</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>DB ヘルス確認</td>
+      <td><code class="kbd">docker compose logs db</code></td>
+      <td>起動失敗・待機中を把握</td>
+    </tr>
+    <tr>
+      <td>コンテナに入る</td>
+      <td><code class="kbd">docker exec -it mylocal_pma sh</code></td>
+      <td>実パーミッションを直接確認</td>
+    </tr>
+    <tr>
+      <td>権限確認</td>
+      <td><code class="kbd">ls -l /etc/phpmyadmin/config.inc.php</code></td>
+      <td><code>-rw-r--r--</code>（644）を目安に</td>
+    </tr>
+    <tr>
+      <td>初期化し直す</td>
+      <td><code class="kbd">docker compose down -v &amp;&amp; docker compose up -d</code></td>
+      <td>ボリューム破棄 → 再作成</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<p class="small">このページは、学習内容を「インプット／学び／気づき／次のアクション」で素早く振り返れるよう最小構成でデザインしています。</p>
+
+<div class="footer">
+  <strong>Why この構成？</strong> 目次・注記ボックス・二段グリッド・プリセット色は、読みやすさと再利用性を優先。1ページ内で「問題→原因→対処」を追える導線とし、次回以降のログテンプレにも流用できます。
+</div>
+
+</body>
+</html>

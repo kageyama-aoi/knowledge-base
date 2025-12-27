@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SPF / DKIM / DMARC 設定先 図解</title>
+  <style>
+    :root { --fg:#111; --muted:#555; --bg:#fff; --chip:#f6f8fa; }
+    body { margin:0; background:var(--bg); color:var(--fg); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans JP","Hiragino Kaku Gothic ProN","Meiryo UI",sans-serif; }
+    .container { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+    h1 { font-size: clamp(20px, 3vw, 28px); margin: 0 0 16px; }
+    h2 { margin-top: 28px; font-size: 18px; }
+    p, li { line-height: 1.7; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    .muted { color: var(--muted); }
+    .note { background: var(--chip); border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; }
+    .kv { display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 14px; }
+    .kv .chip { background: var(--chip); border:1px solid #e5e7eb; padding:6px 10px; border-radius:999px; font-size: 12px; }
+    .mermaid { margin-top: 18px; }
+    footer { margin-top: 36px; font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SPF / DKIM / DMARC 設定先 図解</h1>
+
+    <div class="kv">
+      <div class="chip">対象ドメイン: <code>tcc.com</code></div>
+      <div class="chip">DNSサーバー: <code>ns1.dns-server.jp / ns2.dns-server.jp / ns3.dns-server.jp / ns4.dns-server.jp</code></div>
+      <div class="chip">対象APサーバー兼メール送信サーバー: <code>XXX.XXX.XXX.XXX</code></div>
+    </div>
+
+    <div class="note muted">※ 社内ドキュメントにそのまま貼れるよう、Mermaidで図を描画します。ブラウザで開くだけで表示されます。</div>
+
+    <div class="mermaid">
+flowchart TD
+  subgraph DNS["DNSサーバー群（tcc.com のゾーン）\nns1〜ns4.dns-server.jp"]
+    SPF["SPFレコード（TXT）\n送信許可サーバーIPを登録"]
+    DKIM_pub["DKIM公開鍵（TXT）\nセレクタ付き"]
+    DMARC["DMARCレコード（TXT）\nポリシーとレポート先"]
+  end
+
+  subgraph MailServer["APサーバー兼メール送信サーバー XXX.XXX.XXX.XXX"]
+    DKIM_priv["DKIM秘密鍵\n署名処理を実施（OpenDKIM 等）"]
+  end
+
+  Sender["送信者（From: *@tcc.com）"] --> MailServer
+  MailServer -->|"署名付きメール"| Recipient["受信サーバー（Gmail 等）"]
+
+  MailServer -.-> DKIM_priv
+  SPF --> Recipient
+  DKIM_pub --> Recipient
+  DMARC --> Recipient
+    </div>
+
+    <h2>設定先の要点</h2>
+    <ul>
+      <li><strong>SPF</strong>：DNS の <strong>TXT レコード</strong>（送信可能 IP / サービスを定義）</li>
+      <li><strong>DKIM</strong>：<u>APサーバー側で署名処理</u> ＋ DNS に <strong>公開鍵（TXT）</strong></li>
+      <li><strong>DMARC</strong>：DNS の <strong>TXT レコード</strong>（ポリシーとレポート宛先を定義）</li>
+    </ul>
+
+    <div class="note">
+      <h2 style="margin-top:0">DNS レコード例（そのまま相談用に）</h2>
+      <pre># SPF（例）
+tcc.com. 3600 IN TXT "v=spf1 ip4:XXX.XXX.XXX.XXX include:_spf.google.com ~all"
+
+# DKIM 公開鍵（例：セレクタ 'default'）
+default._domainkey.tcc.com. 3600 IN TXT "v=DKIM1; k=rsa; p=MIIBI..."
+
+# DMARC（例：隔離＋レポート）
+_dmarc.tcc.com. 3600 IN TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc-report@tcc.com; ruf=mailto:dmarc-fail@tcc.com; fo=1"</pre>
+    </div>
+
+    <footer>
+      ・社内で外部CDNが使えない場合は、Mermaid のバンドル版を同梱するローカル配布用にも変更できます。<br/>
+      ・図の文言（ドメイン／IP／セレクタ名など）は検索置換で簡単に差し替え可能な構成です。
+    </footer>
+  </div>
+
+  <!-- Mermaid -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.12.0/dist/mermaid.min.js" integrity="sha384-o+g/BxPwhi0C3RK7oQBxQuNimeafQ3GE/ST4iT2BxVI4Wzt60SH4pq9iXVYujjaS" crossorigin="anonymous"></script>
+  <script>mermaid.initialize({ startOnLoad: true });</script>
+</body>
+</html>
