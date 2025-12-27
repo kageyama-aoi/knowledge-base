@@ -84,59 +84,121 @@
 
   restoreFromHash();
 
-  /* =========================
+    /* =========================
      SEARCH FUNCTION
   ========================= */
   const searchInput = document.getElementById('searchDocs');
+  const clearBtn = document.getElementById('clearSearch');
   const searchStatus = document.getElementById('search-status');
 
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      const term = e.target.value.toLowerCase().trim();
-      const allLinks = document.querySelectorAll('li a');
-      const allDetails = document.querySelectorAll('details');
-      let hitCount = 0;
+  const renderHighlight = (node, original, term) => {
+    if (!term) {
+      node.textContent = original;
+      return;
+    }
 
-      // 1. 各リンクをチェック
-      allLinks.forEach(link => {
-        const li = link.parentElement;
-        const text = link.textContent.toLowerCase();
-        const match = text.includes(term);
-        li.style.display = match ? '' : 'none';
-        if (match) hitCount++;
-      });
+    const originalLower = original.toLowerCase();
+    const termLower = term.toLowerCase();
+    let start = 0;
+    let index = originalLower.indexOf(termLower, start);
 
-      // 2. ステータス表示更新
-      if (term.length > 0) {
-        if (hitCount > 0) {
-          searchStatus.textContent = `${hitCount} 件見つかりました`;
-          searchStatus.className = 'search-status found';
-        } else {
-          searchStatus.textContent = '見つかりませんでした';
-          searchStatus.className = 'search-status not-found';
-        }
-      } else {
-        searchStatus.textContent = '';
-        searchStatus.className = 'search-status';
+    if (index == -1) {
+      node.textContent = original;
+      return;
+    }
+
+    node.textContent = '';
+
+    while (index != -1) {
+      if (index > start) {
+        node.appendChild(document.createTextNode(original.slice(start, index)));
       }
 
-      // 3. アーカイブの制御（検索中はすべて開く、空なら閉じるなど）
-      if (term.length > 0) {
-        // 検索中: マッチする項目が含まれる details だけ開く
-        allDetails.forEach(d => {
-            d.open = true;
-            // 中身が全部消えているかチェック
-            const listItems = d.querySelectorAll('li');
-            const hasVisible = Array.from(listItems).some(li => li.style.display !== 'none');
-            d.style.display = hasVisible ? '' : 'none';
-        });
+      const mark = document.createElement('span');
+      mark.className = 'search-highlight';
+      mark.textContent = original.slice(index, index + term.length);
+      node.appendChild(mark);
 
+      start = index + term.length;
+      index = originalLower.indexOf(termLower, start);
+    }
+
+    if (start < original.length) {
+      node.appendChild(document.createTextNode(original.slice(start)));
+    }
+  };
+
+  const applySearch = () => {
+    const term = searchInput.value.toLowerCase().trim();
+    const allLinks = document.querySelectorAll('li a');
+    const allDetails = document.querySelectorAll('details');
+    let hitCount = 0;
+
+    allLinks.forEach(link => {
+      const li = link.parentElement;
+      const titleNode = link.querySelector('.doc-title');
+      const original = link.dataset.title || (titleNode ? titleNode.textContent : link.textContent);
+      const searchText = link.dataset.search || original;
+      const match = term.length === 0 || searchText.toLowerCase().includes(term);
+      li.style.display = match ? '' : 'none';
+      if (match && term.length > 0) hitCount++;
+      if (titleNode) {
+        renderHighlight(titleNode, original, term);
       } else {
-        // 検索クリア: 表示を戻す
-        allDetails.forEach(d => {
-            d.style.display = ''; // details自体の非表示を解除
-            // d.open = false; // 必要に応じて閉じる処理
-        });
+        renderHighlight(link, original, term);
+      }
+    });
+
+    if (term.length > 0) {
+      if (hitCount > 0) {
+        searchStatus.textContent = `${hitCount} 件見つかりました`;
+        searchStatus.className = 'search-status found';
+      } else {
+        searchStatus.textContent = '見つかりませんでした';
+        searchStatus.className = 'search-status not-found';
+      }
+    } else {
+      searchStatus.textContent = '';
+      searchStatus.className = 'search-status';
+    }
+
+    if (clearBtn) {
+      clearBtn.classList.toggle('is-visible', term.length > 0);
+    }
+
+    if (term.length > 0) {
+      allDetails.forEach(d => {
+        d.open = true;
+        const listItems = d.querySelectorAll('li');
+        const hasVisible = Array.from(listItems).some(li => li.style.display != 'none');
+        d.style.display = hasVisible ? '' : 'none';
+      });
+    } else {
+      allDetails.forEach(d => {
+        d.style.display = '';
+      });
+    }
+  };
+
+  if (searchInput) {
+    searchInput.addEventListener('input', applySearch);
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        applySearch();
+        searchInput.focus();
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const target = e.target;
+      const tag = target && target.tagName;
+      const isEditable = target && (target.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT');
+      if (e.key === '/' && !isEditable) {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
       }
     });
   }
