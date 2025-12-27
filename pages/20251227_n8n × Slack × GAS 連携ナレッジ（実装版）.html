@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>n8n × Slack × GAS 連携ナレッジ（実装版）</title>
+</head>
+<body>
+<h1>n8n × Slack × GAS 連携ナレッジ（実装版）</h1>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>n8n × Slack × GAS 連携ナレッジ（実装版）</title>
+</head>
+<body>
+
+<div class="wrap">
+
+<h1>n8n × Slack × GAS 連携ナレッジ（実装版）</h1>
+
+<p>
+Slack からボタンを押すだけで GAS を実行する仕組みを、<br>
+<strong>「設定値を固定し、壊れにくく、後から再開できる形」</strong>でまとめた実装ナレッジです。
+</p>
+
+<p>
+目的は「毎回 n8n の画面をいじらない運用」に寄せること。<br>
+入口（Slack UI）は共通、実行（GAS）は独立、という考え方をベースにしています。
+</p>
+
+<details id="info-overview" data-kind="info">
+  <summary>全体像・考え方</summary>
+  <p>
+    この構成では、Slack は<strong>UIとトリガー専用</strong>、n8n は<strong>正規化と中継</strong>、GAS は<strong>実行本体</strong>という役割分担にしています。
+  </p>
+  <p>
+    重要なのは「Slack から来る payload をそのまま信じない」ことです。<br>
+    n8n 側で <strong>一度 JSON として正規化し、安定したキー（action2）を作る</strong>ことで、
+    後段の設定変更に強くなります。
+  </p>
+</details>
+
+<details id="info-prerequisite" data-kind="info">
+  <summary>前提条件</summary>
+  <ul>
+    <li>Slack App（Interactive Components 有効化済み）</li>
+    <li>n8n（Webhook / Slack / HTTP Request ノードが使える）</li>
+    <li>GAS（Web App として公開済み）</li>
+    <li>Slack → n8n Webhook が疎通していること</li>
+  </ul>
+</details>
+
+<details id="step-flow" data-kind="step">
+  <summary>手順①：全体フローの構築</summary>
+  <ol>
+    <li>Slack に Block UI を投稿する（Send a message）</li>
+    <li>Interactive payload を Webhook で受信する</li>
+    <li>payload を JSON.parse して action を抽出する</li>
+    <li>action 値で分岐（または共通処理）</li>
+    <li>GAS Web App に JSON POST</li>
+    <li>Slack に結果を返す</li>
+    <li>Respond to Webhook で即時応答</li>
+  </ol>
+</details>
+
+<details id="step-blocks" data-kind="step">
+  <summary>手順②：Slack Block UI（動いた定義）</summary>
+  <p>
+    n8n の Slack ノードでは、<strong>Expression モードか純 JSON のどちらかに統一</strong>します。
+    今回は Expression モードで管理しています。
+  </p>
+  <pre><code>{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*🛠 GAS ランチャー*"
+      }
+    },
+    {
+      "type": "input",
+      "block_id": "gas_select",
+      "label": {
+        "type": "plain_text",
+        "text": "実行する処理"
+      },
+      "element": {
+        "type": "static_select",
+        "action_id": "gas_action",
+        "options": [
+          {
+            "text": { "type": "plain_text", "text": "日次レポート生成" },
+            "value": "daily_report"
+          },
+          {
+            "text": { "type": "plain_text", "text": "CSV整形" },
+            "value": "format_csv"
+          }
+        ]
+      }
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": { "type": "plain_text", "text": "実行" },
+          "style": "primary",
+          "action_id": "execute_gas"
+        }
+      ]
+    }
+  ]
+}</code></pre>
+</details>
+
+<details id="step-normalize" data-kind="step">
+  <summary>手順③：payload 正規化（Edit Fields）</summary>
+  <p>
+    Slack の payload は <strong>JSON文字列</strong>で届きます。<br>
+    そのままでは使えないため、必ず JSON.parse します。
+  </p>
+  <pre><code>payload:
+={{ JSON.parse($json.body.payload) }}
+
+action2:
+={{ JSON.parse($json.body.payload)
+  .state.values.gas_select.gas_action.selected_option.value
+  .replace(/\s+/g, '') }}</code></pre>
+  <p>
+    <strong>replace</strong> を入れる理由は、見えない改行や空白で Switch が外れる事故を防ぐためです。
+  </p>
+</details>
+
+<details id="step-http" data-kind="step">
+  <summary>手順④：GAS 呼び出し（HTTP Request）</summary>
+  <p>
+    JSON の形は静的に保ち、値だけを Expression にします。
+  </p>
+  <pre><code>{
+  "action2": "={$json.action2}"
+}</code></pre>
+  <p>
+    フィールド名が <strong>action / action2 でズレないように統一</strong>するのがポイントです。
+  </p>
+</details>
+
+<details id="trouble-points" data-kind="trouble">
+  <summary>つまずきポイント</summary>
+  <ul>
+    <li>blocksUi に = を混ぜて JSON エラー</li>
+    <li>payload を parse せずに参照して失敗</li>
+    <li>Switch が全部外れる（空白・改行混入）</li>
+    <li>JSON を Expression で丸ごと生成して壊す</li>
+  </ul>
+</details>
+
+<details id="check-verify" data-kind="check">
+  <summary>確認方法</summary>
+  <ol>
+    <li>Slack でボタンを押す</li>
+    <li>n8n Webhook が即時 200 を返す</li>
+    <li>HTTP Request が GAS に届く</li>
+    <li>Slack に <code>{$json.action2}</code> が表示される</li>
+    <li>GAS 側にログが残る</li>
+  </ol>
+</details>
+
+<details id="summary-next" data-kind="info">
+  <summary>まとめ・次にやること</summary>
+  <p>
+    次回再開時は、まず <strong>HTTP Request の参照が action2 か</strong>を確認してください。<br>
+    その後、Slack blocks のモード統一 → action を1つ追加、の順で進めると安全です。
+  </p>
+</details>
+
+</div>
+
+</body>
+</html>
+
+</body>
+</html>
