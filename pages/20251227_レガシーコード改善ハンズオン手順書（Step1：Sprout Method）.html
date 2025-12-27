@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>レガシーコード改善ハンズオン手順書（Step1：Sprout Method）</title>
+</head>
+<body>
+<h1>レガシーコード改善ハンズオン手順書（Step1：Sprout Method）</h1>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>レガシーコード改善ハンズオン手順書（Step1：Sprout Method）</title>
+</head>
+<body>
+
+<div class="wrap">
+
+  <h1>レガシーコード改善ハンズオン手順書（Step1：Sprout Method）</h1>
+
+  <p>
+    本資料は、テストが存在しない、または簡単にテストを書けないレガシーコードに対して、<br>
+    <strong>既存コードを壊さずに新機能を追加し、理解を進めるための最小ハンズオン</strong>です。<br>
+    Python を使い、Sprout Method を実際に適用します。
+  </p>
+
+  <details id="concept-overview" data-kind="info">
+    <summary>全体像・考え方</summary>
+    <p>
+      結論から言うと、<strong>既存コードには手を入れず、新しい処理を外に生やす</strong>のが Sprout Method です。
+    </p>
+    <p>
+      レガシーコードは「動いていること」自体が価値であり、<br>
+      理解が浅い状態で内部を修正すると、壊した理由すら分からなくなります。
+    </p>
+    <p>
+      そこで、変更が必要なロジックを<strong>新しい関数として切り出し</strong>、<br>
+      テスト可能な安全地帯を先に作ります。
+    </p>
+  </details>
+
+  <details id="precondition" data-kind="info">
+    <summary>前提条件</summary>
+    <ul>
+      <li>Python 3.x がインストールされていること</li>
+      <li>標準ライブラリ <code>unittest</code> を使用する</li>
+      <li>既存コードは「壊すと困る」前提で扱う</li>
+    </ul>
+  </details>
+
+  <details id="step0-legacy" data-kind="step">
+    <summary>Step0. レガシーコードの確認（変更禁止）</summary>
+    <p>
+      まずは既存コードをそのまま確認します。<br>
+      <strong>以降の手順でこのファイルは一切変更しません。</strong>
+    </p>
+    <pre><code>def calculate_price(user_type, amount):
+    total = amount
+
+    if user_type == "normal":
+        total = amount
+    elif user_type == "vip":
+        total = amount * 0.8
+    elif user_type == "employee":
+        total = amount * 0.5
+    else:
+        print("unknown user type")
+        total = amount
+
+    total = total * 1.1
+    print(f"calculated price: {total}")
+    return total
+</code></pre>
+    <p>
+      このコードは、<br>
+      ロジックと I/O が混在し、副作用があり、条件分岐も増えやすいため、<br>
+      テストを書こうとすると一気に難易度が上がります。
+    </p>
+  </details>
+
+  <details id="step1-requirement" data-kind="step">
+    <summary>Step1. 追加要件の定義</summary>
+    <p>
+      新しい要件は次のとおりです。
+    </p>
+    <ul>
+      <li>user_type が <code>student</code> の場合</li>
+      <li>30% 割引を適用</li>
+      <li>税率は既存と同じ 10%</li>
+    </ul>
+    <p>
+      制約として、<strong>既存の <code>calculate_price</code> は変更しません</strong>。
+    </p>
+  </details>
+
+  <details id="step2-sprout" data-kind="step">
+    <summary>Step2. Sprout Method の適用</summary>
+    <p>
+      方針は明確です。<br>
+      既存コードの中に条件分岐を足すのではなく、<br>
+      <strong>新しい関数を作って外に生やします。</strong>
+    </p>
+    <pre><code>def calculate_student_price(amount):
+    discounted = amount * 0.7
+    total = discounted * 1.1
+    return total
+</code></pre>
+    <p>
+      この関数は副作用を持たず、責務も明確なので、<br>
+      単体テストが非常に書きやすくなります。
+    </p>
+  </details>
+
+  <details id="step3-test" data-kind="step">
+    <summary>Step3. テストの作成（新規コードのみ）</summary>
+    <p>
+      テストは新しく作った関数だけを対象にします。<br>
+      レガシーコードには触れません。
+    </p>
+    <pre><code>import unittest
+from student_price import calculate_student_price
+
+class TestStudentPrice(unittest.TestCase):
+
+    def test_student_price(self):
+        result = calculate_student_price(1000)
+        self.assertEqual(result, 770.0)
+
+if __name__ == "__main__":
+    unittest.main()
+</code></pre>
+    <p>
+      割引 → 税計算の順序が明確で、<br>
+      print などの副作用がないため、テストは安定して成功します。
+    </p>
+  </details>
+
+  <details id="step4-switch" data-kind="step">
+    <summary>Step4. 呼び出し側での安全な分岐</summary>
+    <p>
+      既存関数の中身には触れず、<br>
+      呼び出し側で振る舞いを切り替えます。
+    </p>
+    <pre><code>from legacy_price import calculate_price
+from student_price import calculate_student_price
+
+def calculate_price_safe(user_type, amount):
+    if user_type == "student":
+        return calculate_student_price(amount)
+
+    return calculate_price(user_type, amount)
+</code></pre>
+    <p>
+      これにより、変更リスクは student 分岐に完全に閉じ込められます。
+    </p>
+  </details>
+
+  <details id="trouble-point" data-kind="trouble">
+    <summary>詰まりポイント・注意点</summary>
+    <ul>
+      <li>「つい既存関数を直したくなる」が最大の罠</li>
+      <li>まずは安全地帯を作ることを優先する</li>
+      <li>重複コードは今は気にしない</li>
+    </ul>
+  </details>
+
+  <details id="check-result" data-kind="check">
+    <summary>確認方法</summary>
+    <p>
+      以下が満たされていれば成功です。
+    </p>
+    <ul>
+      <li>既存コードは未変更</li>
+      <li>student の価格計算はテストで保証されている</li>
+      <li>既存の挙動に影響がない</li>
+    </ul>
+  </details>
+
+  <details id="summary-next" data-kind="info">
+    <summary>まとめ（次にやること）</summary>
+    <p>
+      Sprout Method により、<br>
+      レガシーコード全体を理解せずに、安全に機能追加ができました。
+    </p>
+    <p>
+      次のステップでは、<br>
+      Wrap Method や影響範囲の可視化に進むことで、<br>
+      テスト可能領域をさらに広げていきます。
+    </p>
+  </details>
+
+</div>
+
+</body>
+</html>
+
+</body>
+</html>
