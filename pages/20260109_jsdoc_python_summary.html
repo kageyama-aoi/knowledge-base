@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>jsdoc_python_summary</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="jsdoc-python-docstring-活用まとめ">JSDoc / Python docstring
+活用まとめ</h1>
+<p>〜設計情報からHTML・図・自動化まで〜</p>
+<h2 id="結論サマリ">1. 結論サマリ</h2>
+<ul>
+<li><strong>JSDocは単なるコメントではなく「設計メタデータ」</strong></li>
+<li>Webアプリ / Node.js / GAS すべてで同じ価値を持つ</li>
+<li>Pythonには同等〜それ以上に成熟した仕組みが標準で存在する</li>
+<li>公式ツールを使えば
+<strong>HTML生成までは手頃に自動化可能</strong></li>
+<li>JSDoc / docstring は AI・設計レビュー・引き継ぎに直結する</li>
+</ul>
+<h2 id="なぜjsdocは発展できる情報群なのか">2.
+なぜJSDocは「発展できる情報群」なのか</h2>
+<p>JSDocには、最初から以下の情報が含まれている：</p>
+<ul>
+<li>クラス・関数名</li>
+<li>引数（名前・型・意味）</li>
+<li>戻り値</li>
+<li>責務（description）</li>
+<li>依存関係（型参照）</li>
+</ul>
+<p>これらはそのまま：</p>
+<ul>
+<li>HTMLドキュメント</li>
+<li>クラス図（UML / Mermaid）</li>
+<li>設計レビュー</li>
+<li>AI入力用メタデータ</li>
+</ul>
+<p>に変換できる。</p>
+<h2 id="webアプリgasでjsdocは使えるか">3.
+Webアプリ・GASでJSDocは使えるか？</h2>
+<h3 id="結論">結論</h3>
+<p><strong>完全に使える。しかも価値は同じ。</strong></p>
+<h3 id="理由">理由</h3>
+<ul>
+<li>JSDocは実行に影響しない</li>
+<li>JavaScriptの実行環境に依存しない</li>
+<li>IDE / ツール / AI が読む</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>観点</th>
+<th>Webアプリ</th>
+<th>GAS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JavaScriptとして動く</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>JSDocが書ける</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr>
+<td>補完・設計理解</td>
+<td>○</td>
+<td>◎</td>
+</tr>
+<tr>
+<td>引き継ぎ資料代わり</td>
+<td>△</td>
+<td>◎</td>
+</tr>
+</tbody>
+</table>
+<h2 id="javascriptはどこで使われているか">4.
+JavaScriptはどこで使われているか</h2>
+<ul>
+<li>ブラウザ</li>
+<li>サーバー（Node.js / Deno）</li>
+<li>WebアプリUI</li>
+<li>デスクトップアプリ</li>
+<li>モバイルアプリ</li>
+<li>業務自動化（GAS）</li>
+</ul>
+<h2 id="python-と-javascriptjsdoc周りの対応表">5. Python と
+JavaScript（JSDoc周り）の対応表</h2>
+<h3 id="基本思想">5-1 基本思想</h3>
+<table>
+<thead>
+<tr>
+<th>観点</th>
+<th>JavaScript</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>設計コメント</td>
+<td>JSDoc</td>
+<td>docstring</td>
+</tr>
+<tr>
+<td>型</td>
+<td>任意</td>
+<td>標準</td>
+</tr>
+<tr>
+<td>設計文化</td>
+<td>後付け</td>
+<td>前提</td>
+</tr>
+</tbody>
+</table>
+<h3 id="コメント仕様記述">5-2 コメント・仕様記述</h3>
+<table>
+<thead>
+<tr>
+<th>目的</th>
+<th>JavaScript</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>関数説明</td>
+<td>/** */</td>
+<td>““” ““”</td>
+</tr>
+<tr>
+<td>引数</td>
+<td><span class="citation" data-cites="param">@param</span></td>
+<td>型ヒント</td>
+</tr>
+<tr>
+<td>戻り値</td>
+<td><span class="citation" data-cites="returns">@returns</span></td>
+<td>-&gt; type</td>
+</tr>
+</tbody>
+</table>
+<h3 id="htmlドキュメント生成⑤">5-3 HTMLドキュメント生成（⑤）</h3>
+<table>
+<thead>
+<tr>
+<th>観点</th>
+<th>JavaScript</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>公式ツール</td>
+<td>JSDoc</td>
+<td>Sphinx</td>
+</tr>
+<tr>
+<td>入力</td>
+<td>JSDoc</td>
+<td>docstring + 型</td>
+</tr>
+<tr>
+<td>出力</td>
+<td>HTML</td>
+<td>HTML</td>
+</tr>
+<tr>
+<td>自動化</td>
+<td>◎</td>
+<td>◎</td>
+</tr>
+</tbody>
+</table>
+<h2 id="html生成-手順公式ツール">6. HTML生成 手順（公式ツール）</h2>
+<h3 id="javascript">JavaScript</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-D</span> jsdoc</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> jsdoc <span class="at">-c</span> jsdoc.json</span></code></pre></div>
+<h3 id="python">Python</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install sphinx</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">sphinx-quickstart</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">sphinx-build</span> <span class="at">-b</span> html source docs</span></code></pre></div>
+<h2 id="gasでもhtml生成できるか">7. GASでもHTML生成できるか？</h2>
+<p>Node.js側でJSDocを実行すれば可能。</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> jsdoc src/gas <span class="at">-d</span> docs</span></code></pre></div>
+<h2 id="クラス図mermaidへの発展">8. クラス図・Mermaidへの発展</h2>
+<ul>
+<li>JSDoc / docstring から構造抽出</li>
+<li>Mermaid classDiagram を生成</li>
+<li>半自動運用が現実的</li>
+</ul>
+<h2 id="ai設計レビューとの関係">9. AI・設計レビューとの関係</h2>
+<ul>
+<li>AI理解精度が向上</li>
+<li>責務・依存関係レビューが容易</li>
+<li>設計資産として再利用可能</li>
+</ul>
+<h2 id="まとめ">10. まとめ</h2>
+<ul>
+<li>JSDoc / docstring は「設計資産」</li>
+<li>公式ツールで即HTML化できる</li>
+<li>GAS / Web / Python を横断できる</li>
+</ul>
+</body>
+</html>
