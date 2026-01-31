@@ -1,7 +1,9 @@
 name: Build pages index
+
 on:
   push:
     paths:
+      - 'pages/*.md'
       - 'pages/*.html'
 
 jobs:
@@ -12,6 +14,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # --- md → html & old 退避 ---
+      - name: Convert md to html and archive md
+        run: |
+          mkdir -p pages/old
+          for f in pages/*.md; do
+            [ -e "$f" ] || continue
+            base=$(basename "$f" .md)
+
+            # html 生成
+            pandoc "$f" -o "pages/${base}.html" --standalone
+
+            # md を old に退避
+            mv "$f" "pages/old/"
+          done
+
+      # --- 既存処理 ---
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -20,10 +38,11 @@ jobs:
       - name: Build index.html
         run: python tools/build_index.py
 
+      # --- commit ---
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add pages/index.html
-          git diff --cached --quiet || git commit -m "auto: update pages index"
+          git add pages
+          git diff --cached --quiet || git commit -m "auto: convert md to html and update pages"
           git push
