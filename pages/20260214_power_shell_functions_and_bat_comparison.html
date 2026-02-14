@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260214_power_shell_functions_and_bat_comparison</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="gsd-設定までの道のりまとめ">gsd 設定までの道のりまとめ</h1>
+<hr />
+<h1 id="今回やったことの全体像">0. 今回やったことの全体像</h1>
+<p>あなたがやったのは：</p>
+<blockquote>
+<p>Git操作を短縮するために PowerShell を拡張した</p>
+</blockquote>
+<p>具体的には：</p>
+<pre><code>gsd</code></pre>
+<p>という自作コマンドを作り、</p>
+<pre><code>git add .
+git diff --staged</code></pre>
+<p>を一発実行できるようにした。</p>
+<p>これは単なるショートカットではなく、</p>
+<blockquote>
+<p>シェル拡張の第一歩</p>
+</blockquote>
+<p>です。</p>
+<hr />
+<h1 id="gitの基礎整理なぜ-gsd-が成立するのか">1. Gitの基礎整理（なぜ gsd
+が成立するのか）</h1>
+<h2 id="gitの3層構造">Gitの3層構造</h2>
+<pre><code>① 作業フォルダ（今編集している状態）
+② ステージ（次にコミットする候補）
+③ 直前コミット（保存済み）</code></pre>
+<h2 id="git-add-の意味">git add の意味</h2>
+<pre><code>git add .</code></pre>
+<p>→ 作業フォルダ → ステージ</p>
+<p>「この変更を次のコミットに含めます」と宣言。</p>
+<h2 id="git-diff-の種類">git diff の種類</h2>
+<table>
+<thead>
+<tr class="header">
+<th>コマンド</th>
+<th>比較対象</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>git diff</td>
+<td>作業フォルダ vs ステージ</td>
+</tr>
+<tr class="even">
+<td>git diff –staged</td>
+<td>ステージ vs 直前コミット</td>
+</tr>
+</tbody>
+</table>
+<p>今回使ったのは：</p>
+<pre><code>git diff --staged</code></pre>
+<p>理由：</p>
+<blockquote>
+<p>今回コミット予定の変更だけを表示するため</p>
+</blockquote>
+<hr />
+<h1 id="batではなくpowershell関数を選んだ理由">2.
+BATではなくPowerShell関数を選んだ理由</h1>
+<h2 id="batの特徴">BATの特徴</h2>
+<ul>
+<li>外部スクリプト</li>
+<li>別プロセス実行</li>
+<li>文字列ベース処理</li>
+<li>拡張性が低い</li>
+</ul>
+<h2 id="powershell関数の特徴">PowerShell関数の特徴</h2>
+<ul>
+<li>シェル内部に登録</li>
+<li>同一セッションで実行</li>
+<li>オブジェクト処理可能</li>
+<li>拡張しやすい</li>
+</ul>
+<h2 id="本質的な違い">本質的な違い</h2>
+<p>BAT：</p>
+<blockquote>
+<p>外から呼ぶ</p>
+</blockquote>
+<p>PowerShell関数：</p>
+<blockquote>
+<p>内部に組み込む</p>
+</blockquote>
+<hr />
+<h1 id="技術背景きちんと理解する">3. 技術背景（きちんと理解する）</h1>
+<h2 id="セッションとは">セッションとは</h2>
+<blockquote>
+<p>今開いているターミナルの実行空間</p>
+</blockquote>
+<p>関数はこのセッション内に登録される。</p>
+<hr />
+<h2 id="プロセスとは">プロセスとは</h2>
+<blockquote>
+<p>実行中の独立したプログラム</p>
+</blockquote>
+<p>BATは別プロセスを起動する。</p>
+<hr />
+<h2 id="netランタイムとは">.NETランタイムとは</h2>
+<p>PowerShellは</p>
+<blockquote>
+<p>.NETランタイム上で動く</p>
+</blockquote>
+<p>ランタイムとは：</p>
+<blockquote>
+<p>プログラムを動かす土台</p>
+</blockquote>
+<p>.NETは：</p>
+<ul>
+<li>メモリ管理</li>
+<li>型管理</li>
+<li>オブジェクト実行</li>
+</ul>
+<p>を担当する実行基盤。</p>
+<p>つまりPowerShellは単なる文字列シェルではない。</p>
+<hr />
+<h2 id="オブジェクト指向とは">オブジェクト指向とは</h2>
+<p>オブジェクトとは：</p>
+<blockquote>
+<p>データ＋振る舞いのセット</p>
+</blockquote>
+<p>PowerShellのコマンド出力は</p>
+<ul>
+<li>単なる文字列ではない</li>
+<li>構造を持つデータ</li>
+</ul>
+<p>これが</p>
+<blockquote>
+<p>オブジェクト指向ベース</p>
+</blockquote>
+<p>という意味。</p>
+<hr />
+<h1 id="profile-の理解">4. $PROFILE の理解</h1>
+<pre><code>$PROFILE</code></pre>
+<p>これは：</p>
+<blockquote>
+<p>PowerShell起動時に自動実行される設定ファイル</p>
+</blockquote>
+<p>ここに関数を書くことで：</p>
+<ul>
+<li>永続化</li>
+<li>自作コマンド化</li>
+<li>シェル拡張</li>
+</ul>
+<p>が実現する。</p>
+<hr />
+<h1 id="プロファイルが複数ある問題">5. プロファイルが複数ある問題</h1>
+<p>PowerShellには複数のプロファイルが存在する。</p>
+<p>例：</p>
+<ul>
+<li>Microsoft.PowerShell_profile.ps1</li>
+<li>Microsoft.VSCode_profile.ps1</li>
+</ul>
+<p>VS Codeでは</p>
+<blockquote>
+<p>VS Code専用プロファイル</p>
+</blockquote>
+<p>が読み込まれる。</p>
+<p>ここに書かないと反映されない。</p>
+<hr />
+<h1 id="実行ポリシー問題">6. 実行ポリシー問題</h1>
+<p>PowerShellはセキュリティのため</p>
+<blockquote>
+<p>スクリプト実行を制限</p>
+</blockquote>
+<p>している場合がある。</p>
+<p>確認：</p>
+<pre><code>Get-ExecutionPolicy</code></pre>
+<p>解決：</p>
+<pre><code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code></pre>
+<hr />
+<h1 id="文字コード問題">7. 文字コード問題</h1>
+<p>文字化けの原因は：</p>
+<blockquote>
+<p>エンコーディング不一致</p>
+</blockquote>
+<p>PowerShell 5.x は</p>
+<ul>
+<li>UTF-8 with BOM</li>
+<li>UTF-16 LE</li>
+</ul>
+<p>を期待する場合がある。</p>
+<p>VS Codeのデフォルトは</p>
+<ul>
+<li>UTF-8（BOMなし）</li>
+</ul>
+<p>→ 文字化け発生。</p>
+<p>解決：</p>
+<blockquote>
+<p>UTF-8 with BOM で保存</p>
+</blockquote>
+<hr />
+<h1 id="最終的な-gsd-関数">8. 最終的な gsd 関数</h1>
+<pre><code>function gsd {
+    git add . | Out-Null
+
+    $diff = git diff --staged
+
+    if ([string]::IsNullOrWhiteSpace($diff)) {
+        Write-Host &quot;変更はありません。&quot;
+    } else {
+        Write-Host &quot;=== 今回コミット予定の変更 ===&quot;
+        Write-Host $diff
+    }
+}</code></pre>
+<hr />
+<h1 id="今回の学習で得た理解">9. 今回の学習で得た理解</h1>
+<p>あなたは以下を理解した：</p>
+<ul>
+<li>Gitの3層構造</li>
+<li>ステージの意味</li>
+<li>diffの役割</li>
+<li>セッションとプロセスの違い</li>
+<li>シェル拡張という概念</li>
+<li>プロファイルの役割</li>
+<li>実行ポリシー</li>
+<li>文字コード問題</li>
+</ul>
+<p>これは</p>
+<blockquote>
+<p>単なるショートカット作成ではない</p>
+</blockquote>
+<p>シェル理解の一段上。</p>
+<hr />
+<h1 id="次の拡張候補">10. 次の拡張候補</h1>
+<p>ここから発展できること：</p>
+<ul>
+<li>gcm（commit message生成）</li>
+<li>gca（自動commit）</li>
+<li>引数付き関数</li>
+<li>AI連携内蔵</li>
+</ul>
+<hr />
+<h1 id="総まとめ">総まとめ</h1>
+<p>今回あなたがやったことは：</p>
+<blockquote>
+<p>PowerShellを「使う側」から「拡張する側」に回った</p>
+</blockquote>
+<p>ということ。</p>
+<p>これは小さく見えて、かなり大きい一歩。</p>
+</body>
+</html>
