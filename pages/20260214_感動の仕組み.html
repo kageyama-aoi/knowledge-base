@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260214_感動の仕組み</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<p>以下に、保存用のMarkdown形式でまとめます。</p>
+<hr />
+<h1
+id="なぜこのセットアップ指示書は優れているのか">なぜこのセットアップ指示書は優れているのか</h1>
+<p>― 構造分解と応用可能な設計パターン ―</p>
+<h2 id="完成形から逆算された一本道設計">1.
+完成形から逆算された「一本道設計」</h2>
+<h3 id="特徴">特徴</h3>
+<ul>
+<li>Step1〜Step6まで順序が固定されている</li>
+<li>最終確認まで定義されている</li>
+<li>ゴール状態が明確</li>
+</ul>
+<h3 id="本質">本質</h3>
+<p>単なる「作業リスト」ではなく、
+<strong>完成状態から逆算したロードマップ設計</strong>になっている。</p>
+<h3 id="応用ポイント">応用ポイント</h3>
+<ul>
+<li>まず完成状態を定義する</li>
+<li>そこから逆算して段階を切る</li>
+</ul>
+<hr />
+<h2 id="各stepに必ずヒアリングが入る設計">2.
+各Stepに必ずヒアリングが入る設計</h2>
+<h3 id="特徴-1">特徴</h3>
+<ul>
+<li>推測で進めない</li>
+<li>毎回ユーザー確認が入る</li>
+<li>環境・制約・目的を明確化</li>
+</ul>
+<h3 id="本質-1">本質</h3>
+<p><strong>要件定義をプロセス内に組み込んでいる</strong></p>
+<h3 id="応用ポイント-1">応用ポイント</h3>
+<ul>
+<li>作業前に必ず前提確認フェーズを入れる</li>
+<li>「確認 → 実行」の順番を崩さない</li>
+</ul>
+<hr />
+<h2 id="抽象-具体-カスタマイズの三段構造">3. 抽象 → 具体 →
+カスタマイズの三段構造</h2>
+<h3 id="構造">構造</h3>
+<ol type="1">
+<li>抽象目的を提示</li>
+<li>テンプレ（具体例）を提示</li>
+<li>カスタマイズ可能にする</li>
+</ol>
+<h3 id="本質-2">本質</h3>
+<p>再現性と柔軟性の両立。</p>
+<h3 id="応用ポイント-2">応用ポイント</h3>
+<ul>
+<li>いきなり自由設計にしない</li>
+<li>まず型を示す</li>
+<li>その後に調整可能にする</li>
+</ul>
+<hr />
+<h2 id="完了条件done定義が明確">4. 完了条件（Done定義）が明確</h2>
+<h3 id="特徴-2">特徴</h3>
+<ul>
+<li>「何をもって完了とするか」が明示されている</li>
+<li>接続テスト・確認作業が必須</li>
+</ul>
+<h3 id="本質-3">本質</h3>
+<p>曖昧さを排除している。</p>
+<h3 id="効果">効果</h3>
+<ul>
+<li>手戻りが減る</li>
+<li>不安が減る</li>
+<li>達成感が生まれる</li>
+</ul>
+<h3 id="応用ポイント-3">応用ポイント</h3>
+<ul>
+<li>各工程に「完了条件」を必ず書く</li>
+</ul>
+<hr />
+<h2 id="拡張可能な自己進化型設計">5. 拡張可能な自己進化型設計</h2>
+<h3 id="特徴-3">特徴</h3>
+<ul>
+<li>Skills追加可能</li>
+<li>Agent Team拡張可能</li>
+<li>外部連携可能</li>
+<li>Git管理まで設計</li>
+</ul>
+<h3 id="本質-4">本質</h3>
+<p>これは「セットアップ」ではなく <strong>拡張前提のOS設計</strong></p>
+<h3 id="応用ポイント-4">応用ポイント</h3>
+<ul>
+<li>初期構築時から拡張性を設計に入れる</li>
+<li>固定構造ではなく増殖可能構造にする</li>
+</ul>
+<hr />
+<h2 id="認知負荷をコントロールする段階設計">6.
+認知負荷をコントロールする段階設計</h2>
+<h3 id="特徴-4">特徴</h3>
+<ul>
+<li>1Step＝1テーマ</li>
+<li>粒度が一定</li>
+<li>複数の概念を同時に扱わせない</li>
+</ul>
+<h3 id="本質-5">本質</h3>
+<p>人間の脳の処理能力を前提に設計されている。</p>
+<h3 id="応用ポイント-5">応用ポイント</h3>
+<ul>
+<li>一度に考えさせる範囲を制限する</li>
+<li>構造を段階分割する</li>
+</ul>
+<hr />
+<h2 id="この指示書の骨格再利用可能テンプレ">7.
+この指示書の骨格（再利用可能テンプレ）</h2>
+<pre><code>① 完成形を提示
+② 段階分割
+③ 各段階でヒアリング
+④ テンプレ提示
+⑤ 実行手順明示
+⑥ 完了条件定義
+⑦ 拡張設計
+⑧ 最終テスト</code></pre>
+<p>これが本質的な設計フレームワーク。</p>
+<hr />
+<h1 id="この構造を応用できる領域">この構造を応用できる領域</h1>
+<ul>
+<li>副業運営OS</li>
+<li>演劇制作フロー</li>
+<li>システム開発テンプレート</li>
+<li>個人経営管理基盤</li>
+<li>チームプロジェクト設計</li>
+<li>学習管理システム</li>
+</ul>
+<hr />
+<h1 id="なぜこのまとめ方をしたか">なぜこのまとめ方をしたか</h1>
+<p>あなたが求めているのは 「感想」ではなく「構造理解」。</p>
+<p>そのため：</p>
+<ul>
+<li>感情表現を排除</li>
+<li>抽象化</li>
+<li>再利用可能な骨格化</li>
+<li>応用可能な設計テンプレ化</li>
+</ul>
+<p>という整理でまとめた。</p>
+<hr />
+<p>必要であれば、次は</p>
+<ul>
+<li>「この構造を自分で作るためのチェックリスト化」</li>
+<li>「設計テンプレとして空白版を作成」</li>
+<li>「あなたの副業OSに具体転用」</li>
+</ul>
+<p>まで展開できます。</p>
+<p>どのレベルまで深掘りますか。</p>
+</body>
+</html>
