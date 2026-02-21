@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260221_2＿AI開発_環境構築_Vercel_Cloudflare_Supabase</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="vercel-cloudflare-supabase">Vercel / Cloudflare / Supabase</h1>
+<h2
+id="無料プラン比較詳細整理基準日2026-02-21">無料プラン比較＆詳細整理（基準日：2026-02-21）</h2>
+<hr />
+<h1 id="まずは直感比較表">1. まずは直感比較表</h1>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 27%" />
+<col style="width: 32%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>項目</th>
+<th>Vercel (Hobby)</th>
+<th>Cloudflare (Free)</th>
+<th>Supabase (Free)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>主な役割</td>
+<td>フロント公開</td>
+<td>CDN＋エッジ実行</td>
+<td>バックエンド（DB＋認証）</td>
+</tr>
+<tr class="even">
+<td>何を解決する？</td>
+<td>画面を即公開</td>
+<td>世界中に速く届ける</td>
+<td>DB・ログインを即用意</td>
+</tr>
+<tr class="odd">
+<td>得意分野</td>
+<td>フロント特化</td>
+<td>配信・軽量処理</td>
+<td>データ管理</td>
+</tr>
+<tr class="even">
+<td>コード実行場所</td>
+<td>サーバーレス（Vercel側）</td>
+<td>世界中のエッジ</td>
+<td>サーバー側（DB中心）</td>
+</tr>
+<tr class="odd">
+<td>無料での強み</td>
+<td>Git push → 即公開</td>
+<td>100kリクエスト/日</td>
+<td>Postgres本物DB</td>
+</tr>
+<tr class="even">
+<td>無料での壁</td>
+<td>関数実行時間制限</td>
+<td>CPU 10ms制限</td>
+<td>500MB制限／停止あり</td>
+</tr>
+<tr class="odd">
+<td>向いている人</td>
+<td>UIを早く試したい</td>
+<td>パフォーマンス重視</td>
+<td>DB設計できる人</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="無料枠の上限まとめ数値比較">2.
+無料枠の上限まとめ（数値比較）</h1>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 18%" />
+<col style="width: 45%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>項目</th>
+<th>Vercel</th>
+<th>Cloudflare Workers</th>
+<th>Supabase</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>リクエスト上限</td>
+<td>1,000,000 Edge/月</td>
+<td>100,000/日</td>
+<td>MAU 50,000</td>
+</tr>
+<tr class="even">
+<td>実行時間制限</td>
+<td>最大60秒</td>
+<td>約10ms/回</td>
+<td>DB中心（制限なしだが容量制限あり）</td>
+</tr>
+<tr class="odd">
+<td>DB容量</td>
+<td>なし</td>
+<td>KV 1GB</td>
+<td>500MB</td>
+</tr>
+<tr class="even">
+<td>ストレージ</td>
+<td>なし</td>
+<td>KV</td>
+<td>1GB</td>
+</tr>
+<tr class="odd">
+<td>ビルド回数</td>
+<td>100/日</td>
+<td>500/月（Pages）</td>
+<td>なし</td>
+</tr>
+<tr class="even">
+<td>プロジェクト数</td>
+<td>200</td>
+<td>実質無制限</td>
+<td>2つまで</td>
+</tr>
+<tr class="odd">
+<td>停止リスク</td>
+<td>なし</td>
+<td>上限超で停止</td>
+<td>7日低活動で停止</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="各サービス詳細">3. 各サービス詳細</h1>
+<hr />
+<h2 id="vercelhobby">■ Vercel（Hobby）</h2>
+<h3 id="できること">できること</h3>
+<ul>
+<li>GitHub連携で自動デプロイ</li>
+<li>フロントエンド公開</li>
+<li>サーバーレス関数利用</li>
+<li>Edgeリクエスト最大1,000,000</li>
+<li>ビルド月6,000分</li>
+</ul>
+<h3 id="強み">強み</h3>
+<ul>
+<li>開発→公開が最速</li>
+<li>プレビューURL自動生成</li>
+<li>フロントに最適化</li>
+</ul>
+<h3 id="制約">制約</h3>
+<ul>
+<li>関数実行時間最大60秒</li>
+<li>重い処理は不向き</li>
+<li>チーム機能制限あり</li>
+</ul>
+<hr />
+<h2 id="cloudflarefree">■ Cloudflare（Free）</h2>
+<h3 id="workers">Workers</h3>
+<ul>
+<li>100,000リクエスト/日</li>
+<li>約10ms CPU時間</li>
+<li>KVストレージ1GB</li>
+</ul>
+<h3 id="pages">Pages</h3>
+<ul>
+<li>月500ビルド</li>
+<li>静的サイト向き</li>
+<li>CDN高速配信</li>
+</ul>
+<h3 id="強み-1">強み</h3>
+<ul>
+<li>世界規模の高速配信</li>
+<li>軽量APIに最適</li>
+<li>セキュリティ強い</li>
+</ul>
+<h3 id="制約-1">制約</h3>
+<ul>
+<li>CPU時間が短い</li>
+<li>重いDB処理は難しい</li>
+</ul>
+<hr />
+<h2 id="supabasefree">■ Supabase（Free）</h2>
+<h3 id="できること-1">できること</h3>
+<ul>
+<li>PostgreSQL DB（500MB）</li>
+<li>認証機能</li>
+<li>API自動生成</li>
+<li>ストレージ1GB</li>
+<li>MAU 50,000</li>
+</ul>
+<h3 id="強み-2">強み</h3>
+<ul>
+<li>本格RDB</li>
+<li>Row Level Security</li>
+<li>バックエンド一式揃う</li>
+</ul>
+<h3 id="制約-2">制約</h3>
+<ul>
+<li>2プロジェクトまで</li>
+<li>7日低活動で停止</li>
+<li>DB設計力が必要</li>
+</ul>
+<hr />
+<h1 id="どう組み合わせる">4. どう組み合わせる？</h1>
+<h2 id="最も一般的な無料構成">最も一般的な無料構成</h2>
+<p>Vercel（画面）<br />
+＋<br />
+Supabase（DB・認証）</p>
+<p>→ MVP開発向き</p>
+<hr />
+<h2 id="高速配信重視">高速配信重視</h2>
+<p>Cloudflare Pages<br />
+＋<br />
+Workers<br />
+＋<br />
+Supabase</p>
+<p>→ パフォーマンス重視構成</p>
+<hr />
+<h1 id="ai駆動開発で一緒に出てくる用語おまけ">5.
+AI駆動開発で一緒に出てくる用語（おまけ）</h1>
+<ul>
+<li>Serverless</li>
+<li>Edge Functions</li>
+<li>Webhook</li>
+<li>CI/CD</li>
+<li>RAG</li>
+<li>MCP</li>
+<li>BaaS</li>
+<li>Jamstack</li>
+<li>Agentic Workflow</li>
+</ul>
+<hr />
+<h1 id="全体まとめ">6. 全体まとめ</h1>
+<p>Vercel<br />
+→ 画面を素早く公開</p>
+<p>Cloudflare<br />
+→ 世界中で高速化</p>
+<p>Supabase<br />
+→ DBと認証を即用意</p>
+<p>最近の開発は：</p>
+<p>AIで作る<br />
+↓<br />
+即公開<br />
+↓<br />
+即テスト<br />
+↓<br />
+高速改善</p>
+<p>というループを回す思想に最適化されている。</p>
+</body>
+</html>
