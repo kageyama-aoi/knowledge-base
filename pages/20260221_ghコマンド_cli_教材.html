@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GH CLI 実践教材</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #d2a8ff;
+    --warn: #ffa657;
+    --danger: #f85149;
+    --star: #e3b341;
+    --code-bg: #1f2937;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  /* ヘッダー */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 48px 0 40px;
+    text-align: center;
+    background: linear-gradient(180deg, #161b22 0%, var(--bg) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 200px;
+    background: radial-gradient(ellipse, rgba(88,166,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .header-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .header-sub {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* メインレイアウト */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+
+  /* TOC */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin-bottom: 56px;
+  }
+
+  .toc-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .toc-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 24px;
+  }
+
+  .toc-list a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.15s;
+  }
+
+  .toc-list a:hover { color: var(--text); }
+
+  .toc-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 20px;
+  }
+
+  /* セクション */
+  section {
+    margin-bottom: 64px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.3);
+    border-radius: 4px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 28px 0 12px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    line-height: 1.8;
+  }
+
+  p strong {
+    color: var(--warn);
+    font-weight: 500;
+  }
+
+  /* 前提状態バッジ */
+  .prereq {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(63,185,80,0.1);
+    border: 1px solid rgba(63,185,80,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--accent2);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 20px;
+  }
+
+  .prereq::before {
+    content: '▶';
+    font-size: 8px;
+  }
+
+  /* コードブロック */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 12px 0 20px;
+  }
+
+  .code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .copy-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover {
+    color: var(--text);
+    border-color: var(--text-muted);
+  }
+
+  pre {
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  .cmd { color: #79c0ff; }
+  .flag { color: #d2a8ff; }
+  .arg { color: #a5d6ff; }
+  .comment { color: #484f58; font-style: italic; }
+  .str { color: #a5d6ff; }
+  .important { color: var(--warn); }
+
+  /* 前提状態テーブル */
+  .prereq-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .prereq-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .prereq-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    vertical-align: top;
+  }
+
+  .prereq-table tr:last-child td { border-bottom: none; }
+
+  .prereq-table tr:hover td {
+    background: rgba(255,255,255,0.02);
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--accent3);
+  }
+
+  .badge-ok {
+    display: inline-block;
+    background: rgba(63,185,80,0.15);
+    color: var(--accent2);
+    font-size: 11px;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .badge-need {
+    display: inline-block;
+    background: rgba(255,166,87,0.15);
+    color: var(--warn);
+    font-size: 11px;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* まとめテーブル */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .summary-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .summary-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid rgba(48,54,61,0.4);
+    vertical-align: middle;
+  }
+
+  .summary-table tr:last-child td { border-bottom: none; }
+  .summary-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .stars { color: var(--star); letter-spacing: 1px; font-size: 12px; }
+
+  /* ポイントカード */
+  .tip-card {
+    background: rgba(88,166,255,0.05);
+    border: 1px solid rgba(88,166,255,0.2);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .tip-card strong {
+    color: var(--accent);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* パターンカード */
+  .pattern-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .pattern-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent3);
+    margin-bottom: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* フッター */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 24px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">Learning Material</div>
+  <h1>GH CLI 実践教材</h1>
+  <div class="header-sub">Issue・PR操作 ＋ GitHub Actions連携</div>
+</header>
+
+<div class="container">
+
+  <!-- TOC -->
+  <nav class="toc">
+    <div class="toc-title">Contents</div>
+    <ul class="toc-list">
+      <li><a href="#s1"><span class="toc-num">01</span>コマンドの「前提状態」</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>基本：認証・状態確認</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>--web フラグ ★神コマンド</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Issue操作</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>PR操作</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>GitHub Actions連携</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>リポジトリ操作</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>自動化パターン</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>まとめ TOP 11</a></li>
+    </ul>
+  </nav>
+
+  <!-- S1 前提状態 -->
+  <section id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>重要：コマンドには「前提状態」がある</h2>
+    </div>
+    <p>GH CLIのコマンドは、<strong>対象データが存在しないと動かないものがある</strong>というのが最初の重要な気づきです。まず試すなら <code>gh repo view --web</code> から。リポジトリさえあれば前提なしで動きます。</p>
+    <table class="prereq-table">
+      <thead>
+        <tr>
+          <th>コマンド</th>
+          <th>必要な前提状態</th>
+          <th>状態</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>gh repo view --web</code></td>
+          <td>リポジトリがあればOK</td>
+          <td><span class="badge-ok">即使える</span></td>
+        </tr>
+        <tr>
+          <td><code>gh issue list / create</code></td>
+          <td>リポジトリがあればOK</td>
+          <td><span class="badge-ok">即使える</span></td>
+        </tr>
+        <tr>
+          <td><code>gh pr list / create</code></td>
+          <td>ブランチがpushされていること</td>
+          <td><span class="badge-need">要push</span></td>
+        </tr>
+        <tr>
+          <td><code>gh run list / view</code></td>
+          <td>Actionsが最低1回実行済みであること</td>
+          <td><span class="badge-need">要実行</span></td>
+        </tr>
+        <tr>
+          <td><code>gh workflow run</code></td>
+          <td><code>.github/workflows/</code>にymlファイルがあること</td>
+          <td><span class="badge-need">要yml</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- S2 認証 -->
+  <section id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>基本：認証・状態確認</h2>
+    </div>
+    <div class="prereq">リポジトリがあればOK</div>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-label">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmd">gh</span> auth status   <span class="comment"># 認証アカウントの確認・トークン期限切れチェック</span></pre>
+    </div>
+    <p>現在どのアカウントで認証しているか確認します。トークン期限切れなど問題の第一チェックポイントです。</p>
+  </section>
+
+  <!-- S3 --web -->
+  <section id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>--web フラグ ★ 地味に神コマンド</h2>
+    </div>
+    <p>コマンドに <code>--web</code> を付けると、<strong>該当のGitHubページをブラウザで直接開きます</strong>。ブラウザでリポジトリを探してメニューをたどる手間が完全になくなります。</p>
+    <div class="tip-card">
+      <strong>★ まず最初に試すべき1コマンド</strong>
+      前提状態が不要で、リポジトリさえあれば今すぐ動く。<code>gh repo view --web</code> でGitHubのリポジトリページが直接開きます。
+    </div>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-label">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmd">gh</span> repo view <span class="flag">--web</span>          <span class="comment"># ★前提不要。リポジトリのトップページを開く</span>
+<span class="cmd">gh</span> issue view <span class="arg">42</span> <span class="flag">--web</span>     <span class="comment"># Issue #42のページを開く</span>
+<span class="cmd">gh</span> pr view <span class="arg">15</span> <span class="flag">--web</span>        <span class="comment"># PR #15のページを開く</span>
+<span class="cmd">gh</span> run view <span class="flag">--web</span>           <span class="comment"># Actions実行ページを開く（要：Actions実行済み）</span>
+<span class="cmd">gh</span> workflow view <span class="flag">--web</span>      <span class="comment"># ワークフローのページを開く（要：ymlファイル）</span></pre>
+    </div>
+    <p>ターミナルで作業しながらブラウザも確認したいとき、コンテキストスイッチのコストがほぼゼロになります。</p>
+  </section>
+
+  <!-- S4 Issue -->
+  <section id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Issue操作 ★★★</h2>
+    </div>
+    <div class="prereq">リポジトリがあればOK（即使える）</div>
+
+    <h3>一覧を見る</h3>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-label">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmd">gh</span> issue list                          <span class="comment"># openのIssue一覧</span>
+<span class="cmd">gh</span> issue list <span class="flag">--state</span> <span class="arg">all</span>             <span class="comment"># クローズ済みも含めて全件</span>
+<span class="cmd">gh</span> issue list <span class="flag">--label</span> <span class="str">"bug"</span>           <span class="comment"># ラベルで絞り込み</span></pre>
+    </div>
+
+    <h3>Issueを作る</h3>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-label">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmd">gh</span> issue create <span class="flag">--title</span> <span class="str">"バグ修正"</span> <span class="flag">--body</span> <span class="str">"詳細をここに"</span>
+<span class="cmd">gh</span> issue create <span class="flag">--title</span> <span class="str">"タイトル"</span> <span class="flag">--body</span> <span class="str">"本文"</span> <span class="flag">--label</span> <span class="str">"bug"</span> <span class="flag">--assignee</span> <span class="str">"@me"</span>
+<span class="cmd">gh</span> issue create <span class="flag">--title</span> <span class="str">"タイトル"</span> <span class="flag">--body-file</span> <span class="important">issue_body.md</span>   <span class="comment"># ★AIとの連携で超重要</span></pre>
+    </div>
+    <div class="tip-card">
+      <strong>★ --body-file がAI連携の核心</strong>
+      AIが生成した内容をMarkdownファイルに書き出してから <code>--body-file</code> で渡すと、自動でIssueを量産できます。
+    </div>
+
+    <h3>Issueを見る・操作する</h3>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-label">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmd">gh</span> issue view <span class="arg">42</span>                       <span class="comment"># ターミナルで詳細表示</span>
+<span class="cmd">gh</span> issue view <span class="arg">42</span> <span class="flag">--web</span>                 <span class="comment"># ブラウザで開く</span>
+<span class="cmd">gh</span> issue close <span class="arg">42</span>                      <span class="comment"># クローズ</span>
+<span class="cmd">gh</span> issue comment <span class="arg">42</span> <span class="flag">--body</span> <span class="str">"対応完了"</span>  <span class="comment"># コメント追加</span></pre>
+    </div>
+
+    <h3>★ ぜひ知っておいてほしいコマンド</h3>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-label">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmd">gh</span> issue develop <span class="arg">42</span> <span class="flag">--checkout</span>        <span class="comment"># Issue#42紐付きブランチを作ってチェックアウト</span></pre>
+    </div>
+    <p>Issue番号がブランチ名に含まれるので、GitHubがIssueとPRを自動で関連付けてくれます。<strong>Issue→開発フローを自動化する際の核心</strong>です。</p>
+  </section>
+
+  <!-- S5 PR -->
+  <section id="s5">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>PR操作 ★★★</h2>
+    </div>
+    <div class="prereq">ブランチがpushされていること</div>
+
+    <h3>PRを作る</h3>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-label">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmd">gh</span> pr create <span class="flag">--title</span> <span class="str">"feature: ログイン追加"</span> <span class="flag">--body</span> <span class="str">"Close #42"</span>   <span class="comment"># マージ時にIssue自動クローズ</span>
+<span class="cmd">gh</span> pr create <span class="flag">--draft</span>                                              <span class="comment"># ドラフトPR</span>
+<span class="cmd">gh</span> pr create <span class="flag">--base</span> <span class="arg">main</span> <span class="flag">--head</span> <span class="arg">feature/login</span>                   <span class="comment"># ブランチを明示</span></pre>
+    </div>
+
+    <h3>一覧・確認・操作</h3>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-label">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmd">gh</span> pr list                             <span class="comment"># オープンなPR一覧</span>
+<span class="cmd">gh</span> pr view <span class="arg">15</span>                          <span class="comment"># PR #15の詳細</span>
+<span class="cmd">gh</span> pr view <span class="arg">15</span> <span class="flag">--web</span>                   <span class="comment"># ブラウザで開く</span>
+<span class="cmd">gh</span> pr checkout <span class="arg">15</span>                     <span class="comment"># ローカルにチェックアウト（他人のPR確認に便利）</span>
+<span class="cmd">gh</span> pr merge <span class="arg">15</span> <span class="flag">--squash</span>              <span class="comment"># スカッシュマージ</span>
+<span class="cmd">gh</span> pr merge <span class="arg">15</span> <span class="flag">--merge</span>               <span class="comment"># 通常マージ</span></pre>
+    </div>
+  </section>
+
+  <!-- S6 Actions -->
+  <section id="s6">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>GitHub Actions連携 ★★★</h2>
+    </div>
+    <div class="prereq">.github/workflows/ にymlファイルがあり、1回以上実行済みであること</div>
+
+    <h3>実行状態を確認する</h3>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-label">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmd">gh</span> run list                            <span class="comment"># 実行一覧（成功・失敗・進行中）</span>
+<span class="cmd">gh</span> run list <span class="flag">--limit</span> <span class="arg">5</span>                 <span class="comment"># 直近5件</span>
+<span class="cmd">gh</span> run view                            <span class="comment"># 最新runの詳細</span>
+<span class="cmd">gh</span> run view <span class="flag">--log</span>                      <span class="comment"># ログ全体を出力（CIが落ちた原因調査）</span>
+<span class="cmd">gh</span> run view <span class="flag">--web</span>                      <span class="comment"># ブラウザで確認</span>
+<span class="cmd">gh</span> run watch                           <span class="comment"># ★リアルタイム監視（自動化スクリプトでも使える）</span></pre>
+    </div>
+
+    <h3>ワークフローを手動起動・管理</h3>
+    <div class="prereq">ymlにworkflow_dispatchトリガーが設定されていること</div>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-label">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmd">gh</span> workflow run <span class="arg">deploy.yml</span>
+<span class="cmd">gh</span> workflow run <span class="arg">deploy.yml</span> <span class="flag">--field</span> <span class="arg">environment</span>=<span class="str">staging</span>   <span class="comment"># インプット値を渡す</span>
+<span class="cmd">gh</span> workflow list                       <span class="comment"># 一覧と有効/無効状態</span>
+<span class="cmd">gh</span> workflow enable <span class="arg">deploy.yml</span>
+<span class="cmd">gh</span> workflow disable <span class="arg">deploy.yml</span></pre>
+    </div>
+  </section>
+
+  <!-- S7 リポジトリ -->
+  <section id="s7">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>リポジトリ操作（補足）</h2>
+    </div>
+    <div class="code-block">
+      <div class="code-block-header">
+        <span class="code-label">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      </div>
+      <pre><span class="cmd">gh</span> repo view                           <span class="comment"># 現在のリポジトリの基本情報</span>
+<span class="cmd">gh</span> repo view <span class="flag">--web</span>                    <span class="comment"># ブラウザで開く（前提不要）</span>
+<span class="cmd">gh</span> repo clone <span class="arg">ユーザー名/リポジトリ名</span>   <span class="comment"># クローン</span>
+<span class="cmd">gh</span> repo create <span class="arg">my-new-repo</span> <span class="flag">--public</span>   <span class="comment"># 新リポジトリを作成</span></pre>
+    </div>
+  </section>
+
+  <!-- S8 自動化パターン -->
+  <section id="s8">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>自動化の入り口：組み合わせパターン</h2>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-title">パターン① コミット後にIssueを自動作成（AIと連携）</div>
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-label">bash</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="comment"># AIが生成したIssue本文をファイルに書き出した後</span>
+<span class="cmd">gh</span> issue create <span class="flag">--title</span> <span class="str">"$(cat issue_title.txt)"</span> <span class="flag">--body-file</span> <span class="arg">issue_body.md</span> <span class="flag">--label</span> <span class="str">"auto-generated"</span></pre>
+      </div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-title">パターン② PRを作ってCIの完了を待つ</div>
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-label">bash</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmd">gh</span> pr create <span class="flag">--title</span> <span class="str">"fix: バグ修正"</span> <span class="flag">--body</span> <span class="str">"Close #42"</span>
+<span class="cmd">gh</span> run watch   <span class="comment"># CIが終わるまでここで待機</span></pre>
+      </div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-title">パターン③ Issue → ブランチ → PR を一気に進める</div>
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-label">bash</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="cmd">gh</span> issue develop <span class="arg">42</span> <span class="flag">--checkout</span>   <span class="comment"># Issue#42用ブランチを作ってチェックアウト</span>
+<span class="comment"># ... 開発作業 ...</span>
+<span class="cmd">git</span> add . <span class="flag">&&</span> <span class="cmd">git</span> commit <span class="flag">-m</span> <span class="str">"fix: #42対応"</span>
+<span class="cmd">git</span> push
+<span class="cmd">gh</span> pr create <span class="flag">--title</span> <span class="str">"fix: #42対応"</span> <span class="flag">--body</span> <span class="str">"Close #42"</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- S9 まとめ -->
+  <section id="s9">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>まとめ：優先的に覚えるコマンド TOP 11</h2>
+    </div>
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>優先度</th>
+          <th>コマンド</th>
+          <th>前提状態</th>
+          <th>できること</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="stars">★★★</span></td>
+          <td><code>gh repo view --web</code></td>
+          <td><span class="badge-ok">即使える</span></td>
+          <td>最初に試すべき1コマンド</td>
+        </tr>
+        <tr>
+          <td><span class="stars">★★★</span></td>
+          <td><code>gh issue create</code></td>
+          <td><span class="badge-ok">即使える</span></td>
+          <td>IssueをCLIから作成（自動化の核心）</td>
+        </tr>
+        <tr>
+          <td><span class="stars">★★★</span></td>
+          <td><code>gh pr create</code></td>
+          <td><span class="badge-need">要push</span></td>
+          <td>PRをCLIから作成</td>
+        </tr>
+        <tr>
+          <td><span class="stars">★★★</span></td>
+          <td><code>gh run list</code></td>
+          <td><span class="badge-need">要実行</span></td>
+          <td>Actionsの実行状態確認</td>
+        </tr>
+        <tr>
+          <td><span class="stars">★★☆</span></td>
+          <td><code>gh issue list</code></td>
+          <td><span class="badge-ok">即使える</span></td>
+          <td>Issue一覧確認</td>
+        </tr>
+        <tr>
+          <td><span class="stars">★★☆</span></td>
+          <td><code>gh pr list</code></td>
+          <td><span class="badge-need">要push</span></td>
+          <td>PR一覧確認</td>
+        </tr>
+        <tr>
+          <td><span class="stars">★★☆</span></td>
+          <td><code>gh run watch</code></td>
+          <td><span class="badge-need">要実行</span></td>
+          <td>CI完了まで待機・監視</td>
+        </tr>
+        <tr>
+          <td><span class="stars">★★☆</span></td>
+          <td><code>gh workflow run</code></td>
+          <td><span class="badge-need">要yml</span></td>
+          <td>ワークフロー手動起動</td>
+        </tr>
+        <tr>
+          <td><span class="stars">★☆☆</span></td>
+          <td><code>gh pr checkout</code></td>
+          <td><span class="badge-need">要push</span></td>
+          <td>他人のPRをローカルで確認</td>
+        </tr>
+        <tr>
+          <td><span class="stars">★☆☆</span></td>
+          <td><code>gh issue develop</code></td>
+          <td><span class="badge-ok">Issue存在</span></td>
+          <td>Issue連携ブランチ作成</td>
+        </tr>
+        <tr>
+          <td><span class="stars">★☆☆</span></td>
+          <td><code>gh run view --log</code></td>
+          <td><span class="badge-need">要実行</span></td>
+          <td>CIのログ確認</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
+
+<footer>
+  GH CLI 実践教材 — 作成日：2026-02-21 &nbsp;|&nbsp; 対象：GH CLI初心者〜中級者入り口
+</footer>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 1500);
+  });
+}
+</script>
+
+</body>
+</html>
