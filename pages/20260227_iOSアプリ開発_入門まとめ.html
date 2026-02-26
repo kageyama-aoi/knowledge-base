@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260227_iOSアプリ開発_入門まとめ</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="ios-アプリ開発-入門まとめ">iOS アプリ開発 入門まとめ</h1>
+<blockquote>
+<p>Web開発経験者が「自分用iPhoneアプリ」を作るための全体像とつまずきポイントを先に掴む</p>
+</blockquote>
+<hr />
+<h2 id="前提ゴール">前提・ゴール</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>目的</td>
+<td>自分用のiOSアプリを作り、自分のiPhoneに入れて使える状態にする</td>
+</tr>
+<tr class="even">
+<td>配布方法</td>
+<td><strong>Aルート（完全自分用）</strong> — App
+Store不要、審査なし</td>
+</tr>
+<tr class="odd">
+<td>環境</td>
+<td>Mac あり</td>
+</tr>
+<tr class="even">
+<td>背景</td>
+<td>Webアプリ中心の経験あり。iOS特有のUI・署名・配布の仕組みが未経験</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="ios-ui-の用語整理">iOS UI の用語整理</h2>
+<h3 id="ドラムロール入力の正式名称">ドラムロール入力の正式名称</h3>
+<p>よく「ドラムロールみたいに回して選ぶやつ」と表現されるUIの正式名称：</p>
+<table>
+<thead>
+<tr class="header">
+<th>呼び方</th>
+<th>使う場面</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>ホイールピッカー（Wheel Picker）</strong></td>
+<td>UI呼称として最もわかりやすい</td>
+</tr>
+<tr class="even">
+<td><strong>ピッカー（Picker）</strong></td>
+<td>設計・開発現場での総称</td>
+</tr>
+<tr class="odd">
+<td>スピナー（Spinner）</td>
+<td>Android文脈で使われる（iOS文脈では使わない）</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="実装での名称これを検索実装に使う">実装での名称（これを検索・実装に使う）</h3>
+<p><strong>UIKit：</strong> - <code>UIPickerView</code> —
+汎用選択ピッカー - <code>UIDatePicker</code> — 日付・時間専用</p>
+<p><strong>SwiftUI：</strong> - <code>Picker</code> +
+<code>.pickerStyle(.wheel)</code> - <code>DatePicker</code> +
+<code>.datePickerStyle(.wheel)</code></p>
+<blockquote>
+<p>「ドラムロール」はイメージとして正しいが、実装・検索には通じない。
+<strong>実装に直結する正式名称に翻訳して使う</strong>ことが重要。</p>
+</blockquote>
+<hr />
+<h2
+id="iosアプリ開発の全体像aルート自分用">iOSアプリ開発の全体像（Aルート：自分用）</h2>
+<pre><code>① 開発環境準備（Xcodeの導入）
+       ↓
+② アプリ実装（最小の1画面から）
+       ↓
+③ 実機テスト（自分のiPhoneに直接インストール）
+       ↓
+④ 使いながら改善</code></pre>
+<ul>
+<li>App Store公開・審査は<strong>不要</strong></li>
+<li>Apple Developer
+Program（年額登録）も最初は<strong>不要</strong></li>
+<li>無料アカウントで実機インストールまで完結できる</li>
+</ul>
+<hr />
+<h2 id="vs-code-と-xcode-の役割の違い">VS Code と Xcode
+の役割の違い</h2>
+<h3 id="結論">結論</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ツール</th>
+<th>できること</th>
+<th>できないこと</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>VS Code</td>
+<td>コードの編集</td>
+<td>ビルド・署名・実機転送</td>
+</tr>
+<tr class="even">
+<td>Xcode</td>
+<td>コード編集 ＋ ビルド ＋ 署名 ＋ 実機インストール ＋ デバッグ</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>整理：</strong> 編集はVS
+Codeでもできるが、<strong>動かす最後の責任はXcodeが持つ</strong>。</p>
+<h3 id="なぜxcodeが必須なのか">なぜXcodeが必須なのか</h3>
+<ul>
+<li>iOSアプリは<strong>署名（code
+signing）がないと端末で動かない</strong></li>
+<li>iOS SDKとビルドツールはApple提供でXcodeに統合されている</li>
+<li>Webの「保存 → 即ブラウザ確認」とは違い、必ず「ビルド → 署名 →
+実行」が入る</li>
+</ul>
+<hr />
+<h2 id="xcodeとは何かweb開発者視点">Xcodeとは何か（Web開発者視点）</h2>
+<p>Web開発の感覚に置き換えると：</p>
+<blockquote>
+<p><strong>VS Code ＋ ビルド環境 ＋ Apple署名システム ＋
+実行環境</strong> が一体化したもの</p>
+</blockquote>
+<h3 id="画面構成">画面構成</h3>
+<pre><code>┌─────────────────────────────────────────┐
+│  上：実行（▶︎） ／ 実機・シミュレータ選択    │
+├──────┬──────────────────────┬───────────┤
+│ 左    │       中央            │    右     │
+│ナビ   │    エディタ（コード）   │インスペクタ│
+│ゲータ  │  SwiftUI Preview     │  設定・属性│
+│ファイル│                      │          │
+├──────┴──────────────────────┴───────────┤
+│  下：デバッグ（エラー・ログ）               │
+└─────────────────────────────────────────┘</code></pre>
+<p><strong>最初に使う領域はこの3つだけで十分：</strong></p>
+<ul>
+<li>左：プロジェクトファイル</li>
+<li>中央：SwiftUIコード</li>
+<li>上：▶︎実行ボタン</li>
+</ul>
+<hr />
+<h2
+id="ゼロからiphoneに入れるまでの時間見積もり">ゼロからiPhoneに入れるまでの時間見積もり</h2>
+<p><strong>合計目安：2.5〜4時間</strong>（回線速度・Mac性能による）</p>
+<table>
+<thead>
+<tr class="header">
+<th>工程</th>
+<th>目安時間</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Xcodeダウンロード（約15GB）</td>
+<td>30〜90分（最長工程）</td>
+</tr>
+<tr class="even">
+<td>初回起動＋追加コンポーネント</td>
+<td>10〜15分</td>
+</tr>
+<tr class="odd">
+<td>新規プロジェクト作成</td>
+<td>10〜20分</td>
+</tr>
+<tr class="even">
+<td>実機接続＋署名設定</td>
+<td>20分前後</td>
+</tr>
+<tr class="odd">
+<td>ビルド→実機インストール</td>
+<td>10〜20分</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2
+id="よくつまずくポイント技術ではなくappleの仕組み">よくつまずくポイント（技術ではなく”Appleの仕組み”）</h2>
+<h3 id="つまずきtop3">つまずきTop3</h3>
+<ol type="1">
+<li><strong>署名（Signing）周り</strong> —
+設定が通らない・エラーが出る</li>
+<li><strong>iPhone側の「開発者を信頼」設定</strong> —
+これをしないとアプリが開けない</li>
+<li><strong>Apple IDログイン・2段階認証</strong> —
+認証タイミングで詰まりやすい</li>
+</ol>
+<h3
+id="無料アカウントの制限知っておくと焦らない">無料アカウントの制限（知っておくと焦らない）</h3>
+<blockquote>
+<p><strong>インストールしたアプリは7日で期限切れになる</strong></p>
+</blockquote>
+<ul>
+<li>期限が切れてもアプリのデータは消えない</li>
+<li>再ビルドしてインストールし直せば復活する</li>
+<li>自分用Aルートでは許容範囲内</li>
+</ul>
+<hr />
+<h2
+id="実行計画2日間で実機インストールまで">実行計画：2日間で「実機インストール」まで</h2>
+<h3 id="day-1金曜夜環境構築">Day 1（金曜夜）：環境構築</h3>
+<p><strong>ゴール：Xcodeが起動してApple IDが登録済みの状態</strong></p>
+<p>事前確認：</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Macの空き容量が
+<strong>30GB以上</strong> あるか</label></li>
+<li><label><input
+type="checkbox" />macOSが最新（または推奨バージョン）か</label></li>
+<li><label><input type="checkbox" />回線が安定しているか</label></li>
+</ul>
+<p>手順：</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />App
+StoreからXcodeをインストール（約15GB・最大90分）</label></li>
+<li><label><input
+type="checkbox" />初回起動（追加コンポーネントのインストール・規約同意）</label></li>
+<li><label><input type="checkbox" />Xcode Settings → Accounts → Apple
+IDを追加</label></li>
+<li><label><input type="checkbox" />起動OK・エラーなし・Apple
+IDが表示されているか確認</label></li>
+</ul>
+<hr />
+<h3 id="day-2土曜初めてのアプリ実行">Day
+2（土曜）：初めてのアプリ実行</h3>
+<p><strong>ゴール：SwiftUIテンプレートアプリをシミュレータ・実機で動かす</strong></p>
+<ul class="task-list">
+<li><label><input
+type="checkbox" />新規プロジェクトを作成する（SwiftUI選択）</label></li>
+<li><label><input type="checkbox" />シミュレータで ▶︎
+実行する</label></li>
+<li><label><input
+type="checkbox" />余力があれば実機に接続して「開発者を信頼」設定まで</label></li>
+<li><label><input
+type="checkbox" />実機インストールを確認する</label></li>
+</ul>
+<hr />
+<h2
+id="その後の進め方実機インストール後">その後の進め方（実機インストール後）</h2>
+<p>自分用アプリのテーマに合わせて：</p>
+<ol type="1">
+<li><strong>画面設計</strong> — 1画面で完結する最小構成から始める</li>
+<li><strong>データ設計</strong> — まず永続化なし → 必要になったら
+<code>UserDefaults</code> / <code>SwiftData</code></li>
+<li><strong>使いながら改善</strong> — 動いてからが本番</li>
+</ol>
+<hr />
+<h2 id="このまとめで得た理解">このまとめで得た理解</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"
+checked="" />iOSの「ホイール入力」の正式名称と UIKit / SwiftUI
+での実装名が分かった</label></li>
+<li><label><input type="checkbox"
+checked="" />iOS開発でXcodeが必須な理由（署名・SDK・ビルド）が分かった</label></li>
+<li><label><input type="checkbox" checked="" />VS
+Codeは編集に使えるが、ビルド・実機導入はXcodeが担うと整理できた</label></li>
+<li><label><input type="checkbox"
+checked="" />ゼロから実機インストールまでの所要時間とつまずきポイントが見えた</label></li>
+<li><label><input type="checkbox"
+checked="" />2日間の実行計画に落とし込めた</label></li>
+</ul>
+<hr />
+<h2 id="参照元">参照元</h2>
+<ul>
+<li>原型ファイル：<code>pages/20260227.md</code></li>
+</ul>
+</body>
+</html>
