@@ -1,0 +1,208 @@
+{
+  "name": "Gmail重要メール通知システム",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 7 * * *" },
+            { "field": "cronExpression", "expression": "30 11 * * *" },
+            { "field": "cronExpression", "expression": "0 15 * * *" },
+            { "field": "cronExpression", "expression": "0 18 * * *" },
+            { "field": "cronExpression", "expression": "0 21 * * *" }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "notes": "1日5回（7:00/11:30/15:00/18:00/21:00）定期実行。前回実行から1.5時間以内のメールを取得する"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gmail-check",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger（手動実行）",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 500],
+      "notes": "手動実行用。POSTボディで {\"hours\": 2} または {\"since\": \"2025-02-25T10:00:00\"} を受け付ける。サーバー復旧時や緊急確認時に使用"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// 時間範囲計算ノード\n// Schedule / Webhook どちらから来ても統一した時間範囲を決定する\n// ============================================================\n\nconst now = new Date();\nlet sinceDate;\n\n// Webhookから来た場合（bodyにhours or sinceが入っている）\nif ($input.first().json.body) {\n  const body = $input.first().json.body;\n  \n  if (body.since) {\n    // 特定日時以降を指定\n    sinceDate = new Date(body.since);\n  } else if (body.hours) {\n    // N時間前から\n    sinceDate = new Date(now.getTime() - body.hours * 60 * 60 * 1000);\n  } else {\n    // デフォルト: 2時間前\n    sinceDate = new Date(now.getTime() - 2 * 60 * 60 * 1000);\n  }\n} else {\n  // Scheduleから来た場合: 2時間前（実行間隔は最大6時間だが安全のため短めに）\n  sinceDate = new Date(now.getTime() - 2 * 60 * 60 * 1000);\n}\n\n// Gmail API用のUnixタイムスタンプ（秒）\nconst sinceTimestamp = Math.floor(sinceDate.getTime() / 1000);\n\nreturn [{\n  json: {\n    sinceTimestamp,\n    sinceISO: sinceDate.toISOString(),\n    nowISO: now.toISOString()\n  }\n}];"
+      },
+      "id": "calc-time-range",
+      "name": "時間範囲を計算",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 400],
+      "notes": "Schedule/Webhookどちらのトリガーでも動作するよう、検索対象の時間範囲を統一フォーマットで生成する"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "getAll",
+        "returnAll": false,
+        "limit": 50,
+        "filters": {
+          "q": "={{ 'after:' + $json.sinceTimestamp + ' -label:sent -in:trash' }}"
+        },
+        "options": {
+          "format": "full"
+        }
+      },
+      "id": "gmail-get-messages",
+      "name": "Gmail メール取得",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [750, 400],
+      "credentials": {
+        "gmailOAuth2": {
+          "name": "Gmail account"
+        }
+      },
+      "notes": "指定時間以降の未読メールを最大50件取得。-in:trashでゴミ箱を除外。取得件数が多い場合はlimitを調整する"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// カテゴリ判定ノード\n// メールを4カテゴリに分類してSlackチャンネルを決定する\n// \n// 【カテゴリ追加方法】\n// 下記のcategoriesに新しいオブジェクトをコピペで追加するだけ。\n// ルール評価順は配列の順番通り。先にマッチしたカテゴリが適用される。\n// ============================================================\n\nconst CATEGORIES = [\n  {\n    name: \"報酬関係\",\n    slackChannel: \"#gmail-報酬\",\n    rules: {\n      // メールアドレスの一部でマッチ（部分一致、大文字小文字無視）\n      from: [\n        \"payment@\",\n        \"billing@\",\n        \"invoice@\",\n        \"payroll@\"\n      ],\n      // 件名に含まれるキーワード（部分一致）\n      subject: [\n        \"報酬\",\n        \"給与\",\n        \"支払い通知\",\n        \"振込\",\n        \"請求書\",\n        \"インボイス\"\n      ],\n      // 本文に含まれるキーワード（部分一致）\n      keywords: [\n        \"振込\",\n        \"入金\",\n        \"支払い完了\",\n        \"ご請求\"\n      ]\n    }\n  },\n  {\n    name: \"IT情報\",\n    slackChannel: \"#gmail-it\",\n    rules: {\n      from: [\n        \"github.com\",\n        \"github.io\",\n        \"vercel.com\",\n        \"cloudflare.com\",\n        \"supabase.com\",\n        \"netlify.com\"\n      ],\n      subject: [\n        \"Pull Request\",\n        \"[PR]\",\n        \"Issue\",\n        \"Deploy\",\n        \"Merged\",\n        \"Build\",\n        \"Alert\",\n        \"Security\"\n      ],\n      keywords: [\n        \"Pull Request\",\n        \"デプロイ\",\n        \"障害\",\n        \"セキュリティ\"\n      ]\n    }\n  },\n  {\n    name: \"税務・行政\",\n    slackChannel: \"#gmail-税務\",\n    rules: {\n      from: [\n        \"e-tax\",\n        \"nta.go.jp\",\n        \"etax.nta.go.jp\",\n        \"city.\",\n        \"pref.\",\n        \".go.jp\"\n      ],\n      subject: [\n        \"確定申告\",\n        \"納税\",\n        \"申告\",\n        \"税務\",\n        \"行政\",\n        \"マイナンバー\",\n        \"社会保険\"\n      ],\n      keywords: [\n        \"国税\",\n        \"地方税\",\n        \"申告期限\",\n        \"税務署\",\n        \"役所\"\n      ]\n    }\n  },\n  {\n    // 上記カテゴリにマッチしなかったが重要そうなもの\n    name: \"その他重要\",\n    slackChannel: \"#gmail-その他\",\n    rules: {\n      from: [],\n      subject: [\n        \"重要\",\n        \"緊急\",\n        \"【重要】\",\n        \"【緊急】\",\n        \"至急\",\n        \"要対応\",\n        \"要確認\"\n      ],\n      keywords: [\n        \"至急\",\n        \"対応必要\",\n        \"期限\",\n        \"締め切り\"\n      ]\n    }\n  }\n];\n\n// ---- 判定ロジック（通常変更不要） ----\n\nfunction matchesAny(text, patterns) {\n  if (!text || !patterns || patterns.length === 0) return false;\n  const lowerText = text.toLowerCase();\n  return patterns.some(p => lowerText.includes(p.toLowerCase()));\n}\n\nfunction classifyEmail(email) {\n  const from    = email.from    || \"\";\n  const subject = email.subject || \"\";\n  const snippet = email.snippet || \"\"; // Gmailの本文プレビュー\n\n  for (const cat of CATEGORIES) {\n    const r = cat.rules;\n    if (\n      matchesAny(from, r.from) ||\n      matchesAny(subject, r.subject) ||\n      matchesAny(snippet, r.keywords)\n    ) {\n      return cat;\n    }\n  }\n  return null; // どのカテゴリにも該当しない → スキップ\n}\n\n// ---- メール整形 ----\n\nconst results = [];\n\nfor (const item of $input.all()) {\n  const email = item.json;\n  const category = classifyEmail(email);\n\n  if (!category) continue; // 重要でないメールは無視\n\n  // 本文プレビュー（snippet）を整形\n  const preview = (email.snippet || \"\").replace(/\\s+/g, \" \").substring(0, 200);\n\n  // GmailへのURL\n  const gmailUrl = `https://mail.google.com/mail/u/0/#inbox/${email.id}`;\n\n  results.push({\n    json: {\n      category:      category.name,\n      slackChannel:  category.slackChannel,\n      from:          email.from    || \"（送信者不明）\",\n      subject:       email.subject || \"（件名なし）\",\n      preview,\n      gmailUrl,\n      messageId:     email.id,\n      date:          email.date\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "classify-emails",
+      "name": "メールをカテゴリ分類",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 400],
+      "notes": "CATEGORIES配列に判定ルールを集約管理。カテゴリ追加はこの配列にオブジェクトをコピペするだけ。どのカテゴリにも該当しないメールはスキップ"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "id": "has-results",
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ]
+        }
+      },
+      "id": "check-has-results",
+      "name": "重要メールが存在するか",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1250, 400],
+      "notes": "分類後のメールが0件の場合はここで終了。Slackに無駄な通知を送らない"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "channel": "={{ $json.slackChannel }}",
+        "text": "={{ '📧 *' + $json.category + '* のメールが届いています' }}",
+        "otherOptions": {
+          "blocks": {
+            "values": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "={{ '📧 *[' + $json.category + ']* 新着メール\\n\\n*送信者:* ' + $json.from + '\\n*件名:* ' + $json.subject + '\\n\\n' + $json.preview + '...' + '\\n\\n🔗 <' + $json.gmailUrl + '|Gmailで開く>' }}"
+                }
+              },
+              {
+                "type": "divider"
+              }
+            ]
+          }
+        }
+      },
+      "id": "slack-notify",
+      "name": "Slack通知",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [1500, 350],
+      "credentials": {
+        "slackApi": {
+          "name": "Slack account"
+        }
+      },
+      "notes": "カテゴリ別Slackチャンネルに通知を送信。slackChannelはメールの分類結果から動的に決定される"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'ok', message: '処理完了', processed: $input.all().length }) }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook レスポンス返却",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1500, 550],
+      "notes": "Webhook経由で手動実行した場合に処理結果をレスポンスとして返す"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [{ "node": "時間範囲を計算", "type": "main", "index": 0 }]
+      ]
+    },
+    "Webhook Trigger（手動実行）": {
+      "main": [
+        [{ "node": "時間範囲を計算", "type": "main", "index": 0 }]
+      ]
+    },
+    "時間範囲を計算": {
+      "main": [
+        [{ "node": "Gmail メール取得", "type": "main", "index": 0 }]
+      ]
+    },
+    "Gmail メール取得": {
+      "main": [
+        [{ "node": "メールをカテゴリ分類", "type": "main", "index": 0 }]
+      ]
+    },
+    "メールをカテゴリ分類": {
+      "main": [
+        [{ "node": "重要メールが存在するか", "type": "main", "index": 0 }]
+      ]
+    },
+    "重要メールが存在するか": {
+      "main": [
+        [{ "node": "Slack通知", "type": "main", "index": 0 }],
+        [{ "node": "Webhook レスポンス返却", "type": "main", "index": 0 }]
+      ]
+    },
+    "Slack通知": {
+      "main": [
+        [{ "node": "Webhook レスポンス返却", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": ["Gmail", "Slack", "通知", "自動化"],
+  "triggerCount": 2,
+  "updatedAt": "2026-02-25T00:00:00.000Z",
+  "versionId": "1"
+}
