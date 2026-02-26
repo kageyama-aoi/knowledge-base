@@ -1,0 +1,55 @@
+name: 学習ログ
+description: 技術スキル・自動化アイデアの学習記録
+labels:
+  - learning
+body:
+  - type: dropdown
+    id: learning-category
+    attributes:
+      label: 学習カテゴリ
+      description: 今回の学習の文脈・理由に最も近いものを1つ選んでください
+      options:
+        - 概念・理論理解
+        - ITスキル習得
+        - AI活用
+        - 業務・副業
+        - 税務・確定申告
+        - プライベート活用
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: learning-topics
+    attributes:
+      label: 学習内容
+      description: 実際に扱ったトピックをすべて選択してください（複数可）
+      options:
+        - label: GitHub / Git
+        - label: n8n / 自動化ワークフロー
+        - label: AI駆動開発（Claude Code・Cursor等）
+        - label: AI / プロンプトエンジニアリング
+        - label: Slack / 通知連携
+        - label: その他
+
+  - type: textarea
+    id: learning-purpose
+    attributes:
+      label: 学習の問い・目的
+      description: 今日これを学ぶ理由、または解決したい疑問を書いてください
+      placeholder: 例）GitHub ActionsでPRを自動作成する仕組みを理解したい
+    validations:
+      required: true
+
+  - type: textarea
+    id: learning-notes
+    attributes:
+      label: 気づき・メモ
+      description: 学習中に気づいたこと、残しておきたいメモを書いてください
+      placeholder: 例）直接mainに pushするより PR経由のほうが履歴が安定する
+
+  - type: input
+    id: related-md
+    attributes:
+      label: 関連MDファイル
+      description: 対応するMarkdownファイルのパスを記入してください
+      placeholder: 例）docs/learning/042_github-actions-auto-pr.md
