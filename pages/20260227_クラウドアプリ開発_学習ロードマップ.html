@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260227_クラウドアプリ開発_学習ロードマップ</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="クラウド環境でアプリを作る-学習ロードマップ">クラウド環境でアプリを作る
+学習ロードマップ</h1>
+<blockquote>
+<p>「触れる → 動く → つながる」を実装レベルで体験する</p>
+</blockquote>
+<hr />
+<h2 id="目的">目的</h2>
+<p>以下の3つのクラウド環境を<strong>実際に触って、動かせる状態になること</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>サービス</th>
+<th>役割</th>
+<th>体験内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Vercel</td>
+<td>画面を公開</td>
+<td>デプロイ体験</td>
+</tr>
+<tr class="even">
+<td>Supabase</td>
+<td>DB・認証</td>
+<td>データ保存体験</td>
+</tr>
+<tr class="odd">
+<td>Cloudflare</td>
+<td>エッジ実行</td>
+<td>高速API体験</td>
+</tr>
+</tbody>
+</table>
+<p><strong>最終ゴール：</strong></p>
+<blockquote>
+<p>ログインできて、DBに保存できて、公開URLがあるアプリを作る</p>
+</blockquote>
+<hr />
+<h2 id="全体の進め方">全体の進め方</h2>
+<pre><code>① 公開 → ② 保存 → ③ 高速化</code></pre>
+<p><strong>この順番の理由：</strong>
+成功体験が早い順に進めることで、挫折しにくくなる。</p>
+<hr />
+<h2 id="phase-0開発環境の準備">Phase 0：開発環境の準備</h2>
+<h3 id="必須ツールのインストール">必須ツールのインストール</h3>
+<ul>
+<li>Node.js（LTS版）</li>
+<li>Git</li>
+<li>VS Code</li>
+</ul>
+<p>インストール確認：</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> <span class="at">-v</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">--version</span></span></code></pre></div>
+<h3 id="githubアカウントの準備">GitHubアカウントの準備</h3>
+<ul>
+<li>アカウントを作成する</li>
+<li>リポジトリを1つ作る（Public で OK）</li>
+</ul>
+<hr />
+<h2 id="phase-1vercel-で公開を体験する">Phase 1：Vercel
+で「公開」を体験する</h2>
+<h3 id="アカウント作成">1-1. アカウント作成</h3>
+<p><a href="https://vercel.com" class="uri">https://vercel.com</a></p>
+<p>→ GitHub連携でログイン</p>
+<h3 id="最速でデプロイする">1-2. 最速でデプロイする</h3>
+<p>GitHubに <code>index.html</code> を追加：</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Hello Cloud!<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>Pushした後、Vercelで：</p>
+<ol type="1">
+<li>Import Project</li>
+<li>Deploy</li>
+</ol>
+<p>→ 数十秒で公開URLが発行される</p>
+<p><strong>チェックポイント：</strong> 「世界に公開」を体験できた</p>
+<hr />
+<h2 id="phase-2supabase-でdb認証を体験する">Phase 2：Supabase
+で「DB・認証」を体験する</h2>
+<h3 id="アカウント作成-1">2-1. アカウント作成</h3>
+<p><a href="https://supabase.com"
+class="uri">https://supabase.com</a></p>
+<p>→ GitHubでログイン</p>
+<h3 id="プロジェクトを作成する">2-2. プロジェクトを作成する</h3>
+<ul>
+<li>名前：<code>demo-app</code></li>
+<li>リージョン：Tokyo</li>
+</ul>
+<h3 id="テーブルを作成する">2-3. テーブルを作成する</h3>
+<p>Table Editor → New table で <code>messages</code>
+テーブルを作成：</p>
+<table>
+<thead>
+<tr class="header">
+<th>カラム名</th>
+<th>型</th>
+<th>設定</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>id</td>
+<td>uuid</td>
+<td>デフォルト</td>
+</tr>
+<tr class="even">
+<td>text</td>
+<td>text</td>
+<td>必須</td>
+</tr>
+<tr class="odd">
+<td>created_at</td>
+<td>timestamp</td>
+<td><code>now()</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="apiキーを取得する">2-4. APIキーを取得する</h3>
+<p>Project Settings → API から以下を控える：</p>
+<ul>
+<li>Project URL</li>
+<li>anon public key</li>
+</ul>
+<h3 id="フロントエンドから接続する">2-5. フロントエンドから接続する</h3>
+<p>React（Vite）プロジェクトを作成：</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> create vite@latest</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install @supabase/supabase-js</span></code></pre></div>
+<p>Supabase接続コード：</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { createClient } <span class="im">from</span> <span class="st">&#39;@supabase/supabase-js&#39;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> supabase <span class="op">=</span> <span class="fu">createClient</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="im">import</span><span class="op">.</span><span class="at">meta</span><span class="op">.</span><span class="at">env</span><span class="op">.</span><span class="at">VITE_SUPABASE_URL</span><span class="op">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="im">import</span><span class="op">.</span><span class="at">meta</span><span class="op">.</span><span class="at">env</span><span class="op">.</span><span class="at">VITE_SUPABASE_ANON_KEY</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p><code>.env</code> ファイルに記載：</p>
+<pre><code>VITE_SUPABASE_URL=xxxx
+VITE_SUPABASE_ANON_KEY=xxxx</code></pre>
+<p>Vercel側の環境変数にも同じ値を登録する。</p>
+<p><strong>チェックポイント：</strong></p>
+<ul>
+<li>テキストを入力する</li>
+<li>DBに保存される</li>
+<li>再表示できる</li>
+</ul>
+<p>→ 「BaaSを使ったWebアプリ開発」の体験完了</p>
+<hr />
+<h2 id="phase-3cloudflare-でエッジ実行を体験する">Phase 3：Cloudflare
+で「エッジ実行」を体験する</h2>
+<h3 id="アカウント作成-2">3-1. アカウント作成</h3>
+<p><a href="https://dash.cloudflare.com"
+class="uri">https://dash.cloudflare.com</a></p>
+<h3 id="workerを作成してデプロイする">3-2.
+Workerを作成してデプロイする</h3>
+<p>Workers → Create から以下のコードをデプロイ：</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">async</span> <span class="fu">fetch</span>(request) {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">new</span> <span class="fu">Response</span>(<span class="st">&quot;Hello from Edge!&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>→ URLが発行される</p>
+<p><strong>体験ポイント：</strong></p>
+<ul>
+<li>サーバー契約不要</li>
+<li>ほぼ即時デプロイ</li>
+<li>世界中で実行される</li>
+</ul>
+<p>これが「Edge実行」の感覚。</p>
+<hr />
+<h2 id="phase-43つを組み合わせる">Phase 4：3つを組み合わせる</h2>
+<h3 id="最小構成のアーキテクチャ">最小構成のアーキテクチャ</h3>
+<pre><code>Vercel      → 画面（フロントエンド）
+Supabase    → DB（データ保存）
+Cloudflare  → Webhook処理（バックグラウンド処理）</code></pre>
+<h3 id="組み合わせの例フォーム-slack通知">組み合わせの例：フォーム →
+Slack通知</h3>
+<ol type="1">
+<li>フォームに入力する</li>
+<li>Supabaseにデータを保存する</li>
+<li>Cloudflare Workerに通知する</li>
+<li>Slackにメッセージが届く</li>
+</ol>
+<hr />
+<h2 id="週間スケジュール目安">2週間スケジュール（目安）</h2>
+<h3 id="week-1">Week 1</h3>
+<table>
+<thead>
+<tr class="header">
+<th>日</th>
+<th>やること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Day 1</td>
+<td>環境構築（Node.js / Git / VS Code）</td>
+</tr>
+<tr class="even">
+<td>Day 2</td>
+<td>Vercelで公開する</td>
+</tr>
+<tr class="odd">
+<td>Day 3</td>
+<td>Supabaseでテーブルを作る</td>
+</tr>
+<tr class="even">
+<td>Day 4</td>
+<td>DBに接続してデータを保存する</td>
+</tr>
+<tr class="odd">
+<td>Day 5</td>
+<td>認証を実装する</td>
+</tr>
+</tbody>
+</table>
+<h3 id="week-2">Week 2</h3>
+<table>
+<thead>
+<tr class="header">
+<th>日</th>
+<th>やること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Day 1</td>
+<td>Cloudflare Workerを作る</td>
+</tr>
+<tr class="even">
+<td>Day 2</td>
+<td>Webhookと連携する</td>
+</tr>
+<tr class="odd">
+<td>Day 3</td>
+<td>ログを確認・動作を検証する</td>
+</tr>
+<tr class="even">
+<td>Day 4</td>
+<td>改善・整理</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="概念メモ">概念メモ</h2>
+<table>
+<thead>
+<tr class="header">
+<th>用語</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Serverless</td>
+<td>サーバー管理が不要な実行環境</td>
+</tr>
+<tr class="even">
+<td>Edge</td>
+<td>ユーザーに近い場所で処理を実行すること</td>
+</tr>
+<tr class="odd">
+<td>BaaS</td>
+<td>バックエンド機能を外部サービスとして利用すること</td>
+</tr>
+<tr class="even">
+<td>CI/CD</td>
+<td>コードのPushから自動テスト・自動デプロイまでの仕組み</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="なぜこの順番なのか">なぜこの順番なのか</h2>
+<ol type="1">
+<li><strong>まず公開</strong>（達成感を得やすい）</li>
+<li><strong>次にデータ</strong>（アプリの本質）</li>
+<li><strong>最後に高速化</strong>（応用・最適化）</li>
+</ol>
+<p>逆の順番にすると難易度が急上昇する。</p>
+<hr />
+<h2
+id="最終到達点ログインできるメモアプリ">最終到達点：ログインできるメモアプリ</h2>
+<ul>
+<li>認証（ログイン・ログアウト）</li>
+<li>データの保存・表示</li>
+<li>公開URLあり</li>
+</ul>
+<p>これが：</p>
+<blockquote>
+<p><strong>AI駆動開発の最小単位</strong></p>
+</blockquote>
+<hr />
+<h2 id="次のステップ余裕があれば">次のステップ（余裕があれば）</h2>
+<ul>
+<li>完全コピペ版チュートリアル</li>
+<li>GitHubテンプレ構成図</li>
+<li>AIエージェント連携まで拡張</li>
+</ul>
+</body>
+</html>

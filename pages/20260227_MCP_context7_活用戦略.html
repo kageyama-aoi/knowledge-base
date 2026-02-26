@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260227_MCP_context7_活用戦略</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="mcp-context7-活用戦略まとめ">MCP context7 活用戦略まとめ</h1>
+<blockquote>
+<p>「AIに渡す文脈を設計することで、回答品質が根本から変わる」</p>
+</blockquote>
+<hr />
+<h2 id="part-1context7-とは何か何が変わるのか">Part 1：context7
+とは何か、何が変わるのか</h2>
+<h3 id="本質">本質</h3>
+<p>context7 は <strong>MCPサーバー</strong> のひとつ。
+AIが参照できる「文脈」を、自分で設計・制御できるようにする仕組み。</p>
+<p>通常のAIが見ているもの：</p>
+<ul>
+<li>今開いているファイル</li>
+<li>直近の会話の流れ</li>
+</ul>
+<p>context7 を使うと渡せるもの：</p>
+<ul>
+<li>ライブラリの最新ドキュメント（ハルシネーション防止）</li>
+<li>プロジェクト全体の設計思想</li>
+<li>命名規則・レビュー基準</li>
+<li>SQL群・テスト構造・Issue履歴</li>
+</ul>
+<hr />
+<h3 id="何が進化するのか">何が「進化」するのか</h3>
+<h4 id="回答の正確さが上がる">① 回答の正確さが上がる</h4>
+<p>AIは学習データの時点で知識が止まっている。
+そのため、ライブラリのAPIが変わっていても古い書き方を平気で返す。</p>
+<p>context7 で最新ドキュメントを渡すと：</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>課題</th>
+<th>context7 導入後</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>廃止されたAPIを使ったコードを提案される</td>
+<td>最新仕様に基づいた提案になる</td>
+</tr>
+<tr class="even">
+<td>関数名・引数が間違っている</td>
+<td>ドキュメント参照で正確になる</td>
+</tr>
+<tr class="odd">
+<td>毎回「このライブラリはバージョン○○で〜」と説明が必要</td>
+<td>説明ゼロで始められる</td>
+</tr>
+</tbody>
+</table>
+<h4 id="回答の一貫性が上がる">② 回答の一貫性が上がる</h4>
+<p>通常のAIは「今の会話」しか覚えない。
+セッションが変わるたびに、前提を説明し直す必要がある。</p>
+<p>context7 で設計資産を渡すと：</p>
+<ul>
+<li>命名規則を毎回教えなくてよくなる</li>
+<li>レビュー基準をゼロから共有しなくてよくなる</li>
+<li>「いつものやつで」が通じるAIになる</li>
+</ul>
+<h4 id="判断の深さが変わる">③ 判断の深さが変わる</h4>
+<pre><code>通常AI：  「このコードで動きますか？」 → 動くかどうかだけ答える
+
+context7： 「このコードで動きますか？」 → 設計思想・命名規則・既存の構造との整合性も踏まえて答える</code></pre>
+<p><strong>単発の質問応答</strong> から
+<strong>設計一貫性チェック</strong> へ変わる。</p>
+<hr />
+<h3 id="効果を出すための原則">効果を出すための原則</h3>
+<p>context7
+は「何でも読ませる」ではなく「何を読ませるかを設計する」ツール。</p>
+<ul>
+<li>ディレクトリ単位を明確に切る</li>
+<li>ノイズ（古い版・無関係なファイル）を混ぜない</li>
+<li>「AIに何を覚えさせるか」を自分で決める</li>
+</ul>
+<hr />
+<h2 id="part-2自分のパターンに当てはめると何が変わるか">Part
+2：自分のパターンに当てはめると何が変わるか</h2>
+<h3 id="自分のライフスタイル">自分のライフスタイル</h3>
+<ul>
+<li><strong>システム開発</strong>（業務委託・個人開発）</li>
+<li><strong>インストラクター</strong>（業務委託で人に教える仕事）</li>
+<li><strong>舞台役者</strong>（プライベートの時間を使った活動）</li>
+<li><strong>時間価値を最重視</strong>している</li>
+</ul>
+<p>3つのロールを持ちながら成立させるには、<strong>1つひとつにかける時間を圧縮する</strong>しかない。
+context7 はその圧縮を「品質を落とさずに」実現する。</p>
+<hr />
+<h3 id="ロール別の価値">ロール別の価値</h3>
+<h4 id="システム開発での価値">システム開発での価値</h4>
+<p><strong>今の課題：</strong> -
+使うライブラリが変わるたびにAIへの説明コストが発生する -
+設計思想・命名規則をセッションをまたいで共有できない -
+SQLやテスト構造の「お作法」をその都度教えなければならない</p>
+<p><strong>context7 導入後：</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>場面</th>
+<th>変化</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ライブラリの最新APIを使いたい</td>
+<td>ドキュメントを自動参照。古い書き方を返されない</td>
+</tr>
+<tr class="even">
+<td>SQL設計レビューを頼む</td>
+<td>target_config思想・共通JOIN構造を前提に話せる</td>
+</tr>
+<tr class="odd">
+<td>E2Eテストの追加を依頼する</td>
+<td>ページオブジェクト原則・Quality
+Gate基準を常に参照した状態でAIが動く</td>
+</tr>
+<tr class="even">
+<td>新しいセッションを始める</td>
+<td>前提説明ゼロで、昨日の続きから始められる</td>
+</tr>
+</tbody>
+</table>
+<p><strong>時間的インパクト：</strong> -
+前提説明の削減：1セッションあたり5〜15分 -
+修正対応の削減：古い・間違ったコードの手直し時間がほぼゼロに -
+レビュー精度向上：設計レベルの指摘が自動で来るため、後工程での手戻りが減る</p>
+<hr />
+<h4 id="インストラクターとしての価値">インストラクターとしての価値</h4>
+<p><strong>今の課題：</strong> -
+受講者のレベルや環境によって毎回説明内容を調整する必要がある -
+教材・資料のアップデートに時間がかかる -
+「最新の情報で教えているか」の確認コストがある</p>
+<p><strong>context7 導入後：</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>場面</th>
+<th>変化</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>教材を作る</td>
+<td>ライブラリの最新ドキュメントを参照した資料をAIが作れる</td>
+</tr>
+<tr class="even">
+<td>受講者の質問に答える準備</td>
+<td>「このバージョンでは〜」という最新情報をAIが把握した状態で壁打ちできる</td>
+</tr>
+<tr class="odd">
+<td>カリキュラムを見直す</td>
+<td>自分の教育思想・過去カリキュラムを文脈として渡し、一貫した改善提案が得られる</td>
+</tr>
+</tbody>
+</table>
+<p><strong>時間的インパクト：</strong> -
+資料作成・アップデートの時間圧縮 -
+「最新かどうか」の確認作業がなくなる</p>
+<hr />
+<h4
+id="舞台役者としての価値間接効果">舞台役者としての価値（間接効果）</h4>
+<p>舞台の準備には<strong>まとまった集中時間</strong>が必要。
+開発・教育の仕事でかかる「余計な時間」を削ることが、舞台に使える時間を直接生み出す。</p>
+<pre><code>開発の前提説明コスト削減
+  ↓
+余った時間が生まれる
+  ↓
+稽古・台本読み・自己研鑽に使える</code></pre>
+<p>context7
+は「開発を速くするツール」ではなく、<strong>「時間の使い方を再設計するツール」</strong>でもある。</p>
+<hr />
+<h3 id="自分に合った-context7-の構成イメージ">自分に合った context7
+の構成イメージ</h3>
+<pre><code>context7サーバー（開発用）
+  ├── SQL設計資産（最新日付フォルダ）
+  ├── E2Eテスト構造・Quality Gate基準
+  ├── 命名規則・設計思想ドキュメント
+  └── Skills / レビュー基準
+
+context7サーバー（教育用）
+  ├── カリキュラム構成
+  ├── 過去教材・FAQ
+  └── 教育方針・受講者レベル別対応メモ</code></pre>
+<p>用途別にサーバーを分けることで、ノイズなく「今必要な文脈だけ」をAIに渡せる。</p>
+<hr />
+<h2 id="まとめcontext7-が自分にとって何者か">まとめ：context7
+が自分にとって何者か</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>視点</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>開発者として</td>
+<td>設計思想を忘れないAIを持てる</td>
+</tr>
+<tr class="even">
+<td>インストラクターとして</td>
+<td>最新・一貫した情報で教えられるAIを持てる</td>
+</tr>
+<tr class="odd">
+<td>時間を大切にする人として</td>
+<td>前提説明・手戻り・確認作業という「隠れたコスト」を削れる</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>context7 は「賢いAI」を使うためのツールではなく、</strong>
+<strong>「自分の文脈を理解したAI」を育てるための仕組み。</strong></p>
+</blockquote>
+<hr />
+<h2 id="次のアクション候補">次のアクション候補</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />開発用の context7
+サーバー構成を設計する（どのディレクトリを渡すか）</label></li>
+<li><label><input type="checkbox" />教育用の context7
+サーバー構成を設計する</label></li>
+<li><label><input
+type="checkbox" />SQL専用・テスト専用にサーバーを分離する案を検討する</label></li>
+<li><label><input
+type="checkbox" />Skills・プロンプト資産との連携構造を設計する</label></li>
+</ul>
+<hr />
+<h2 id="参照元">参照元</h2>
+<ul>
+<li>原型ファイル：<code>pages/20260227.md</code></li>
+</ul>
+</body>
+</html>
