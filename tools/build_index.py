@@ -50,11 +50,16 @@ def extract_date_label(name: str) -> str:
 
 
 def is_new(path: Path) -> bool:
-    try:
-        mtime = datetime.fromtimestamp(path.stat().st_mtime)
-    except OSError:
+    # ファイル名の日付プレフィックスで判定（CI checkout で mtime がリセットされる問題を回避）
+    match = re.match(r"(\d{4})(\d{2})(\d{2})", path.name)
+    if not match:
         return False
-    return datetime.now() - mtime <= timedelta(days=7)
+    y, m, d = match.groups()
+    try:
+        file_date = datetime(int(y), int(m), int(d))
+    except ValueError:
+        return False
+    return datetime.now() - file_date <= timedelta(days=7)
 
 def archive_id(label: str) -> str:
     if label == "その他":
@@ -107,7 +112,10 @@ lines = [
     "</head>",
     "<body>",
     "<div class='wrap'>",
+    "<div class='page-header'>",
     "<h1>📚 資料一覧</h1>",
+    "<button type='button' id='toggleTheme' class='theme-btn' aria-label='テーマ切り替え'>🌙</button>",
+    "</div>",
     "<div class='sub'>自動生成されたドキュメント・インデックスです。</div>",
     "<br>",
     "<div class='toolbar search-toolbar'>",

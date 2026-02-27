@@ -240,7 +240,7 @@ details,
 }
 
 .search-actions {
-  display: none;
+  display: flex;
   gap: 8px;
   margin-top: 8px;
 }
@@ -336,11 +336,26 @@ footer{
   font-size:12px;
 }
 
-@media (max-width: 640px) {
-  .search-actions {
-    display: flex;
-  }
+/* =========================
+   PAGE HEADER & THEME BUTTON
+========================= */
 
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.theme-btn {
+  font-size: 18px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  line-height: 1;
+  min-height: unset;
+}
+
+@media (max-width: 640px) {
   .archive-jump {
     flex-wrap: nowrap;
     overflow-x: auto;

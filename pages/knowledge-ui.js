@@ -181,7 +181,11 @@
   };
 
   if (searchInput) {
-    searchInput.addEventListener('input', applySearch);
+    let searchTimer;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(applySearch, 150);
+    });
 
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
@@ -199,6 +203,11 @@
         e.preventDefault();
         searchInput.focus();
         searchInput.select();
+      }
+      if (e.key === 'Escape' && document.activeElement === searchInput) {
+        searchInput.value = '';
+        applySearch();
+        searchInput.blur();
       }
     });
   }
