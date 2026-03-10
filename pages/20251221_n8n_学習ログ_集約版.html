@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20251221_n8n_学習ログ_集約版</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="n8n-学習ログ-集約版2025年12月">n8n 学習ログ
+集約版（2025年12月）</h1>
+<blockquote>
+<p><strong>集約元（削除候補）:</strong> -
+<code>pages/20251215_n8n_学び全体.html</code>（Docker/Gmail OAuth/OpenAI
+初期セットアップ） -
+<code>pages/20251221_n8n 学習ログ（この1週間の学び）｜環境構築→概念→連携→実装→運用.html</code>（1週間総まとめ）</p>
+<p>内容が時系列で重複・発展しているため、このファイルに集約。
+元ファイルの確認後、削除または <code>pages/old/</code>
+に退避すること。</p>
+</blockquote>
+<hr />
+<h2 id="n8n-って何">n8n って何？</h2>
+<p><strong>ノーコード/ローコードの自動化ツール。</strong></p>
+<p>「ある出来事をきっかけに（トリガー）」→「処理をつないで（ワークフロー）」→「別の場所へ結果を渡す」ための実行基盤。</p>
+<p><strong>強いポイント:</strong> -
+UIで組める（ノードをつなぐ）＋必要なら Code Node（JS）でロジックを書ける
+- Webhook、API、Slack、GitHub、GAS、Notionなど外部サービス連携が中心</p>
+<hr />
+<h2 id="day-1環境構築docker-gmail-oauth-openai">Day 1：環境構築（Docker
++ Gmail OAuth + OpenAI）</h2>
+<h3 id="docker-compose-で-n8n-を立ち上げる">Docker Compose で n8n
+を立ち上げる</h3>
+<p><strong>構成:</strong> n8n本体 ＋ PostgreSQL（永続化DB）</p>
+<pre><code>① Docker Desktop を起動
+② docker compose up -d
+③ http://localhost:5678 にアクセス
+④ n8n の初期画面が表示されれば成功</code></pre>
+<ul>
+<li>n8n と PostgreSQL を一発でまとめて起動できる</li>
+<li>本番（VPS）移行時も同じ構成を流用できる</li>
+<li>PostgreSQL はホストにポート公開せず、Docker内ネットワークで接続</li>
+</ul>
+<p><strong>重要な環境変数:</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>変数</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>GENERIC_TIMEZONE=Asia/Tokyo</code></td>
+<td>実行時刻・ログ・スケジュールのズレ防止</td>
+</tr>
+<tr class="even">
+<td><code>DB_TYPE=postgresdb</code></td>
+<td>ワークフロー情報の保存先</td>
+</tr>
+<tr class="odd">
+<td><code>N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true</code></td>
+<td>設定ファイル権限チェック</td>
+</tr>
+</tbody>
+</table>
+<h3 id="gmail-アカウント連携oauth">Gmail アカウント連携（OAuth）</h3>
+<p>n8nは「自前アプリ」として Google に身元登録が必要。 Gmail
+のID/パスワードを直接渡さないための仕組みが OAuth。</p>
+<p><strong>手順:</strong> 1. Google Cloud プロジェクト作成 2. Gmail API
+を有効化 3. OAuth クライアントID を作成 4. 承認済みリダイレクト URI
+を登録:
+<code>http://localhost:5678/rest/oauth2-credential/callback</code> 5.
+OAuth 同意画面を設定 6. テストユーザーに自分の Gmail を追加</p>
+<p><strong>よくあるエラー:</strong> - <code>redirect_uri_mismatch</code>
+→ URL の完全一致が必要 - <code>access_denied</code> →
+テストユーザー未登録が原因</p>
+<h3 id="openai-api-キー取得">OpenAI API キー取得</h3>
+<ol type="1">
+<li>OpenAI のアカウント作成/ログイン</li>
+<li>API Keys 画面から新規キー発行</li>
+<li>キーを n8n の Credential に登録</li>
+</ol>
+<ul>
+<li>※ APIキーは一度しか表示されないため、安全な場所に保管</li>
+<li>※ Billing を設定しない限り無料枠内で使える</li>
+</ul>
+<p><strong>Day 1 の学びポイント:</strong> -
+Dockerのエラーはホスト環境が原因なことが多い（5432競合はWindows側PostgreSQLが原因）
+- n8n は SaaS ではなく Web サービス → OAuth
+設定が必要になる理由が理解できた -
+OAuthのエラーは段階的に前進している証拠（失敗ではなくチェックポイント）</p>
+<hr />
+<h2 id="week-1-総まとめ学びの全体像">Week 1 総まとめ：学びの全体像</h2>
+<p>学びの流れ：<strong>環境を作る → 概念が分かる → 連携したくなる →
+実装が必要になる → 運用が重要になる</strong></p>
+<h3 id="基本概念最重要">基本概念（最重要）</h3>
+<p>データが流れている理解がないと、WebhookもSlackもGitHubも「なぜ動かないか分からない」状態になる。</p>
+<table>
+<thead>
+<tr class="header">
+<th>要素</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Trigger</td>
+<td>開始点（Webhook / Cron / アプリイベント / 手動実行）</td>
+</tr>
+<tr class="even">
+<td>Node</td>
+<td>処理（取得・変換・分岐・送信など）</td>
+</tr>
+<tr class="odd">
+<td>Connection</td>
+<td>前ノードの出力を次ノードへ渡す線</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>各ノードは基本的に <strong>items（配列）</strong> を扱う</li>
+<li>Expression: <code>{{$json.xxx}}</code> で値を埋め込む</li>
+</ul>
+<h3 id="webhook発行側-vs-受け側">Webhook（発行側 vs 受け側）</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>視点</th>
+<th>特徴</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>発行する側</td>
+<td>設定はラク（URL貼る＋イベント選ぶ程度）</td>
+</tr>
+<tr class="even">
+<td>受け取る側</td>
+<td>URLを用意＋データ形式に合わせた処理＋セキュリティ考慮が必要</td>
+</tr>
+</tbody>
+</table>
+<p>n8n の Webhook Trigger = 「外から叩ける入口」
+入口ができると、Slack通知、GitHub操作、DB書き込み等へ繋げられる。</p>
+<h3 id="slack連携token-scope-bot">Slack連携（Token / Scope / Bot）</h3>
+<ul>
+<li><strong>Token</strong> =
+「このリクエストは誰が何の権限でやってるか」を判断する鍵</li>
+<li><strong>Scope</strong> = Token に紐づく「できることの範囲」</li>
+<li><strong>Bot</strong> = Slack上で動作する “アプリの人格”</li>
+</ul>
+<p>アプリの使い分け判断軸: - <strong>既存アプリ活用</strong>:
+管理が一元化できるが、権限が肥大化しがち -
+<strong>新規アプリ作成</strong>:
+用途別に最小権限にできるが、管理対象が増える</p>
+<h3 id="github連携issue-コメント-ラベル">GitHub連携（Issue / コメント /
+ラベル）</h3>
+<ul>
+<li>Issue:
+「やること」「バグ」「改善案」をチケット化したメモ兼タスク</li>
+<li>n8nと繋ぐと:
+Slack投稿→Issue作成、特定キーワード→ラベル付け、定型返信→コメント追加</li>
+</ul>
+<h3 id="code-nodejavascript">Code Node（JavaScript）</h3>
+<p>UIだけでは面倒な「整形」「抽出」「条件分岐」「集計」をやる場所。</p>
+<p>実例: 天気JSONから最高/最低を取り出してSlackに投げる -
+どの階層に値があるか - 配列/オブジェクトの扱い -
+n8nの「items構造」を崩さず返す</p>
+<h3 id="n8n-gas-連携の設計思想">n8n × GAS 連携の設計思想</h3>
+<p>得意領域を分担させる: - <strong>GAS</strong>:
+Google側（スプレッドシート/Drive/カレンダー等）の操作が得意 -
+<strong>n8n</strong>: 外部連携のハブ＋ワークフロー可視化が得意</p>
+<p>例: - <code>Slack → n8n → GAS → スプレッドシート更新</code> -
+<code>スプレッドシート更新 → n8n → Slack通知</code></p>
+<hr />
+<h2 id="次の学習テーマ優先順">次の学習テーマ（優先順）</h2>
+<ol type="1">
+<li><strong>Webhookのセキュリティ</strong>（署名検証、シークレット、Basic認証、リプレイ対策）</li>
+<li><strong>Slackイベント起点の設計</strong>（メンション/特定チャンネル/特定キーワードで分岐）</li>
+<li><strong>GitHub
+Issue運用テンプレ</strong>（個人開発で回る最小セット：ラベル設計＋定型コメント）</li>
+<li><strong>Code
+Node整形の定石</strong>（items配列、例外時の返し方、ログの見方）</li>
+<li><strong>エラーの切り分け手順</strong>（どこで止まっているか：認証/入力/変換/送信）</li>
+</ol>
+<hr />
+<h2 id="関連ドキュメント同時期作成">関連ドキュメント（同時期作成）</h2>
+<ul>
+<li><code>20251221_n8n_Git連動_集約版.html</code> — GitHub
+Webhook連動（レベル1〜5）</li>
+<li><code>20251221_n8n_Slack連携_集約版.html</code> —
+Slack連携ナレッジ（基礎〜GAS実装版）</li>
+</ul>
+</body>
+</html>
