@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260311_Liquid_Jekyll_衝突問題_解説</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<p>{% raw %} # Jekyllのビルドエラー「Liquid構文エラー」とは何か</p>
+<p><strong>対象ファイル:</strong>
+<code>pages/old/20251221_n8n_Git連動_集約版.md</code>
+<strong>エラー:</strong>
+<code>Liquid syntax error (line 156): Variable '{{ ... }}' was not properly terminated</code>
+<strong>修正:</strong> ファイル全体を
+<code>{% raw %}...{% endraw %}</code> で囲む</p>
+<hr />
+<h2 id="レベル1中学生高校生向け">レベル1：中学生・高校生向け</h2>
+<h3 id="ルールがぶつかってしまった話">ルールがぶつかってしまった話</h3>
+<p>プログラムの世界には、<strong>文章の中に「命令」を埋め込む仕組み</strong>がたくさんあります。</p>
+<p>たとえば学校の通知プリントで、こういうテンプレートを想像してください。</p>
+<pre><code>保護者の方へ
+
+{{生徒の名前}} さんは、{{日付}} に欠席しました。</code></pre>
+<p>この <code>{{ }}</code>
+の中は「あとで実際の値に置き換える場所」です。先生が名前と日付を入力すると、自動でプリントが完成します。</p>
+<hr />
+<p>今回の問題は「<strong>同じ記号を別々のツールが使っていた</strong>」ことです。</p>
+<table>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 21%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ツール</th>
+<th>役割</th>
+<th><code>{{ }}</code> の意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Jekyll</strong></td>
+<td>ウェブページを作るツール</td>
+<td>ここに値を入れてね（Liquid記法）</td>
+</tr>
+<tr class="even">
+<td><strong>n8n</strong></td>
+<td>自動化ツール</td>
+<td>ここに値を入れてね（n8n記法）</td>
+</tr>
+</tbody>
+</table>
+<p>Jekyllがn8nのメモを読んだとき、「あ、<code>{{ }}</code>
+がある！これは私への命令だな」と勘違いしてしまいました。でもn8n用の書き方なので、Jekyllには理解できず、エラーになりました。</p>
+<h3 id="解決策">解決策</h3>
+<p>Jekyllに「この部分は読まなくていいよ」と伝える特別な印をつけました。</p>
+<pre><code>{% raw %}
+（ここにn8nのメモ）
+{% endraw %}</code></pre>
+<p><code>raw（ロウ）</code>
+は「生のまま」という意味で、「この中は加工しないでそのまま表示してね」という合図です。</p>
+<hr />
+<h2 id="レベル2社会人向け">レベル2：社会人向け</h2>
+<h3 id="テンプレートエンジンの競合">テンプレートエンジンの競合</h3>
+<p>GitHubのウェブサイト公開機能（GitHub
+Pages）は、<strong>Jekyll</strong>というツールでMarkdownファイルをHTMLに変換します。</p>
+<p>Jekyllは内部で <strong>Liquid（リキッド）</strong>
+というテンプレートエンジンを使っており、<code>{{ 変数名 }}</code>
+という記法でページ内の動的な値を処理します。</p>
+<p>一方、ナレッジベースに保存していたドキュメントは
+<strong>n8n</strong>（ノーコード自動化ツール）の設定メモで、n8nのExpression構文も同じ
+<code>{{ }}</code> 記号を使います。</p>
+<pre><code>// n8nの式（ドキュメントに記載していた内容）
+{{ $json.body.commits[0].message }}</code></pre>
+<p>Jekyllがこのファイルをビルドしようとした際、n8n用の
+<code>{{ }}</code>
+をLiquidの変数として解釈しようとし、構文が不正なためエラーで停止しました。</p>
+<h3 id="なぜ-render_with_liquid-false-では解決しなかったのか">なぜ
+<code>render_with_liquid: false</code> では解決しなかったのか</h3>
+<p>Jekyllには <code>render_with_liquid: false</code>
+というフロントマター設定があり、本来はLiquid処理をスキップできます。しかし、GitHub
+Pages環境（github-pages gem v232 / Jekyll
+3.10.0）では、この設定が期待通りに機能しないケースがあります。</p>
+<h3 id="採用した解決策">採用した解決策</h3>
+<p>より確実なLiquidの組み込みタグ <code>{% raw %}...{% endraw %}</code>
+を使いました。これはLiquidエンジン自体が「この範囲は処理しない」と認識する公式の方法です。</p>
+<pre><code>{% raw %}
+（Liquidと衝突するn8nの式が含まれるコンテンツ）
+{% endraw %}</code></pre>
+<p>ファイル全体に20箇所以上 <code>{{ }}</code>
+が散在していたため、ファイルボディ全体を一括でラップする方針を採りました。</p>
+<hr />
+<h2 id="レベル3it技術者向け">レベル3：IT技術者向け</h2>
+<h3 id="問題の技術的背景">問題の技術的背景</h3>
+<p>GitHub Pages は Jekyll 3.10.0 + github-pages gem v232
+で動作しており、ビルドパイプラインは以下の順で処理します。</p>
+<pre><code>Pre-Render Hooks
+→ Rendering Liquid   ← ここでLiquidテンプレートを評価
+→ Rendering Markup   ← Markdown → HTML 変換
+→ Rendering Layout   ← テーマレイアウトへの埋め込み</code></pre>
+<p>問題のファイルには n8n Expression 構文が含まれていました。</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// n8nのJavaScript-like Expression</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>{{</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  [</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span>$json<span class="op">.</span><span class="at">body</span><span class="op">.</span><span class="at">commits</span>[<span class="dv">0</span>]<span class="op">.</span><span class="at">added</span><span class="op">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span>$json<span class="op">.</span><span class="at">body</span><span class="op">.</span><span class="at">commits</span>[<span class="dv">0</span>]<span class="op">.</span><span class="at">modified</span><span class="op">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span>$json<span class="op">.</span><span class="at">body</span><span class="op">.</span><span class="at">commits</span>[<span class="dv">0</span>]<span class="op">.</span><span class="at">removed</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">map</span>(file <span class="kw">=&gt;</span> <span class="vs">`  - </span><span class="sc">${</span>file<span class="sc">}</span><span class="vs">`</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">join</span>(<span class="st">&#39;</span><span class="sc">\n</span><span class="st">&#39;</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>}}</span></code></pre></div>
+<p>LiquidパーサーはMarkdownコードブロック（<code>```</code>）の中身も含めてファイル全体をスキャンするため、コードフェンス内であっても
+<code>{{ }}</code> を変数トークンとして認識してしまいます。</p>
+<h3
+id="render_with_liquid-false-が効かなかった理由"><code>render_with_liquid: false</code>
+が効かなかった理由</h3>
+<p>Jekyll のソースコードレベルでは
+<code>render_with_liquid: false</code> は <code>Page#render</code>
+の中で判定されますが、<code>jekyll-optional-front-matter</code>
+や他のプラグインのフック処理タイミングによって、フロントマターのパース前にLiquidレンダリングが走るケースがあります。</p>
+<p>GitHub Pages
+環境では複数の公式プラグインが有効になっているため（<code>jekyll-commonmark-ghpages</code>,
+<code>jekyll-github-metadata</code>
+等）、この競合が発生しやすい状況にありました。</p>
+<p>ビルドログからも <code>render_with_liquid: false</code> の設定後も
+<code>Rendering Liquid:</code>
+ステップが実行されていることが確認できます。</p>
+<h3 id="採用した修正">採用した修正</h3>
+<p>Liquidエンジン自体が持つ <code>raw</code>
+タグを使用しました。これはLiquidパーサーのレキサー段階で処理されるため、いかなるプラグイン・設定よりも確実に動作します。</p>
+<pre class="liquid"><code>{% raw %}
+... n8nのExpression構文を含むコンテンツ ...
+{% endraw %}</code></pre>
+<p><strong>修正のポイント:</strong> -
+<code>render_with_liquid: false</code>
+は残置（設定の意図を明示するため） - <code>{% raw %}</code>
+はフロントマットの直後に配置（ファイル全体をカバー） -
+<code>{% endraw %}</code> はファイル末尾に配置 - ネストされた
+<code>{% raw %}</code>
+は使用不可なため、部分ラップは使わず全体ラップを採用</p>
+<h3 id="同様の問題が起きるケース">同様の問題が起きるケース</h3>
+<table>
+<thead>
+<tr class="header">
+<th>ドキュメントの種類</th>
+<th>衝突する記号</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>n8n Expression</td>
+<td><code>{{ }}</code></td>
+</tr>
+<tr class="even">
+<td>Vue.js テンプレート</td>
+<td><code>{{ }}</code></td>
+</tr>
+<tr class="odd">
+<td>Handlebars / Mustache</td>
+<td><code>{{ }}</code></td>
+</tr>
+<tr class="even">
+<td>Ansible Jinja2 テンプレート</td>
+<td><code>{{ }}</code></td>
+</tr>
+<tr class="odd">
+<td>GitHub Actions の式</td>
+<td><code>${{ }}</code> （<code>{{</code>
+部分が反応することがある）</td>
+</tr>
+</tbody>
+</table>
+<p>これらを含むMarkdownをJekyllでビルドする場合は、<code>{% raw %}...{% endraw %}</code>
+で囲む対応が最も確実です。</p>
+<p>{% endraw %}</p>
+</body>
+</html>
