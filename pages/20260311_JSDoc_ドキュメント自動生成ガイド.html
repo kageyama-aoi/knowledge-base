@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260311_JSDoc_ドキュメント自動生成ガイド</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="jsdoc-ドキュメント自動生成ガイド">JSDoc
+ドキュメント自動生成ガイド</h1>
+<p>集約元: -
+<code>20260107_gas_jsdoc_コメント作法ガイド（実務向け決定版）.html</code>
+— GAS向けJSDocコメント作法 -
+<code>20260109_jsdoc_python_github_actions_design.html</code> —
+JSDoc+Python+GHActions自動化設計 -
+<code>20260109_jsdoc_python_summary.html</code> —
+JSDoc+Python概要まとめ</p>
+<hr />
+<h2 id="第1章jsdocとは何か概念">第1章：JSDocとは何か（概念）</h2>
+<h3 id="jsdocは設計メタデータ">JSDocは「設計メタデータ」</h3>
+<p>JSDocは単なるコメントではなく、<strong>設計情報そのもの</strong>。最初から以下の情報が含まれている。</p>
+<ul>
+<li>クラス・関数名</li>
+<li>引数（名前・型・意味）</li>
+<li>戻り値</li>
+<li>責務（description）</li>
+<li>依存関係（型参照）</li>
+</ul>
+<p>これらはそのまま
+HTMLドキュメント・クラス図（Mermaid）・設計レビュー・AI入力用メタデータに変換できる。</p>
+<h3 id="gasでも使えるか">GASでも使えるか？</h3>
+<p><strong>完全に使える。しかも価値は同じ。</strong></p>
+<p>JSDocは実行に影響しない。JavaScriptの実行環境にも依存しない。IDE・ツール・AIが読む情報として機能する。</p>
+<table>
+<thead>
+<tr class="header">
+<th>観点</th>
+<th>Webアプリ</th>
+<th>GAS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>JSDocが書ける</td>
+<td>○</td>
+<td>○</td>
+</tr>
+<tr class="even">
+<td>補完・設計理解</td>
+<td>○</td>
+<td>◎</td>
+</tr>
+<tr class="odd">
+<td>引き継ぎ資料代わり</td>
+<td>△</td>
+<td>◎</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="第2章gas向け-jsdoc-コメント作法実務ガイド">第2章：GAS向け JSDoc
+コメント作法（実務ガイド）</h2>
+<blockquote>
+<p><strong>目的</strong>:
+GASのコードに「意味が残るコメント」を最小コストで書く。
+文法暗記ではなく、<strong>使いどころが分かること</strong>をゴールにする。</p>
+</blockquote>
+<h3 id="まず覚えるべき5つ">まず覚えるべき5つ</h3>
+<table>
+<thead>
+<tr class="header">
+<th>タグ</th>
+<th>何のため</th>
+<th>主な使いどころ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>@param</code></td>
+<td>関数の入口を説明</td>
+<td>関数定義</td>
+</tr>
+<tr class="even">
+<td><code>@return</code></td>
+<td>関数の出口を説明</td>
+<td>関数定義</td>
+</tr>
+<tr class="odd">
+<td><code>@typedef</code></td>
+<td>オブジェクト構造の設計図</td>
+<td>設定・データ構造</td>
+</tr>
+<tr class="even">
+<td><code>@type</code></td>
+<td>変数・定数の型</td>
+<td>定数・共有変数</td>
+</tr>
+<tr class="odd">
+<td><code>@fileoverview</code></td>
+<td>ファイルの責務</td>
+<td>ファイル冒頭</td>
+</tr>
+</tbody>
+</table>
+<h3 id="param-return関数の契約"><span class="citation"
+data-cites="param">@param</span> / <span class="citation"
+data-cites="return">@return</span>（関数の契約）</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * メールを検索して一覧を返す</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@param</span><span class="co"> </span><span class="cv">{string}</span><span class="co"> query Gmail検索条件</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@return</span><span class="co"> {Array</span><span class="kw">&lt;object&gt;</span><span class="co">} メール一覧</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">searchMails</span>(query) {}</span></code></pre></div>
+<p>関数の<strong>契約書</strong>と考えると分かりやすい。</p>
+<h3 id="typeこの変数は何か"><span class="citation"
+data-cites="type">@type</span>（この変数は何か？）</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">/** </span><span class="an">@type</span><span class="co"> {string} */</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> SPREADSHEET_ID <span class="op">=</span> <span class="st">&quot;xxxx&quot;</span><span class="op">;</span></span></code></pre></div>
+<p>「これは文字列IDだよ」と宣言する役目。GASのゆるい型で事故を防ぐ。</p>
+<h3 id="typedefオブジェクトの設計図"><span class="citation"
+data-cites="typedef">@typedef</span>（オブジェクトの設計図）</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * メールレポート設定</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@typedef</span><span class="co"> </span><span class="do">{Object}</span><span class="co"> </span><span class="do">MailReportSetting</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@property</span><span class="co"> </span><span class="cv">{string}</span><span class="co"> condition Gmail検索条件</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@property</span><span class="co"> </span><span class="cv">{string}</span><span class="co"> outputSheetName 出力先シート名</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@property</span><span class="co"> </span><span class="cv">{number=}</span><span class="co"> max 最大取得件数（省略可）</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@property</span><span class="co"> </span><span class="cv">{string}</span><span class="co"> parserType パーサー種別</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">/** </span><span class="an">@type</span><span class="co"> {MailReportSetting} */</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> setting <span class="op">=</span> {</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">condition</span><span class="op">:</span> <span class="st">&#39;subject:&quot;完了&quot;&#39;</span><span class="op">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">outputSheetName</span><span class="op">:</span> <span class="st">&#39;一覧&#39;</span><span class="op">,</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">max</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">parserType</span><span class="op">:</span> <span class="st">&#39;keyValue&#39;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+<p><strong><span class="citation" data-cites="typedef">@typedef</span>
+は型を作る側</strong>、<span class="citation"
+data-cites="param">@param</span> はそれを使う側。</p>
+<h3 id="property-と-param-の違い"><span class="citation"
+data-cites="property">@property</span> と <span class="citation"
+data-cites="param">@param</span> の違い</h3>
+<table>
+<thead>
+<tr class="header">
+<th>タグ</th>
+<th>主語</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>@property</code></td>
+<td>オブジェクト</td>
+<td>中身の説明</td>
+</tr>
+<tr class="even">
+<td><code>@param</code></td>
+<td>関数</td>
+<td>引数の説明</td>
+</tr>
+</tbody>
+</table>
+<p>→ <strong>データ構造 vs 関数契約</strong> の違い。</p>
+<h3 id="fileoverviewこのファイルは何をする"><span class="citation"
+data-cites="fileoverview">@fileoverview</span>（このファイルは何をする？）</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@fileoverview</span><span class="co"> メールレポート設定を管理する</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span></code></pre></div>
+<p>複数ファイル構成のGASでは、役割の境界が見えにくいのでここが効く。</p>
+<h3 id="実務ルール">実務ルール</h3>
+<ol type="1">
+<li>JSDocは<strong>直後の要素1つにだけ対応</strong>させる</li>
+<li>型は厳密より<strong>構造が分かることを優先</strong></li>
+<li>運用メモは <code>// TODO:</code> に分離</li>
+<li>迷ったら「未来の自分が読めるか」で判断</li>
+</ol>
+<h3 id="最低限テンプレコピペ用">最低限テンプレ（コピペ用）</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@fileoverview</span><span class="co"> 〇〇管理</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@typedef</span><span class="co"> </span><span class="do">{Object}</span><span class="co"> </span><span class="do">Data</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@property</span><span class="co"> </span><span class="cv">{string}</span><span class="co"> id</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">/** </span><span class="an">@type</span><span class="co"> {string} */</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> ID <span class="op">=</span> <span class="st">&#39;xxx&#39;</span><span class="op">;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@param</span><span class="co"> </span><span class="cv">{Data}</span><span class="co"> data</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@return</span><span class="co"> {boolean}</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">run</span>(data) {}</span></code></pre></div>
+<hr />
+<h2 id="第3章javascript-と-python-の対応比較">第3章：JavaScript と
+Python の対応比較</h2>
+<h3 id="基本思想">基本思想</h3>
+<table>
+<thead>
+<tr class="header">
+<th>観点</th>
+<th>JavaScript</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>設計コメント</td>
+<td>JSDoc</td>
+<td>docstring</td>
+</tr>
+<tr class="even">
+<td>型</td>
+<td>任意</td>
+<td>標準</td>
+</tr>
+<tr class="odd">
+<td>設計文化</td>
+<td>後付け</td>
+<td>前提</td>
+</tr>
+</tbody>
+</table>
+<h3 id="コメント仕様記述">コメント・仕様記述</h3>
+<table>
+<thead>
+<tr class="header">
+<th>目的</th>
+<th>JavaScript</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>関数説明</td>
+<td><code>/** */</code></td>
+<td><code>""" """</code></td>
+</tr>
+<tr class="even">
+<td>引数</td>
+<td><code>@param</code></td>
+<td>型ヒント</td>
+</tr>
+<tr class="odd">
+<td>戻り値</td>
+<td><code>@returns</code></td>
+<td><code>-&gt; type</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="htmlドキュメント生成ツール">HTMLドキュメント生成ツール</h3>
+<table>
+<thead>
+<tr class="header">
+<th>観点</th>
+<th>JavaScript</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>公式ツール</td>
+<td>JSDoc</td>
+<td>Sphinx</td>
+</tr>
+<tr class="even">
+<td>入力</td>
+<td>JSDocコメント</td>
+<td>docstring + 型</td>
+</tr>
+<tr class="odd">
+<td>出力</td>
+<td>HTML</td>
+<td>HTML</td>
+</tr>
+<tr class="even">
+<td>自動化</td>
+<td>◎</td>
+<td>◎</td>
+</tr>
+</tbody>
+</table>
+<h3 id="html生成コマンド">HTML生成コマンド</h3>
+<p><strong>JavaScript</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-D</span> jsdoc</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> jsdoc <span class="at">-c</span> jsdoc.json</span></code></pre></div>
+<p><strong>Python</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install sphinx</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">sphinx-quickstart</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">sphinx-build</span> <span class="at">-b</span> html source docs</span></code></pre></div>
+<p><strong>GAS（Node.js側で実行）</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> jsdoc src/gas <span class="at">-d</span> docs</span></code></pre></div>
+<hr />
+<h2 id="第4章github-actions-で自動ドキュメント生成">第4章：GitHub
+Actions で自動ドキュメント生成</h2>
+<h3 id="なぜ-github-actions-と相性がいいのか">なぜ GitHub Actions
+と相性がいいのか</h3>
+<ol type="1">
+<li>CLI一発でHTML生成できる</li>
+<li>出力が静的HTML</li>
+<li>Node / Python が標準で使える</li>
+</ol>
+<p>→ CI/CD
+向きの条件を最初から満たしている。<strong>「コメントを書く＝ドキュメントが勝手に更新される」</strong>
+状態を作れる。</p>
+<h3 id="javascriptjsdocの構成例">JavaScript（JSDoc）の構成例</h3>
+<p><strong>リポジトリ構成</strong></p>
+<pre><code>.
+├ src/
+│ └ index.js
+├ jsdoc.json
+├ package.json
+└ .github/
+  └ workflows/
+    └ docs.yml</code></pre>
+<p><strong>GitHub Actions（最小構成）</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> Generate JSDoc</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">on</span><span class="kw">:</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">push</span><span class="kw">:</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">branches</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at"> main </span><span class="kw">]</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">jobs</span><span class="kw">:</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">docs</span><span class="kw">:</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/setup-node@v4</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">node-version</span><span class="kw">:</span><span class="at"> </span><span class="dv">20</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">run</span><span class="kw">:</span><span class="at"> npm ci</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">run</span><span class="kw">:</span><span class="at"> npx jsdoc -c jsdoc.json</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploy to GitHub Pages</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> peaceiris/actions-gh-pages@v4</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">github_token</span><span class="kw">:</span><span class="at"> ${{ secrets.GITHUB_TOKEN }}</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">publish_dir</span><span class="kw">:</span><span class="at"> ./docs</span></span></code></pre></div>
+<h3 id="pythonsphinxの構成例">Python（Sphinx）の構成例</h3>
+<p><strong>リポジトリ構成</strong></p>
+<pre><code>.
+├ src/
+│ └ app/
+│   └ service.py
+├ docs/
+│ ├ source/
+│ └ Makefile
+└ .github/
+  └ workflows/
+    └ docs.yml</code></pre>
+<p><strong>GitHub Actions（最小構成）</strong></p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> Build Sphinx Docs</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">on</span><span class="kw">:</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">push</span><span class="kw">:</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">branches</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at"> main </span><span class="kw">]</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">jobs</span><span class="kw">:</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">docs</span><span class="kw">:</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/setup-python@v5</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">python-version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;3.11&quot;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">run</span><span class="kw">:</span><span class="at"> pip install sphinx</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">run</span><span class="kw">:</span><span class="at"> sphinx-build -b html docs/source docs/build</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploy to GitHub Pages</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> peaceiris/actions-gh-pages@v4</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">github_token</span><span class="kw">:</span><span class="at"> ${{ secrets.GITHUB_TOKEN }}</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">publish_dir</span><span class="kw">:</span><span class="at"> ./docs/build</span></span></code></pre></div>
+<h3 id="実務的な運用パターン">実務的な運用パターン</h3>
+<table>
+<thead>
+<tr class="header">
+<th>パターン</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>push時</td>
+<td>常に最新ドキュメント</td>
+</tr>
+<tr class="even">
+<td>mainのみ</td>
+<td>安定版のみ生成</td>
+</tr>
+<tr class="odd">
+<td>手動実行</td>
+<td><code>workflow_dispatch</code></td>
+</tr>
+<tr class="even">
+<td>PR時</td>
+<td>差分レビュー用</td>
+</tr>
+</tbody>
+</table>
+<h3 id="発展方向">発展方向</h3>
+<ul>
+<li>Mermaid 図の自動生成追加</li>
+<li>Node/GAS 境界を明示した設計テンプレート化</li>
+<li>JSDoc / docstring の書き方ルール化</li>
+</ul>
+</body>
+</html>
