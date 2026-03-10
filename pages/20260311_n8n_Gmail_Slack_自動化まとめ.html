@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260311_n8n_Gmail_Slack_自動化まとめ</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="n8n-gmailslack-自動化まとめ">n8n Gmail・Slack 自動化まとめ</h1>
+<p>集約元: - <code>20260119_n8n_summary_2026-01-19.html</code> —
+メール自動分類・ラベル付けワークフロー（実装済み） -
+<code>20260227_n8n_Gmail_Slack_自動通知_実装計画.html</code> —
+Gmail重要メール→Slack自動通知（設計済み・未実装）</p>
+<hr />
+<h2
+id="第1章実装済み-メール自動分類ラベル付けワークフロー2026-01-19">第1章：実装済み
+— メール自動分類・ラベル付けワークフロー（2026-01-19）</h2>
+<h3 id="構築したワークフロー全体像">構築したワークフロー全体像</h3>
+<pre><code>Gmail Trigger → Chat Model → Code（JSONパース）→ Switch → Add Label
+                                                         └→ Get Labels → Format → PostgreSQL Upsert</code></pre>
+<h3 id="gmail-trigger-の設定">1. Gmail Trigger の設定</h3>
+<p>新着メールを自動取得するトリガーを設定。</p>
+<h3 id="chat-model-を使った構造的分類">2. Chat Model
+を使った構造的分類</h3>
+<p>Text Classifierノードは「Expected object, received
+array」エラーが発生したため断念。
+<code>Chat Model（OpenAI gpt-4.1-mini）→ Codeノードで解析</code>
+の構成に移行。</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> items<span class="op">.</span><span class="fu">map</span>(item <span class="kw">=&gt;</span> {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">try</span> {</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> rawText <span class="op">=</span> item<span class="op">.</span><span class="at">json</span><span class="op">.</span><span class="at">output</span>[<span class="dv">0</span>]<span class="op">.</span><span class="at">content</span>[<span class="dv">0</span>]<span class="op">.</span><span class="at">text</span><span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> parsed <span class="op">=</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">parse</span>(rawText)<span class="op">;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> { <span class="dt">json</span><span class="op">:</span> parsed }<span class="op">;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">catch</span> (e) {</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> { <span class="dt">json</span><span class="op">:</span> { <span class="dt">error</span><span class="op">:</span> <span class="st">&quot;Parse failed&quot;</span><span class="op">,</span> <span class="dt">raw</span><span class="op">:</span> item<span class="op">.</span><span class="at">json</span> } }<span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+<h3 id="gmail-ラベルの自動付与">3. Gmail ラベルの自動付与</h3>
+<p><code>Add label to message</code> ノードで <code>Message ID</code> と
+<code>Label ID</code> を動的に指定。</p>
+<blockquote>
+<p><strong>ポイント</strong>: ラベル名ではなく「<strong>Label
+ID</strong>」が必要。名前とIDは別物。</p>
+</blockquote>
+<h3 id="ラベルマスタの自動抽出postgresql保存">4.
+ラベルマスタの自動抽出・PostgreSQL保存</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// ラベル一覧を整形・ソート</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> items</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">map</span>(item <span class="kw">=&gt;</span> ({ <span class="dt">json</span><span class="op">:</span> { <span class="dt">id</span><span class="op">:</span> item<span class="op">.</span><span class="at">json</span><span class="op">.</span><span class="at">id</span><span class="op">,</span> <span class="dt">name</span><span class="op">:</span> item<span class="op">.</span><span class="at">json</span><span class="op">.</span><span class="at">name</span> } }))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">sort</span>((a<span class="op">,</span> b) <span class="kw">=&gt;</span> a<span class="op">.</span><span class="at">json</span><span class="op">.</span><span class="at">name</span><span class="op">.</span><span class="fu">localeCompare</span>(b<span class="op">.</span><span class="at">json</span><span class="op">.</span><span class="at">name</span>))<span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- Upsert方式で保存</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> gmail_labels (<span class="kw">id</span>, name)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">VALUES</span> ({{$json[<span class="ot">&quot;id&quot;</span>]}}, {{$json[<span class="ot">&quot;name&quot;</span>]}})</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> CONFLICT (<span class="kw">id</span>) DO <span class="kw">UPDATE</span> <span class="kw">SET</span> name <span class="op">=</span> EXCLUDED.name;</span></code></pre></div>
+<h3 id="データ保存方式の比較検討">データ保存方式の比較検討</h3>
+<table>
+<thead>
+<tr class="header">
+<th>方法</th>
+<th>評価</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Data Store</td>
+<td>可だが柔軟性・検索性に制約</td>
+</tr>
+<tr class="even">
+<td>Data Table</td>
+<td>EEライセンスが必要なため断念</td>
+</tr>
+<tr class="odd">
+<td>MongoDB Vector</td>
+<td>用途が異なる（類似検索特化）</td>
+</tr>
+<tr class="even">
+<td><strong>PostgreSQL</strong>（採用）</td>
+<td>◎ Dockerコンテナ名で接続・最適解</td>
+</tr>
+</tbody>
+</table>
+<h3 id="実装結果">実装結果</h3>
+<table>
+<thead>
+<tr class="header">
+<th>実装項目</th>
+<th>状態</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gmail自動取得</td>
+<td>✅ 完了</td>
+</tr>
+<tr class="even">
+<td>ChatGPTによる分類</td>
+<td>✅ 完了</td>
+</tr>
+<tr class="odd">
+<td>分類結果のJSON変換・解析</td>
+<td>✅ 完了</td>
+</tr>
+<tr class="even">
+<td>条件分岐（Switch）でルート制御</td>
+<td>✅ 完了</td>
+</tr>
+<tr class="odd">
+<td>Gmailラベルの自動付与</td>
+<td>✅ 完了</td>
+</tr>
+<tr class="even">
+<td>ラベルマスタのPostgreSQL登録</td>
+<td>✅ 完了</td>
+</tr>
+</tbody>
+</table>
+<h3 id="学んだ重要ポイント">学んだ重要ポイント</h3>
+<ul>
+<li>Text Classifierノードの限界と実運用の選定基準</li>
+<li>ChatGPT Structured Outputの形式制御</li>
+<li>Gmail APIのLabel操作における <code>name</code> と <code>id</code>
+の違い</li>
+<li>n8nにおけるDB連携のベストプラクティス（Postgres）</li>
+<li>Data TableはEE限定 → 自前ならPostgres活用が正解</li>
+</ul>
+<h3 id="次にやれること">次にやれること</h3>
+<ul>
+<li>スケジューラーで定期的にラベルマスタ更新</li>
+<li>自動分類後にフォルダ振り分け or アーカイブ</li>
+<li>ChatGPTと連携した履歴ベースの分類精度向上</li>
+<li>Notion/Slack連携で通知も可能</li>
+</ul>
+<hr />
+<h2
+id="第2章設計済み未実装-gmail-重要メール-slack-自動通知">第2章：設計済み・未実装
+— Gmail 重要メール → Slack 自動通知</h2>
+<blockquote>
+<p><strong>ステータス：未実装（設計・ワークフロー・マニュアルは揃っている）</strong></p>
+</blockquote>
+<h3 id="やりたいこと">やりたいこと</h3>
+<p>Gmailを毎日チェックするのをやめたい。重要なメールだけを自動で拾って、カテゴリ別のSlackチャンネルに通知する仕組みをn8nで作る。</p>
+<h3 id="完成イメージ">完成イメージ</h3>
+<pre><code>Gmail
+  ↓（n8n が定期取得 or 手動実行）
+カテゴリ分類
+  ↓
+Slack へ通知
+
+  #gmail-報酬   ← 報酬・請求・振込関連
+  #gmail-it     ← GitHub / Vercel 等のIT通知
+  #gmail-税務   ← 税務・行政関連
+  #gmail-その他 ← 件名に「重要」「緊急」が含まれるもの</code></pre>
+<h3 id="トリガー">トリガー</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>種類</th>
+<th>動き</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Schedule Trigger</td>
+<td>1日5回（7:00 / 11:30 / 15:00 / 18:00 / 21:00）自動実行</td>
+</tr>
+<tr class="even">
+<td>Webhook Trigger</td>
+<td>curl で手動実行。サーバー復旧時や緊急確認に使う</td>
+</tr>
+</tbody>
+</table>
+<h3 id="処理の流れ">処理の流れ</h3>
+<pre><code>Schedule Trigger ─┐
+                   ├→ 時間範囲を計算 → Gmail取得 → カテゴリ分類 → IF → Slack通知
+Webhook Trigger ──┘                                               └→ Webhookレスポンス返却</code></pre>
+<h3 id="カテゴリ判定ルール">カテゴリ判定ルール</h3>
+<ul>
+<li><code>from</code>（送信者アドレスの部分一致）</li>
+<li><code>subject</code>（件名の部分一致）</li>
+<li><code>keywords</code>（本文プレビューの部分一致）</li>
+</ul>
+<p>上から順に評価し、最初にマッチしたカテゴリを適用。どのカテゴリにも該当しないメールはスキップ。</p>
+<h3 id="用意されているファイル">用意されているファイル</h3>
+<table>
+<colgroup>
+<col style="width: 60%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ファイル</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>files/gmail-slack-workflow.json</code></td>
+<td>n8nにそのままインポートできるワークフロー本体</td>
+</tr>
+<tr class="even">
+<td><code>files/setup-guide.md</code></td>
+<td>セットアップ手順</td>
+</tr>
+<tr class="odd">
+<td><code>files/operations-manual.md</code></td>
+<td>日常運用・カテゴリ追加・トラブルシューティング</td>
+</tr>
+<tr class="even">
+<td><code>files/category-templates.js</code></td>
+<td>カテゴリ追加用テンプレート</td>
+</tr>
+</tbody>
+</table>
+<h3 id="実装手順概要">実装手順（概要）</h3>
+<ol type="1">
+<li>Slackに4チャンネルを作成（<code>#gmail-報酬</code> /
+<code>#gmail-it</code> / <code>#gmail-税務</code> /
+<code>#gmail-その他</code>）</li>
+<li>n8nにGmail Credentialを登録</li>
+<li>n8nにSlack Credentialを登録</li>
+<li><code>gmail-slack-workflow.json</code> をn8nにインポート</li>
+<li>各ノードにCredentialを紐づける</li>
+<li>ワークフローをアクティブ化</li>
+<li>curlでテスト実行してSlackに通知が来ることを確認</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># テスト実行コマンド</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-X</span> POST https://your-n8n.example.com/webhook/gmail-check <span class="dt">\</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;hours&quot;: 24}&#39;</span></span></code></pre></div>
+<h3 id="前提環境">前提環境</h3>
+<ul>
+<li>n8nが動いているサーバー（またはクラウド版n8n）</li>
+<li>Gmail アカウント（Google Cloud ConsoleでGmail API有効化が必要）</li>
+<li>Slackワークスペース</li>
+</ul>
+<h3 id="運用メモ">運用メモ</h3>
+<ul>
+<li>カテゴリ判定ルールは意図的に「広め」に設定。最初の1〜2週間は誤検知を観察してルールを絞り込む</li>
+<li>月1回はExecutionログと誤検知・見落としをレビュー</li>
+<li>Google OAuth2トークンは失効することがある → 定期的に確認が必要</li>
+</ul>
+</body>
+</html>
