@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260311_ナレッジ整理提案_2026年以降</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="ナレッジ整理提案2026年1月以降ファイル対象">ナレッジ整理提案（2026年1月以降ファイル対象）</h1>
+<p>作成日: 2026-03-11 対象: <code>pages/</code> および
+<code>pages/old/</code> 内の2026年以降ファイル（計約55ファイル）</p>
+<hr />
+<h2 id="現状の問題点">現状の問題点</h2>
+<ol type="1">
+<li><strong>md と html の二重管理</strong> — <code>pages/old/*.md</code>
+と <code>pages/*.html</code>
+が同じ内容を別形式で存在している（自動変換の副産物）</li>
+<li><strong>バージョン違いの重複</strong> — <code>_2</code>
+サフィックスで全く同じ内容が複製されているファイルが複数ある</li>
+<li><strong>テーマが近いのに別ファイル</strong> —
+同日・同テーマなのに分割されたファイルが散在している</li>
+<li><strong>ファイル名と内容の不一致</strong> —
+ファイル名から内容が想像できないファイルがある</li>
+</ol>
+<hr />
+<h2 id="a.-即削除できる重複ファイルpagesold-内">A.
+即削除できる重複ファイル（pages/old/ 内）</h2>
+<p>以下は内容が完全に同一のペア。片方を削除してよい。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>削除してよい方</th>
+<th>残す方</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260119_github-actions-docs-summary_2.md</code></td>
+<td><code>20260119_github-actions-docs-summary.md</code></td>
+<td>完全同一。<code>_2</code>は不要</td>
+</tr>
+<tr class="even">
+<td><code>20260119_n8n_summary_2.md</code></td>
+<td><code>20260119_n8n_summary_2026-01-19.md</code></td>
+<td>完全同一。日付入りの方が分かりやすい</td>
+</tr>
+<tr class="odd">
+<td><code>20260120_Git_pre-push_学び振り返り_2.md</code></td>
+<td><code>20260120_Git_pre-push_学び振り返り.md</code></td>
+<td>完全同一。<code>_2</code>は不要</td>
+</tr>
+<tr class="even">
+<td><code>20260221_2＿AI開発_環境構築_Vercel_Cloudflare_Supabase.md</code></td>
+<td><code>20260221_AI開発_環境構築_Vercel_Cloudflare_Supabase.md</code></td>
+<td>完全同一</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>注意</strong>: <code>pages/</code> の HTML 版
+<code>20260221_AI開発...</code> と <code>20260221_2＿AI開発...</code>
+は<strong>内容が異なる</strong>ので別途扱うこと（後述）。</p>
+</blockquote>
+<hr />
+<h2 id="b.-統合候補グループ">B. 統合候補グループ</h2>
+<h3 id="グループ1git-github-操作まとめ">グループ1：Git &amp; GitHub
+操作まとめ</h3>
+<p><strong>→ 1ファイルに統合推奨</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>現ファイル</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260107_gitフックでnode.html</code></td>
+<td>Gitフック + Node.js連携</td>
+</tr>
+<tr class="even">
+<td><code>20260120_Git_pre-push_学び振り返り.html</code></td>
+<td>pre-pushフック実装の振り返り</td>
+</tr>
+<tr class="odd">
+<td><code>20260214_Issue運用とghメモ.html</code></td>
+<td>GitHub Issue運用ルール</td>
+</tr>
+<tr class="even">
+<td><code>20260221_ghコマンド_cli_教材.html</code></td>
+<td>gh CLIコマンド実践教材</td>
+</tr>
+</tbody>
+</table>
+<p><strong>統合後ファイル名案:</strong>
+<code>Git_GitHub_操作ガイド集.md</code> <strong>理由:</strong>
+すべて「Gitの使い方・GitHub操作」という同一軸。Gitフック→gh
+CLI→Issue運用という学習の流れにもなる。</p>
+<hr />
+<h3
+id="グループ2jsdocドキュメント生成">グループ2：JSDoc・ドキュメント生成</h3>
+<p><strong>→ 2ファイルに集約推奨</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>現ファイル</th>
+<th>内容</th>
+<th>振り分け先</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260107_gas_jsdoc_コメント作法ガイド（実務向け決定版）.html</code></td>
+<td>GAS向けJSDocコメント作法</td>
+<td>ファイルA</td>
+</tr>
+<tr class="even">
+<td><code>20260109_jsdoc_python_github_actions_design.html</code></td>
+<td>JSDoc+Python+GHActions自動化設計</td>
+<td>ファイルA</td>
+</tr>
+<tr class="odd">
+<td><code>20260109_jsdoc_python_summary.html</code></td>
+<td>JSDoc+Python概要</td>
+<td>ファイルA（上に統合）</td>
+</tr>
+<tr class="even">
+<td><code>20260107_pandoc概要説明（社内向け）.html</code></td>
+<td>Pandocドキュメント変換ツール</td>
+<td>ファイルB</td>
+</tr>
+<tr class="odd">
+<td><code>20260131_MDファイル運用ミニ手順書.html</code></td>
+<td>MDファイル運用手順</td>
+<td>ファイルB</td>
+</tr>
+</tbody>
+</table>
+<p><strong>統合後ファイル名案:</strong> - A:
+<code>JSDoc_ドキュメント自動生成ガイド.md</code>（JSDoc系3本を統合） -
+B: <code>Markdown_Pandoc_運用ガイド.md</code>（MD運用系2本を統合）
+<strong>理由:</strong> jsdoc_design と jsdoc_summary
+は切り口が異なるが主題が同一。pandocとMD運用は「ドキュメント形式の変換・管理」という共通軸。</p>
+<hr />
+<h3 id="グループ3n8n-自動化まとめ">グループ3：n8n 自動化まとめ</h3>
+<p><strong>→ 1ファイルに統合推奨</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>現ファイル</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260119_n8n_summary_2026-01-19.html</code></td>
+<td>Gmail自動分類・ラベル付けワークフロー</td>
+</tr>
+<tr class="even">
+<td><code>20260227_n8n_Gmail_Slack_自動通知_実装計画.html</code></td>
+<td>Gmail・Slack自動通知実装計画</td>
+</tr>
+</tbody>
+</table>
+<p><strong>統合後ファイル名案:</strong>
+<code>n8n_Gmail_Slack_自動化まとめ.md</code> <strong>理由:</strong>
+両方ともn8n×メール通知という同一テーマ。時系列で並べると学習の経緯が追いやすくなる。</p>
+<hr />
+<h3 id="グループ4javascript-コード解説メモ">グループ4：JavaScript
+コード解説メモ</h3>
+<p><strong>→ 1ファイルに統合推奨</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>現ファイル</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260131_filter行コード解説.html</code></td>
+<td>filterメソッドの解説</td>
+</tr>
+<tr class="even">
+<td><code>20260131_オブジェクトの分割代入.html</code></td>
+<td>オブジェクト分割代入の解説</td>
+</tr>
+</tbody>
+</table>
+<p><strong>統合後ファイル名案:</strong>
+<code>JavaScript_コード解説メモ.md</code> <strong>理由:</strong>
+同日作成・同テーマ（JS基礎構文）。単体では薄い内容なので1ファイルにまとめた方が参照しやすい。</p>
+<hr />
+<h3
+id="グループ5クラウド開発環境vercel-cloudflare-supabase">グループ5：クラウド開発環境（Vercel
+/ Cloudflare / Supabase）</h3>
+<p><strong>→ 要確認の上で整理</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>現ファイル</th>
+<th>実際の内容</th>
+<th>対応</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260221_AI開発_環境構築_Vercel_Cloudflare_Supabase.html</code></td>
+<td>AIアプリ開発用Issue作成ルール・ワークフロー</td>
+<td>ファイル名と内容が不一致。リネーム必要</td>
+</tr>
+<tr class="even">
+<td><code>20260221_2＿AI開発_環境構築_Vercel_Cloudflare_Supabase.html</code></td>
+<td>Vercel・Cloudflare・Supabase無料プラン比較</td>
+<td>内容はこちらが正しい名前</td>
+</tr>
+<tr class="odd">
+<td><code>20260227_クラウドアプリ開発_学習ロードマップ.html</code></td>
+<td>クラウドアプリ開発ロードマップ全般</td>
+<td>上の環境構築資料と統合候補</td>
+</tr>
+</tbody>
+</table>
+<p><strong>推奨アクション:</strong> 1.
+<code>20260221_AI開発_環境構築...</code>（1つ目）は内容がIssue運用なので
+<code>GitHub_Issue_ワークフロー定義.md</code> にリネーム 2.
+<code>20260221_2＿AI開発_環境構築...</code> と
+<code>20260227_クラウドアプリ開発_学習ロードマップ</code> を統合 →
+<code>クラウド開発環境_Vercel_Supabase_ガイド.md</code></p>
+<hr />
+<h3 id="グループ6ai-ツール活用戦略">グループ6：AI ツール活用戦略</h3>
+<p><strong>→ 2ファイルに集約推奨</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>現ファイル</th>
+<th>内容</th>
+<th>振り分け先</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260214_kaji_note_claude-code-setup-guide.html</code></td>
+<td>Claude Code セットアップ</td>
+<td>ファイルA</td>
+</tr>
+<tr class="even">
+<td><code>20260227_MCP_context7_活用戦略.html</code></td>
+<td>MCP・context7の活用戦略</td>
+<td>ファイルA</td>
+</tr>
+<tr class="odd">
+<td><code>20260227_AI運用設計_方向性マップ.html</code></td>
+<td>AIを使う仕事の方向性・ポジショニング</td>
+<td>ファイルB（単独でも可）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>統合後ファイル名案:</strong> - A:
+<code>Claude_MCP_活用ガイド.md</code>（ツール技術系） - B:
+<code>AI運用設計_方向性マップ.md</code>（方向性・思想系）単独で残す
+<strong>理由:</strong>
+ClaudeとMCPは技術的に隣接。方向性マップはキャリア・思考整理の性格が強く、別物。</p>
+<hr />
+<h3 id="グループ7looker-studio-関連">グループ7：Looker Studio 関連</h3>
+<p><strong>→ 1ファイルに統合推奨</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>現ファイル</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260227.html</code>（ファイル名に内容なし）</td>
+<td>Looker Studio学習フェーズ分析</td>
+</tr>
+<tr class="even">
+<td><code>20260227_LookerStudio_学習ロードマップ.html</code></td>
+<td>Looker Studio BIロードマップ</td>
+</tr>
+</tbody>
+</table>
+<p><strong>統合後ファイル名案:</strong>
+<code>LookerStudio_学習ロードマップ.md</code> <strong>理由:</strong>
+同日・同テーマ。<code>20260227.html</code>
+はファイル名が内容を表していないため特に統合が必要。</p>
+<hr />
+<h3
+id="グループ8ナレッジシステム自体の改善メモ">グループ8：ナレッジシステム自体の改善メモ</h3>
+<p><strong>→ 1ファイルに統合推奨</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>現ファイル</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260131_index_UX改善案.html</code></td>
+<td>インデックスページのUX改善提案</td>
+</tr>
+<tr class="even">
+<td><code>20260227_ナレッジシステム_静的レビュー.html</code></td>
+<td>ナレッジシステム全体の品質レビュー</td>
+</tr>
+</tbody>
+</table>
+<p><strong>統合後ファイル名案:</strong>
+<code>ナレッジシステム_改善記録.md</code> <strong>理由:</strong>
+両方ともこのナレッジベース自体を改善する記録。まとめて見ると改善の変遷が追いやすい。</p>
+<hr />
+<h2 id="c.-単独で残すべきファイル">C. 単独で残すべきファイル</h2>
+<p>以下は統合せず、そのまま残すことを推奨。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ファイル</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260130_Pythonテストコード学習プラン.html</code></td>
+<td>Python学習計画として独立性が高い。他と混ぜると探しにくくなる</td>
+</tr>
+<tr class="even">
+<td><code>20260131_codex_設定まわりのCLI操作整理.html</code></td>
+<td>Codex固有のCLI設定メモ。他CLIと混ぜると用途が曖昧になる</td>
+</tr>
+<tr class="odd">
+<td><code>20260214_power_shell_functions_and_bat_comparison.html</code></td>
+<td>PowerShell vs BATの比較。Windowsシェル固有で独立性が高い</td>
+</tr>
+<tr class="even">
+<td><code>20260214_感動の仕組み.html</code></td>
+<td>「優れた指示書の構造」という独自テーマ。分類が難しい良質なメモ</td>
+</tr>
+<tr class="odd">
+<td><code>20260227_iOSアプリ開発_入門まとめ.html</code></td>
+<td>iOSという独立したプラットフォーム。他と統合しにくい</td>
+</tr>
+<tr class="even">
+<td><code>20260303_外部サービス手順書_公式ドキュメント照合ガイド.html</code></td>
+<td>手順書管理の方法論。独立テーマ</td>
+</tr>
+<tr class="odd">
+<td><code>20260311_Liquid_Jekyll_衝突問題_解説.md</code></td>
+<td>今回作成。トラブルシュート記録として独立させる</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="d.-整理後のファイル構成イメージ">D.
+整理後のファイル構成イメージ</h2>
+<pre><code>pages/
+├── [Git・GitHub]
+│   └── Git_GitHub_操作ガイド集.md         ← 4ファイル統合
+│
+├── [ドキュメント生成]
+│   ├── JSDoc_ドキュメント自動生成ガイド.md  ← 3ファイル統合
+│   └── Markdown_Pandoc_運用ガイド.md       ← 2ファイル統合
+│
+├── [n8n自動化]
+│   └── n8n_Gmail_Slack_自動化まとめ.md     ← 2ファイル統合
+│
+├── [JavaScript]
+│   └── JavaScript_コード解説メモ.md        ← 2ファイル統合
+│
+├── [クラウド開発]
+│   ├── GitHub_Issue_ワークフロー定義.md    ← リネーム
+│   └── クラウド開発環境_Vercel_Supabase.md ← 2ファイル統合
+│
+├── [AIツール]
+│   ├── Claude_MCP_活用ガイド.md            ← 2ファイル統合
+│   └── AI運用設計_方向性マップ.md          ← そのまま
+│
+├── [Looker Studio]
+│   └── LookerStudio_学習ロードマップ.md    ← 2ファイル統合（20260227.htmlも吸収）
+│
+├── [ナレッジシステム]
+│   └── ナレッジシステム_改善記録.md        ← 2ファイル統合
+│
+└── [単独]
+    ├── Pythonテストコード学習プラン.md
+    ├── codex_CLI操作整理.md
+    ├── PowerShell_BAT_比較.md
+    ├── 感動の仕組み.md
+    ├── iOSアプリ開発_入門まとめ.md
+    ├── 外部サービス手順書_照合ガイド.md
+    └── Liquid_Jekyll_衝突問題_解説.md</code></pre>
+<hr />
+<h2 id="e.-優先度別アクションリスト">E. 優先度別アクションリスト</h2>
+<h3 id="優先度-高今すぐできる">優先度 高（今すぐできる）</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><code>pages/old/</code>
+の重複4ペアを削除（Aセクション）</label></li>
+<li><label><input type="checkbox" /><code>20260227.html</code> を
+<code>20260227_LookerStudio_学習ロードマップ</code>
+に統合してリネーム</label></li>
+<li><label><input
+type="checkbox" /><code>20260131_filter行コード解説</code> +
+<code>20260131_オブジェクトの分割代入</code> を統合</label></li>
+</ul>
+<h3 id="優先度-中内容確認しながら">優先度 中（内容確認しながら）</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />Git系4ファイルを統合</label></li>
+<li><label><input type="checkbox" />n8n系2ファイルを統合</label></li>
+<li><label><input type="checkbox" />Looker
+Studio系2ファイルを統合</label></li>
+<li><label><input
+type="checkbox" />ナレッジシステム改善系2ファイルを統合</label></li>
+<li><label><input
+type="checkbox" /><code>20260221_AI開発_環境構築</code>（1つ目）をリネーム</label></li>
+</ul>
+<h3 id="優先度-低内容の書き直しを伴う">優先度
+低（内容の書き直しを伴う）</h3>
+<ul class="task-list">
+<li><label><input
+type="checkbox" />JSDoc系3ファイルを統合（内容が段階的なので整理に手間がかかる）</label></li>
+<li><label><input
+type="checkbox" />クラウド開発環境系2ファイルを統合</label></li>
+<li><label><input
+type="checkbox" />Claude・MCP系2ファイルを統合</label></li>
+</ul>
+</body>
+</html>
