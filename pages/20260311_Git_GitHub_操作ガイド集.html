@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260311_Git_GitHub_操作ガイド集</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="git-github-操作ガイド集">Git &amp; GitHub 操作ガイド集</h1>
+<p>集約元: - <code>20260107_gitフックでnode.html</code> — Gitフック +
+Node.js連携 - <code>20260120_Git_pre-push_学び振り返り.html</code> —
+pre-pushフック実装の振り返り -
+<code>20260214_Issue運用とghメモ.html</code> — GitHub Issue運用ルール -
+<code>20260221_ghコマンド_cli_教材.html</code> — gh
+CLIコマンド実践教材</p>
+<hr />
+<h2
+id="第1章gitフックpre-pushでテストを自動実行する">第1章：Gitフック（pre-push）でテストを自動実行する</h2>
+<p>このドキュメントは、<strong>Gitフック（pre-push）を使って Node.js
+のテストを自動実行する</strong>ための、最小構成・手順ベースのまとめです。</p>
+<h3 id="ゴール">ゴール</h3>
+<ul>
+<li><code>git push</code> を実行した瞬間に</li>
+<li>Node.js のテストが自動で走り</li>
+<li>テストが失敗したら <strong>push が止まる</strong></li>
+</ul>
+<h3 id="全体の流れイメージ">全体の流れ（イメージ）</h3>
+<pre><code>git push
+  ↓
+pre-push フックが起動
+  ↓
+node test/logic.test.js 実行
+  ↓
+OK → push 続行
+NG → push 中断</code></pre>
+<h3 id="手順①-フォルダ構成">手順① フォルダ構成</h3>
+<pre><code>project/
+├─ gas/
+│  └─ logic.js        # GASとNodeで共通のロジック
+├─ test/
+│  └─ logic.test.js   # Node.jsで実行するテスト
+└─ .git/
+   └─ hooks/
+      └─ pre-push     # Gitフック（自動実行される）</code></pre>
+<blockquote>
+<p><code>.git/hooks</code>
+配下のファイルは、Gitが自動的に実行します。</p>
+</blockquote>
+<h3 id="手順②-テスト対象のロジックを書く">手順②
+テスト対象のロジックを書く</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// gas/logic.js</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">double</span>(values) {</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> values<span class="op">.</span><span class="fu">map</span>(v <span class="kw">=&gt;</span> v <span class="op">*</span> <span class="dv">2</span>)<span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Node.js から使えるように公開</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="kw">typeof</span> module <span class="op">!==</span> <span class="st">&#39;undefined&#39;</span>) {</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  module<span class="op">.</span><span class="at">exports</span> <span class="op">=</span> { double }<span class="op">;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<ul>
+<li><code>double</code> という関数を定義</li>
+<li>配列の各要素を2倍にするロジック</li>
+<li><code>module.exports</code> は <strong>Node.js
+用</strong>（GASでは無視される）</li>
+</ul>
+<h3 id="手順③-node.js-のテストを書く">手順③ Node.js のテストを書く</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// test/logic.test.js</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> { double } <span class="op">=</span> <span class="pp">require</span>(<span class="st">&#39;../gas/logic&#39;</span>)<span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">assert</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">JSON</span><span class="op">.</span><span class="fu">stringify</span>(<span class="fu">double</span>([<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span>])) <span class="op">===</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">stringify</span>([<span class="dv">2</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">6</span>])<span class="op">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;❌ double の結果が違う&#39;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)<span class="op">;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">&#39;✅ ロジックテストOK&#39;</span>)<span class="op">;</span></span></code></pre></div>
+<h3 id="手順④-手動でテストを実行する重要">手順④
+手動でテストを実行する（重要）</h3>
+<p>まずは Gitフックを使わず、<strong>直接 Node.js
+で実行</strong>して動作確認します。</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> test/logic.test.js</span></code></pre></div>
+<p>実行結果： - 成功時: <code>✅ ロジックテストOK</code> - 失敗時:
+<code>Assertion failed: ❌ double の結果が違う</code></p>
+<blockquote>
+<p>ここが動かない場合、Gitフックでも動きません。</p>
+</blockquote>
+<h3 id="手順⑤-gitフックpre-pushを書く">手順⑤
+Gitフック（pre-push）を書く</h3>
+<p>ファイル: <code>.git/hooks/pre-push</code></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/sh</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> test/logic.test.js <span class="kw">||</span> <span class="bu">exit</span> 1</span></code></pre></div>
+<p>実行権限を付与（必須）：</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x .git/hooks/pre-push</span></code></pre></div>
+<p><code>exit 1</code> を返すと Git が異常終了を検知して push
+を中断します。</p>
+<h3 id="手順⑥-git-push-で動作確認">手順⑥ git push で動作確認</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push</span></code></pre></div>
+<ul>
+<li>テスト成功 → push 続行</li>
+<li>テスト失敗 → push 中断（リモートに送られない）</li>
+</ul>
+<h3 id="補足よくある誤解">補足：よくある誤解</h3>
+<ul>
+<li>Gitフックは難しい仕組みではない（中身は「node
+を1行実行しているだけ」）</li>
+<li>GAS全体をテストする必要はなく、守りたいロジックだけ守れれば十分</li>
+<li>CI（GitHub Actions）より手前で止められる</li>
+</ul>
+<h3 id="次に進むとしたら">次に進むとしたら</h3>
+<ul>
+<li>husky を使って Gitフックをリポジトリ管理する</li>
+<li>テストを <code>npm test</code> にまとめる</li>
+<li>既存GASを「ロジック / I/O」で分解する</li>
+</ul>
+<hr />
+<h2
+id="第2章gitフック実装の振り返り">第2章：Gitフック実装の振り返り</h2>
+<h3 id="今日やったこと事実">今日やったこと（事実）</h3>
+<ul>
+<li>Git フック（<code>pre-push</code>）を実装した</li>
+<li><code>git push</code> 時に <code>pytest</code>
+を自動実行する仕組みを作成</li>
+<li>テストが失敗すると <strong>push 自体が中断される</strong>
+ことを実体験</li>
+<li>PowerShell と Bash の違いによるエラーを経験</li>
+<li>既存テストの import エラーで push が止まる事象を確認</li>
+<li>テスト対象ディレクトリを限定して pre-push を制御</li>
+<li>import を構造に合わせて修正し、挙動を統一</li>
+</ul>
+<h3 id="技術的な学び表面">技術的な学び（表面）</h3>
+<p><strong>Git フック</strong> - <code>pre-push</code> は push
+直前に処理を差し込める - <code>exit 1</code> を返すと push が中断される
+- CI 前段のローカル品質ゲートとして有効</p>
+<p><strong>pytest</strong> - <code>python -m pytest</code>
+は実行ディレクトリ（CWD）基準で動く - テスト前に collection（import
+解決）フェーズがある - import エラーは実行前エラーとして扱われる</p>
+<h3 id="技術的な学び本質">技術的な学び（本質）</h3>
+<p><strong>import はコードだけで決まらない</strong>
+実行場所（CWD）・<code>sys.path</code>・パッケージ構造の組み合わせで成否が決まる。</p>
+<p><strong>pre-push は環境の甘さを可視化する</strong> IDE
+の補正・偶然のカレントディレクトリ・暗黙の <code>PYTHONPATH</code>
+への依存が顕在化する。</p>
+<p><strong>構造に沿った import の重要性</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> .src.handlers <span class="im">import</span> CrowdLogHandler, TaskReportHandler</span></code></pre></div>
+<p>構造と import が一致していると、pytest / Git フック / IDE
+で挙動が統一される。</p>
+<h3 id="つまずきと対処">つまずきと対処</h3>
+<table>
+<thead>
+<tr class="header">
+<th>つまずき</th>
+<th>原因</th>
+<th>対処</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Set-Content エラー</td>
+<td>PowerShell と Bash の差</td>
+<td>ヒアストリング使用</td>
+</tr>
+<tr class="even">
+<td>push が止まる</td>
+<td>import エラー</td>
+<td>テスト対象限定</td>
+</tr>
+<tr class="odd">
+<td>handlers が見つからない</td>
+<td>構造不一致</td>
+<td>相対 import 修正</td>
+</tr>
+</tbody>
+</table>
+<h3 id="次に活かすアクション">次に活かすアクション</h3>
+<ul>
+<li>pre-push / CI の役割分担設計</li>
+<li><code>src/</code> レイアウト整理</li>
+<li>チーム共有用ガイド作成</li>
+</ul>
+<hr />
+<h2 id="第3章github-issue-運用方針と-gh-cli-基礎">第3章：GitHub Issue
+運用方針と gh CLI 基礎</h2>
+<h3 id="運用方針">運用方針</h3>
+<ul>
+<li>Issue で課題を可視化する</li>
+<li>課題は「機能追加」だけでなく「情報設計」も対象にする</li>
+<li>Issue 本文に受け入れ条件とチェックリストを入れて進捗管理する</li>
+</ul>
+<h3 id="issue-を作る手順web">Issue を作る手順（Web）</h3>
+<ol type="1">
+<li>対象リポジトリの <code>Issues</code> を開く</li>
+<li><code>New issue</code> を押す</li>
+<li>タイトルと本文を貼り付ける</li>
+<li>必要なら <code>Labels</code> / <code>Assignees</code> /
+<code>Projects</code> を設定する</li>
+<li><code>Create</code> で作成する</li>
+</ol>
+<h3 id="issue-本文に入れると良い項目">Issue 本文に入れると良い項目</h3>
+<ul>
+<li>背景</li>
+<li>現在の課題</li>
+<li>目的</li>
+<li>受け入れ条件（Done の定義）</li>
+<li>タスクチェックリスト</li>
+<li>関連ファイル</li>
+</ul>
+<h3 id="コードや-pr-との紐づけ方">コードや PR との紐づけ方</h3>
+<ol type="1">
+<li>ファイル参照を書く（例: <code>README.md</code>,
+<code>build.py</code>）</li>
+<li>行番号リンクを貼る（例:
+<code>https://github.com/&lt;owner&gt;/&lt;repo&gt;/blob/&lt;branch&gt;/README.md#L1</code>）</li>
+<li>PR 本文に <code>Closes #123</code> または <code>Fixes #123</code>
+を書いて自動クローズ</li>
+<li><code>- [ ] タスク名</code> でチェックリスト管理</li>
+</ol>
+<h3 id="gh-cli-とは">gh CLI とは</h3>
+<p>GitHub 公式の CLI ツール。ブラウザを開かなくても Issue / PR /
+リポジトリ操作をターミナルから実行できます。</p>
+<p><strong>主な利点</strong> - Issue 作成・閲覧・編集を CLI で完結 - PR
+作成やレビュー確認を高速化 -
+スクリプト化しやすく、運用を自動化しやすい</p>
+<p><strong>基本コマンド</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>gh <span class="op">--</span>version          <span class="co"># インストール確認</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>gh auth status        <span class="co"># ログイン状態確認</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>gh issue create       <span class="co"># Issue 作成（対話）</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>gh issue list         <span class="co"># Issue 一覧</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>gh issue view 123     <span class="co"># 特定 Issue を表示</span></span></code></pre></div>
+<h3 id="推奨の次アクション">推奨の次アクション</h3>
+<ol type="1">
+<li>まず Web で Issue を 1 件作成して運用開始</li>
+<li><code>gh</code> を導入して CLI 運用に移行</li>
+<li><code>.github/ISSUE_TEMPLATE/</code> で Issue テンプレート化</li>
+</ol>
+<hr />
+<h2 id="第4章gh-cli-実践教材">第4章：gh CLI 実践教材</h2>
+<h3 id="コマンドには前提状態がある">コマンドには「前提状態」がある</h3>
+<table>
+<thead>
+<tr class="header">
+<th>コマンド</th>
+<th>必要な前提状態</th>
+<th>状態</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>gh repo view --web</code></td>
+<td>リポジトリがあればOK</td>
+<td>即使える</td>
+</tr>
+<tr class="even">
+<td><code>gh issue list / create</code></td>
+<td>リポジトリがあればOK</td>
+<td>即使える</td>
+</tr>
+<tr class="odd">
+<td><code>gh pr list / create</code></td>
+<td>ブランチが push されていること</td>
+<td>要 push</td>
+</tr>
+<tr class="even">
+<td><code>gh run list / view</code></td>
+<td>Actions が最低1回実行済み</td>
+<td>要実行</td>
+</tr>
+<tr class="odd">
+<td><code>gh workflow run</code></td>
+<td><code>.github/workflows/</code> に yml</td>
+<td>要 yml</td>
+</tr>
+</tbody>
+</table>
+<h3 id="認証状態確認">認証・状態確認</h3>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> auth status   <span class="co"># 認証アカウントの確認・トークン期限切れチェック</span></span></code></pre></div>
+<h3 id="web-フラグ地味に便利">–web フラグ（地味に便利）</h3>
+<p>コマンドに <code>--web</code> を付けると該当の GitHub
+ページをブラウザで直接開きます。</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo view <span class="at">--web</span>          <span class="co"># リポジトリのトップページを開く（前提不要）</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue view 42 <span class="at">--web</span>     <span class="co"># Issue #42 のページを開く</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> pr view 15 <span class="at">--web</span>        <span class="co"># PR #15 のページを開く</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> run view <span class="at">--web</span>           <span class="co"># Actions 実行ページを開く</span></span></code></pre></div>
+<h3 id="issue-操作">Issue 操作</h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 一覧</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue list                          <span class="co"># open の Issue 一覧</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue list <span class="at">--state</span> all             <span class="co"># クローズ済みも含めて全件</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue list <span class="at">--label</span> <span class="st">&quot;bug&quot;</span>           <span class="co"># ラベルで絞り込み</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 作成</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue create <span class="at">--title</span> <span class="st">&quot;バグ修正&quot;</span> <span class="at">--body</span> <span class="st">&quot;詳細をここに&quot;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue create <span class="at">--title</span> <span class="st">&quot;タイトル&quot;</span> <span class="at">--body-file</span> issue_body.md   <span class="co"># AI連携で有用</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 操作</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue view 42                       <span class="co"># 詳細表示</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue close 42                      <span class="co"># クローズ</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue comment 42 <span class="at">--body</span> <span class="st">&quot;対応完了&quot;</span>  <span class="co"># コメント追加</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue develop 42 <span class="at">--checkout</span>        <span class="co"># Issue 連携ブランチを作成してチェックアウト</span></span></code></pre></div>
+<blockquote>
+<p><code>gh issue develop 42 --checkout</code> は Issue
+番号がブランチ名に含まれるため、GitHub が Issue と PR
+を自動で関連付けてくれる。Issue → 開発フローの自動化の核心。</p>
+</blockquote>
+<h3 id="pr-操作">PR 操作</h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 作成</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> pr create <span class="at">--title</span> <span class="st">&quot;feature: ログイン追加&quot;</span> <span class="at">--body</span> <span class="st">&quot;Close #42&quot;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> pr create <span class="at">--draft</span>                    <span class="co"># ドラフト PR</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> pr create <span class="at">--base</span> main <span class="at">--head</span> feature/login</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 確認・操作</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> pr list                             <span class="co"># オープンな PR 一覧</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> pr view 15                          <span class="co"># PR #15 の詳細</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> pr checkout 15                     <span class="co"># ローカルにチェックアウト</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> pr merge 15 <span class="at">--squash</span>              <span class="co"># スカッシュマージ</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> pr merge 15 <span class="at">--merge</span>               <span class="co"># 通常マージ</span></span></code></pre></div>
+<h3 id="github-actions-連携">GitHub Actions 連携</h3>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 実行状態確認</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> run list                            <span class="co"># 実行一覧</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> run list <span class="at">--limit</span> 5                 <span class="co"># 直近5件</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> run view <span class="at">--log</span>                     <span class="co"># ログ全体（CI 失敗原因調査）</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> run watch                           <span class="co"># リアルタイム監視</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ワークフロー手動起動（workflow_dispatch トリガーが必要）</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> workflow run deploy.yml</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> workflow run deploy.yml <span class="at">--field</span> environment=staging</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> workflow list</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> workflow enable deploy.yml</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> workflow disable deploy.yml</span></code></pre></div>
+<h3 id="リポジトリ操作">リポジトリ操作</h3>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo view                           <span class="co"># 基本情報</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo view <span class="at">--web</span>                    <span class="co"># ブラウザで開く</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo clone ユーザー名/リポジトリ名   <span class="co"># クローン</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo create my-new-repo <span class="at">--public</span>   <span class="co"># 新リポジトリ作成</span></span></code></pre></div>
+<h3 id="自動化の組み合わせパターン">自動化の組み合わせパターン</h3>
+<p><strong>パターン① AI 生成 Issue の自動作成</strong></p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue create <span class="at">--title</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">cat</span> issue_title.txt<span class="va">)</span><span class="st">&quot;</span> <span class="at">--body-file</span> issue_body.md <span class="at">--label</span> <span class="st">&quot;auto-generated&quot;</span></span></code></pre></div>
+<p><strong>パターン② PR 作成後 CI 完了を待つ</strong></p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> pr create <span class="at">--title</span> <span class="st">&quot;fix: バグ修正&quot;</span> <span class="at">--body</span> <span class="st">&quot;Close #42&quot;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> run watch</span></code></pre></div>
+<p><strong>パターン③ Issue → ブランチ → PR を一気に進める</strong></p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> issue develop 42 <span class="at">--checkout</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ... 開発作業 ...</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add . <span class="kw">&amp;&amp;</span> <span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;fix: #42対応&quot;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> pr create <span class="at">--title</span> <span class="st">&quot;fix: #42対応&quot;</span> <span class="at">--body</span> <span class="st">&quot;Close #42&quot;</span></span></code></pre></div>
+<h3 id="優先的に覚えるコマンド-top-11">優先的に覚えるコマンド TOP
+11</h3>
+<table>
+<thead>
+<tr class="header">
+<th>優先度</th>
+<th>コマンド</th>
+<th>前提状態</th>
+<th>できること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>★★★</td>
+<td><code>gh repo view --web</code></td>
+<td>即使える</td>
+<td>最初に試すべき1コマンド</td>
+</tr>
+<tr class="even">
+<td>★★★</td>
+<td><code>gh issue create</code></td>
+<td>即使える</td>
+<td>Issue を CLI から作成</td>
+</tr>
+<tr class="odd">
+<td>★★★</td>
+<td><code>gh pr create</code></td>
+<td>要 push</td>
+<td>PR を CLI から作成</td>
+</tr>
+<tr class="even">
+<td>★★★</td>
+<td><code>gh run list</code></td>
+<td>要実行</td>
+<td>Actions の実行状態確認</td>
+</tr>
+<tr class="odd">
+<td>★★☆</td>
+<td><code>gh issue list</code></td>
+<td>即使える</td>
+<td>Issue 一覧確認</td>
+</tr>
+<tr class="even">
+<td>★★☆</td>
+<td><code>gh pr list</code></td>
+<td>要 push</td>
+<td>PR 一覧確認</td>
+</tr>
+<tr class="odd">
+<td>★★☆</td>
+<td><code>gh run watch</code></td>
+<td>要実行</td>
+<td>CI 完了まで待機・監視</td>
+</tr>
+<tr class="even">
+<td>★★☆</td>
+<td><code>gh workflow run</code></td>
+<td>要 yml</td>
+<td>ワークフロー手動起動</td>
+</tr>
+<tr class="odd">
+<td>★☆☆</td>
+<td><code>gh pr checkout</code></td>
+<td>要 push</td>
+<td>他人の PR をローカルで確認</td>
+</tr>
+<tr class="even">
+<td>★☆☆</td>
+<td><code>gh issue develop</code></td>
+<td>Issue 存在</td>
+<td>Issue 連携ブランチ作成</td>
+</tr>
+<tr class="odd">
+<td>★☆☆</td>
+<td><code>gh run view --log</code></td>
+<td>要実行</td>
+<td>CI のログ確認</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
