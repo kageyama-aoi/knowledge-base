@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>20260311_ナレッジ整理_作業再開手順書</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="ナレッジ整理-作業再開手順書">ナレッジ整理 作業再開手順書</h1>
+<p>作業日: 2026-03-11 ステータス:
+<strong>途中停止（グループ4まで完了）</strong></p>
+<hr />
+<h2 id="作業の前に読む資料">作業の前に読む資料</h2>
+<p>まず以下の提案書を開いて全体像を把握すること。</p>
+<pre><code>pages/20260311_ナレッジ整理提案_2026年以降.md</code></pre>
+<p>この提案書に A〜E セクションで整理計画が全部書いてある。</p>
+<hr />
+<h2 id="完了済み作業">完了済み作業</h2>
+<h3 id="a.-重複ファイル削除完了">A. 重複ファイル削除（完了）</h3>
+<p><code>pages/old/</code> の完全同一ファイル4ペアを削除済み。</p>
+<table>
+<thead>
+<tr class="header">
+<th>削除済み</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260119_github-actions-docs-summary_2.md</code></td>
+</tr>
+<tr class="even">
+<td><code>20260119_n8n_summary_2.md</code></td>
+</tr>
+<tr class="odd">
+<td><code>20260120_Git_pre-push_学び振り返り_2.md</code></td>
+</tr>
+<tr class="even">
+<td><code>20260221_2＿AI開発_環境構築_Vercel_Cloudflare_Supabase.md</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="b.-グループ統合グループ14-完了">B. グループ統合（グループ1〜4
+完了）</h3>
+<h4 id="グループ1git-github-操作完了">グループ1：Git &amp; GitHub
+操作（完了）</h4>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>元ファイル（削除済み）</th>
+<th>統合先</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260107_gitフックでnode.html</code></td>
+<td><code>20260311_Git_GitHub_操作ガイド集.md</code></td>
+</tr>
+<tr class="even">
+<td><code>20260120_Git_pre-push_学び振り返り.html</code></td>
+<td>同上</td>
+</tr>
+<tr class="odd">
+<td><code>20260214_Issue運用とghメモ.html</code></td>
+<td>同上</td>
+</tr>
+<tr class="even">
+<td><code>20260221_ghコマンド_cli_教材.html</code></td>
+<td>→ <strong>デザイン参考としてリネーム保持</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>デザイン参考として残したファイル:
+<code>pages/20260221_(デザイン参考)_ghコマンド_cli_教材.html</code></p>
+</blockquote>
+<h4
+id="グループ2jsdocドキュメント生成完了">グループ2：JSDoc・ドキュメント生成（完了）</h4>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>元ファイル（削除済み）</th>
+<th>統合先</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260107_gas_jsdoc_コメント作法ガイド（実務向け決定版）.html</code></td>
+<td><code>20260311_JSDoc_ドキュメント自動生成ガイド.md</code></td>
+</tr>
+<tr class="even">
+<td><code>20260109_jsdoc_python_github_actions_design.html</code></td>
+<td>同上</td>
+</tr>
+<tr class="odd">
+<td><code>20260109_jsdoc_python_summary.html</code></td>
+<td>同上</td>
+</tr>
+<tr class="even">
+<td><code>20260107_pandoc概要説明（社内向け）.html</code></td>
+<td><code>20260311_Markdown_Pandoc_運用ガイド.md</code></td>
+</tr>
+<tr class="odd">
+<td><code>20260131_MDファイル運用ミニ手順書.html</code></td>
+<td>同上</td>
+</tr>
+</tbody>
+</table>
+<h4 id="グループ3n8n-自動化完了">グループ3：n8n 自動化（完了）</h4>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>元ファイル（削除済み）</th>
+<th>統合先</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260119_n8n_summary_2026-01-19.html</code></td>
+<td><code>20260311_n8n_Gmail_Slack_自動化まとめ.md</code></td>
+</tr>
+<tr class="even">
+<td><code>20260227_n8n_Gmail_Slack_自動通知_実装計画.html</code></td>
+<td>同上</td>
+</tr>
+</tbody>
+</table>
+<h4 id="グループ4javascript-コード解説完了">グループ4：JavaScript
+コード解説（完了）</h4>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>元ファイル（削除済み）</th>
+<th>統合先</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260131_filter行コード解説.html</code></td>
+<td><code>20260311_JavaScript_コード解説メモ.md</code></td>
+</tr>
+<tr class="even">
+<td><code>20260131_オブジェクトの分割代入.html</code></td>
+<td>同上</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="未対応作業ここから再開">未対応作業（ここから再開）</h2>
+<h3
+id="グループ5クラウド開発環境vercel-cloudflare-supabase">グループ5：クラウド開発環境（Vercel
+/ Cloudflare / Supabase）</h3>
+<p><strong>注意：ファイル名と内容が不一致のものがある</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ファイル</th>
+<th>実際の内容</th>
+<th>対応</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pages/20260221_AI開発_環境構築_Vercel_Cloudflare_Supabase.html</code></td>
+<td>AIアプリ開発用 <strong>Issue作成ルール・ワークフロー</strong></td>
+<td>→ <code>20260221_GitHub_Issue_ワークフロー定義.md</code>
+にリネーム</td>
+</tr>
+<tr class="even">
+<td><code>pages/20260221_2＿AI開発_環境構築_Vercel_Cloudflare_Supabase.html</code></td>
+<td>Vercel・Cloudflare・Supabase <strong>無料プラン比較</strong></td>
+<td>→ <code>20260311_クラウド開発環境_Vercel_Supabase_ガイド.md</code>
+に統合</td>
+</tr>
+<tr class="odd">
+<td><code>pages/20260227_クラウドアプリ開発_学習ロードマップ.html</code></td>
+<td>クラウドアプリ開発ロードマップ全般</td>
+<td>→ 同上に統合</td>
+</tr>
+</tbody>
+</table>
+<p><strong>手順:</strong> 1.
+<code>20260221_AI開発_環境構築...</code>（1つ目）を
+<code>20260221_GitHub_Issue_ワークフロー定義.md</code> にリネーム 2.
+<code>20260221_2＿AI開発_環境構築...</code> と
+<code>20260227_クラウドアプリ開発_学習ロードマップ</code> を統合して
+<code>20260311_クラウド開発環境_Vercel_Supabase_ガイド.md</code>
+を新規作成 3. 元ファイル2件（統合した方）を削除</p>
+<hr />
+<h3 id="グループ6ai-ツール活用戦略">グループ6：AI ツール活用戦略</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ファイル</th>
+<th>内容</th>
+<th>対応</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pages/20260214_kaji_note_claude-code-setup-guide.html</code></td>
+<td>Claude Code セットアップ</td>
+<td>→ <code>20260311_Claude_MCP_活用ガイド.md</code> に統合</td>
+</tr>
+<tr class="even">
+<td><code>pages/20260227_MCP_context7_活用戦略.html</code></td>
+<td>MCP・context7活用戦略</td>
+<td>→ 同上に統合</td>
+</tr>
+<tr class="odd">
+<td><code>pages/20260227_AI運用設計_方向性マップ.html</code></td>
+<td>AIを使う仕事の方向性</td>
+<td>→ <code>20260227_AI運用設計_方向性マップ.md</code>
+として単独保持（リネームのみ）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>手順:</strong> 1. Claude・MCP系2ファイルを統合して
+<code>20260311_Claude_MCP_活用ガイド.md</code> を新規作成 2.
+元ファイル2件を削除 3.
+<code>20260227_AI運用設計_方向性マップ.html</code> は内容を
+<code>.md</code> にリネームのみ（削除しない）</p>
+<hr />
+<h3 id="グループ7looker-studio-関連">グループ7：Looker Studio 関連</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ファイル</th>
+<th>内容</th>
+<th>対応</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pages/20260227.html</code></td>
+<td>Looker
+Studio学習フェーズ分析（<strong>ファイル名に内容なし</strong>）</td>
+<td>→ <code>20260311_LookerStudio_学習ロードマップ.md</code> に統合</td>
+</tr>
+<tr class="even">
+<td><code>pages/20260227_LookerStudio_学習ロードマップ.html</code></td>
+<td>Looker Studio BIロードマップ</td>
+<td>→ 同上に統合</td>
+</tr>
+</tbody>
+</table>
+<p><strong>手順:</strong> 1. 2ファイルを統合して
+<code>20260311_LookerStudio_学習ロードマップ.md</code> を新規作成 2.
+元ファイル2件を削除</p>
+<hr />
+<h3
+id="グループ8ナレッジシステム改善メモ">グループ8：ナレッジシステム改善メモ</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ファイル</th>
+<th>内容</th>
+<th>対応</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pages/20260131_index_UX改善案.html</code></td>
+<td>インデックスページのUX改善提案</td>
+<td>→ <code>20260311_ナレッジシステム_改善記録.md</code> に統合</td>
+</tr>
+<tr class="even">
+<td><code>pages/20260227_ナレッジシステム_静的レビュー.html</code></td>
+<td>ナレッジシステム全体の品質レビュー</td>
+<td>→ 同上に統合</td>
+</tr>
+</tbody>
+</table>
+<p><strong>手順:</strong> 1. 2ファイルを統合して
+<code>20260311_ナレッジシステム_改善記録.md</code> を新規作成 2.
+元ファイル2件を削除</p>
+<hr />
+<h2 id="対応不要単独保持">対応不要（単独保持）</h2>
+<p>以下は整理不要。そのまま残す。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ファイル</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>20260130_Pythonテストコード学習プラン.html</code></td>
+<td>独立性が高い</td>
+</tr>
+<tr class="even">
+<td><code>20260131_codex_設定まわりのCLI操作整理.html</code></td>
+<td>Codex固有</td>
+</tr>
+<tr class="odd">
+<td><code>20260214_power_shell_functions_and_bat_comparison.html</code></td>
+<td>Windows固有</td>
+</tr>
+<tr class="even">
+<td><code>20260214_感動の仕組み.html</code></td>
+<td>独自テーマ</td>
+</tr>
+<tr class="odd">
+<td><code>20260227_iOSアプリ開発_入門まとめ.html</code></td>
+<td>プラットフォーム独立</td>
+</tr>
+<tr class="even">
+<td><code>20260303_外部サービス手順書_公式ドキュメント照合ガイド.html</code></td>
+<td>独立テーマ</td>
+</tr>
+<tr class="odd">
+<td><code>20260221_(デザイン参考)_ghコマンド_cli_教材.html</code></td>
+<td>HTMLデザイン参考用</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="作業時の進め方前回のやり方">作業時の進め方（前回のやり方）</h2>
+<ol type="1">
+<li>グループの元ファイルを Claude Code に読ませる</li>
+<li>Claude Code が統合 <code>.md</code> ファイルを作成</li>
+<li><strong>元ファイルと新ファイルのパスを確認してから削除を承認</strong></li>
+<li>削除 → コミット → プッシュ</li>
+<li>次のグループへ</li>
+</ol>
+<blockquote>
+<p>デザインが優れたHTMLは「リネームして保持」することができる（グループ1の前例参照）。</p>
+</blockquote>
+</body>
+</html>

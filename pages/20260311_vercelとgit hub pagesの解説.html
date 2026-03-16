@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vercel vs GitHub Pages — IT教育教材</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f8f6f1;
+    --ink: #1a1a1a;
+    --vercel: #0070f3;
+    --vercel-light: #e8f2ff;
+    --github: #238636;
+    --github-light: #e6f4ea;
+    --accent: #ff4500;
+    --mid: #6b6b6b;
+    --rule: #d4d0c8;
+    --bg-warm: #faf8f3;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--white);
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  header {
+    background: var(--black);
+    color: var(--white);
+    padding: 60px 40px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -50px;
+    width: 300px; height: 300px;
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .header-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  header h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .vs-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 2px 10px;
+    margin: 0 8px;
+    border-radius: 2px;
+    vertical-align: middle;
+  }
+  header p {
+    color: rgba(248,246,241,0.6);
+    font-size: 14px;
+    margin-top: 8px;
+    font-weight: 300;
+  }
+
+  /* ── LAYOUT ──────────────────────────────── */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ── SECTION ─────────────────────────────── */
+  .section {
+    padding: 64px 0 48px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 700;
+    margin-bottom: 32px;
+    line-height: 1.3;
+  }
+
+  /* ── CONCEPT CARDS ───────────────────────── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 8px;
+  }
+  @media(max-width:600px){ .concept-grid { grid-template-columns: 1fr; } }
+
+  .concept-card {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .concept-card-header {
+    padding: 16px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .concept-card-header.vercel-h {
+    background: var(--black);
+    color: var(--white);
+  }
+  .concept-card-header.github-h {
+    background: #161b22;
+    color: var(--white);
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-v { background: var(--vercel); }
+  .dot-g { background: var(--github); }
+
+  .concept-card-body {
+    padding: 20px;
+    background: var(--bg-warm);
+  }
+  .concept-card-body p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--ink);
+  }
+  .concept-card-body .keyword {
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .pill {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin: 2px 2px 0;
+  }
+  .pill-v { background: var(--vercel-light); color: var(--vercel); }
+  .pill-g { background: var(--github-light); color: var(--github); }
+  .pill-list { margin-top: 12px; }
+
+  /* ── LEVEL TABS ──────────────────────────── */
+  .level-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+    border: 1px solid var(--rule);
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+  }
+  .level-tab {
+    flex: 1;
+    padding: 10px 6px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--bg-warm);
+    border: none;
+    border-right: 1px solid var(--rule);
+    transition: all 0.15s;
+    color: var(--mid);
+  }
+  .level-tab:last-child { border-right: none; }
+  .level-tab.active {
+    background: var(--black);
+    color: var(--white);
+  }
+  .level-panel {
+    display: none;
+    border: 1px solid var(--rule);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    padding: 28px 24px;
+    background: white;
+  }
+  .level-panel.active { display: block; }
+
+  .level-panel h4 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .level-panel .analogy {
+    background: var(--bg-warm);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--mid);
+  }
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 12px;
+  }
+  @media(max-width:600px){ .two-col { grid-template-columns: 1fr; } }
+  .mini-card {
+    padding: 14px;
+    border-radius: 3px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .mini-card.v { background: var(--vercel-light); border-left: 3px solid var(--vercel); }
+  .mini-card.g { background: var(--github-light); border-left: 3px solid var(--github); }
+  .mini-card strong { display: block; margin-bottom: 4px; font-size: 12px; letter-spacing: 0.05em; }
+
+  /* ── COMPARE TABLE ───────────────────────── */
+  .compare-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead tr {
+    background: var(--black);
+    color: var(--white);
+  }
+  thead th {
+    padding: 14px 16px;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+  }
+  thead th:first-child { width: 130px; }
+  thead th:nth-child(2) { color: #60a5fa; }
+  thead th:nth-child(3) { color: #4ade80; }
+
+  tbody tr { border-bottom: 1px solid var(--rule); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: var(--bg-warm); }
+  tbody td { padding: 13px 16px; vertical-align: top; line-height: 1.6; }
+  tbody td:first-child {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--mid);
+    white-space: nowrap;
+  }
+
+  .check { color: var(--github); font-weight: 700; }
+  .cross { color: #cc0000; }
+  .partial { color: #b45309; }
+
+  /* ── ARCH DIAGRAM ────────────────────────── */
+  .arch-box {
+    background: var(--black);
+    border-radius: 6px;
+    padding: 32px 28px;
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+  }
+  .arch-title {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .arch-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .arch-node {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 3px;
+    padding: 8px 14px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .arch-node .label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    display: block;
+    margin-bottom: 2px;
+    letter-spacing: 0.1em;
+  }
+  .arch-node.highlight {
+    background: var(--vercel);
+    border-color: var(--vercel);
+  }
+  .arch-arrow {
+    font-size: 18px;
+    color: rgba(255,255,255,0.3);
+  }
+  .arch-note {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+  }
+  .arch-note span { color: var(--vercel); }
+
+  /* ── USAGE GUIDE ─────────────────────────── */
+  .usage-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media(max-width:600px){ .usage-grid { grid-template-columns: 1fr; } }
+  .usage-card {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .usage-card-head {
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .usage-card-head.v-head { background: var(--vercel-light); color: #003d99; }
+  .usage-card-head.g-head { background: var(--github-light); color: #145221; }
+  .usage-card ul {
+    list-style: none;
+    padding: 16px 18px;
+  }
+  .usage-card ul li {
+    font-size: 13px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.6;
+  }
+  .usage-card ul li:last-child { border-bottom: none; }
+  .li-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+
+  /* ── SUMMARY ─────────────────────────────── */
+  .summary-box {
+    background: var(--ink);
+    color: var(--white);
+    border-radius: 6px;
+    padding: 36px 32px;
+  }
+  .summary-rule {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #ffe0d6;
+  }
+  .summary-items {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 20px;
+  }
+  @media(max-width:600px){ .summary-items { grid-template-columns: 1fr; } }
+  .summary-item {
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .summary-item strong {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .summary-item.sv strong { color: #93c5fd; }
+  .summary-item.sg strong { color: #86efac; }
+
+  .final-line {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.8;
+  }
+  .final-line strong { color: var(--white); }
+
+  /* ── GLOSSARY ────────────────────────────── */
+  .gloss-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  .gf-btn {
+    font-family: 'DM Mono', monospace; font-size: 12px; padding: 6px 14px;
+    border: 1px solid var(--rule); border-radius: 2px; background: white;
+    cursor: pointer; color: var(--mid); transition: all 0.15s;
+  }
+  .gf-btn.active, .gf-btn:hover { background: var(--black); color: white; border-color: var(--black); }
+  .gloss-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .gloss-card {
+    border: 1px solid var(--rule); border-radius: 4px; overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .gloss-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .gloss-card.hidden { display: none; }
+  .gloss-head {
+    padding: 12px 16px 8px; display: flex; align-items: center;
+    justify-content: space-between; background: var(--bg-warm); border-bottom: 1px solid var(--rule);
+  }
+  .gloss-abbr { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: var(--ink); }
+  .gloss-cat { font-size: 10px; font-family: 'DM Mono', monospace; padding: 2px 8px; border-radius: 2px; letter-spacing: 0.05em; }
+  .render-cat    { background: #fef3c7; color: #92400e; }
+  .infra-cat     { background: #ede9fe; color: #5b21b6; }
+  .framework-cat { background: #dbeafe; color: #1e40af; }
+  .saas-cat      { background: #dcfce7; color: #166534; }
+  .gloss-full { padding: 6px 16px 10px; font-size: 11px; color: var(--mid); font-style: italic; background: var(--bg-warm); }
+  .gloss-body { padding: 14px 16px 16px; background: white; }
+  .gloss-body p { font-size: 13px; line-height: 1.75; color: var(--ink); margin-bottom: 8px; }
+  .gloss-body code { font-family: 'DM Mono', monospace; font-size: 12px; background: var(--bg-warm); padding: 1px 5px; border-radius: 2px; }
+  .gloss-vs { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--rule); padding-top: 10px; margin-top: 4px; }
+  .vs-v { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--vercel-light); color: #003d99; padding: 2px 8px; border-radius: 2px; }
+  .vs-g { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--github-light); color: #145221; padding: 2px 8px; border-radius: 2px; }
+
+  /* ── FOOTER ──────────────────────────────── */
+  footer {
+    background: var(--black);
+    color: rgba(255,255,255,0.3);
+    text-align: center;
+    padding: 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="container">
+    <div class="header-tag">IT教育教材 / Web公開サービス</div>
+    <h1>Vercel <span class="vs-badge">VS</span> GitHub Pages</h1>
+    <p>Webアプリをどこに公開するか ── 二大プラットフォームを徹底比較</p>
+  </div>
+</header>
+
+<!-- SECTION 1: CONCEPT -->
+<div class="section">
+  <div class="container">
+    <div class="section-num">Section 01</div>
+    <div class="section-title">概念説明 ── それぞれ何者か？</div>
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="concept-card-header vercel-h"><span class="dot dot-v"></span>Vercel</div>
+        <div class="concept-card-body">
+          <p><span class="keyword">Vercel</span>は、フロントエンド特化のクラウドプラットフォームです。Next.js の開発元でもあり、静的サイトだけでなく<strong>サーバーサイドレンダリング(SSR)・Serverless Functions・Edge Computing</strong>まで対応します。</p>
+          <p style="margin-top:10px;">GitHubにコードをpushするだけで自動デプロイされ、CDNによる高速配信・プレビューURL・分析機能などが無料で使えます。</p>
+          <div class="pill-list">
+            <span class="pill pill-v">SSR</span><span class="pill pill-v">Serverless</span><span class="pill pill-v">Edge</span><span class="pill pill-v">CI/CD</span><span class="pill pill-v">CDN</span>
+          </div>
+        </div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-card-header github-h"><span class="dot dot-g"></span>GitHub Pages</div>
+        <div class="concept-card-body">
+          <p><span class="keyword">GitHub Pages</span>は、GitHubが提供する<strong>静的サイト専用</strong>のホスティングサービスです。HTMLファイルをリポジトリに置くだけで公開でき、Jekyll によるブログ生成も標準サポートします。</p>
+          <p style="margin-top:10px;">完全無料・設定ゼロで使える手軽さが最大の特徴で、ドキュメントサイト・ポートフォリオ・技術ブログに最適です。</p>
+          <div class="pill-list">
+            <span class="pill pill-g">静的サイト</span><span class="pill pill-g">Jekyll</span><span class="pill pill-g">無料</span><span class="pill pill-g">ドキュメント</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: LEVEL -->
+<div class="section">
+  <div class="container">
+    <div class="section-num">Section 02</div>
+    <div class="section-title">レベル別解説</div>
+    <div class="level-tabs">
+      <button class="level-tab active" onclick="switchTab(this,'junior')">🏫 中学生</button>
+      <button class="level-tab" onclick="switchTab(this,'senior')">📚 高校生</button>
+      <button class="level-tab" onclick="switchTab(this,'adult')">💼 社会人</button>
+      <button class="level-tab" onclick="switchTab(this,'engineer')">⚙️ エンジニア</button>
+    </div>
+
+    <div id="junior" class="level-panel active">
+      <h4>🏫 中学生向け ── お店の棚で考えてみよう</h4>
+      <div class="analogy">「GitHub Pages」は文化祭で作ったポスターをそのまま貼り出す掲示板。「Vercel」はお客さんが来るたびに最新メニューを自動で更新してくれるデジタル看板。</div>
+      <div class="two-col">
+        <div class="mini-card v"><strong>▶ Vercel</strong>ホームページを作ったとき、誰かが見るたびにサーバーが動いて最新情報を見せてくれる。ゲームのランキングみたいに、リアルタイムで変わるサイトが作れる。</div>
+        <div class="mini-card g"><strong>▶ GitHub Pages</strong>作ったHTMLファイルをそのままインターネットに置いておくサービス。自己紹介ページや学校のクラブ紹介ページに向いている。むずかしい設定ゼロで使える。</div>
+      </div>
+    </div>
+
+    <div id="senior" class="level-panel">
+      <h4>📚 高校生向け ── プログラミング学習者へ</h4>
+      <div class="analogy">GitHub Pages は「静的ファイルをそのまま配信するCDN」、Vercel は「静的配信 ＋ サーバー処理まで担うフルスタックPaaS」と理解しよう。</div>
+      <div class="two-col">
+        <div class="mini-card v"><strong>▶ Vercel</strong>React・Next.jsで作ったSPAやSSRアプリを自動デプロイできる。APIサーバーも同じプロジェクトに置けるので、フロントとバックを別々に管理しなくていい。無料枠でも本格的な開発が可能。</div>
+        <div class="mini-card g"><strong>▶ GitHub Pages</strong>HTML/CSS/JS・Vue・Reactのビルド済みファイルを公開するのに最適。プロジェクトのドキュメントや、JavaScriptだけで作ったポートフォリオサイトの公開に向いている。</div>
+      </div>
+    </div>
+
+    <div id="adult" class="level-panel">
+      <h4>💼 社会人向け ── 非エンジニアも知っておきたいポイント</h4>
+      <div class="analogy">GitHub Pages は「印刷済みチラシを棚に置くだけ」、Vercel は「注文ごとに最適なチラシを自動生成して渡す店舗」のイメージ。</div>
+      <div class="two-col">
+        <div class="mini-card v"><strong>▶ Vercel を選ぶ場面</strong>会社のサービスサイト、ECサイト、ダッシュボード、AIを使ったWebアプリなど「ユーザーごとに異なる情報を表示したい」ケース。スタートアップやプロダクト開発に最適。</div>
+        <div class="mini-card g"><strong>▶ GitHub Pages を選ぶ場面</strong>社内ドキュメント、技術ブログ、オープンソースのドキュメントサイト、ランディングページなど「内容が固定されていて、誰が見ても同じでよい」ケース。</div>
+      </div>
+    </div>
+
+    <div id="engineer" class="level-panel">
+      <h4>⚙️ ITエンジニア向け ── アーキテクチャ視点</h4>
+      <div class="analogy">GitHub Pages は Origin サーバーを持たない純粋な CDN エッジ配信、Vercel は CDN + Serverless Functions + Edge Runtime + ISR を統合した Composable Infrastructure。</div>
+      <div class="two-col">
+        <div class="mini-card v"><strong>▶ Vercel の強み</strong>Next.js の App Router と完全統合。RSC (React Server Components) のストリーミング、ISR (Incremental Static Regeneration)、Edge Middleware、Functions のコールドスタート最適化。GitHub Actions 不要で PR ごとにプレビューURLが自動生成される。</div>
+        <div class="mini-card g"><strong>▶ GitHub Pages の強み</strong>完全無料・SLA制約なし・CNAME設定シンプル。Jekyll / Hugo / Astro などSSGとの相性が良く、Actions による独自ビルドパイプラインも構築可能。vendored assets の long-term caching に適している。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: TABLE -->
+<div class="section">
+  <div class="container">
+    <div class="section-num">Section 03</div>
+    <div class="section-title">詳細比較表</div>
+    <div class="compare-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>機能・観点</th>
+            <th>▲ Vercel</th>
+            <th>◆ GitHub Pages</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>静的サイト</td>
+            <td><span class="check">✓</span> 完全対応。ビルド自動化・CDN配信</td>
+            <td><span class="check">✓</span> 完全対応。最もシンプルな使い方</td>
+          </tr>
+          <tr>
+            <td>動的サイト</td>
+            <td><span class="check">✓</span> SSR/ISR でユーザーごとに生成可能</td>
+            <td><span class="cross">✗</span> 不可。静的ファイルのみ</td>
+          </tr>
+          <tr>
+            <td>API</td>
+            <td><span class="check">✓</span> API Routes / Serverless Functions で実装可</td>
+            <td><span class="cross">✗</span> バックエンド処理不可。外部APIへの proxy も不可</td>
+          </tr>
+          <tr>
+            <td>Serverless</td>
+            <td><span class="check">✓</span> Functions (Node, Python, Go等) を内蔵</td>
+            <td><span class="cross">✗</span> 非対応</td>
+          </tr>
+          <tr>
+            <td>SSR</td>
+            <td><span class="check">✓</span> Next.js の getServerSideProps / App Router RSC を完全サポート</td>
+            <td><span class="cross">✗</span> 非対応。CSR のみ</td>
+          </tr>
+          <tr>
+            <td>Edge</td>
+            <td><span class="check">✓</span> Edge Middleware・Edge Runtime でユーザー近傍処理</td>
+            <td><span class="partial">△</span> CDN経由で静的ファイルをエッジ配信するのみ</td>
+          </tr>
+          <tr>
+            <td>CDN</td>
+            <td><span class="check">✓</span> グローバルエッジネットワーク標準搭載</td>
+            <td><span class="check">✓</span> Fastly CDN により全世界に配信</td>
+          </tr>
+          <tr>
+            <td>AIアプリ</td>
+            <td><span class="check">✓</span> OpenAI API等の呼び出しをServerless Functionsで安全に実行可能</td>
+            <td><span class="cross">✗</span> APIキー露出リスクあり。原則不可</td>
+          </tr>
+          <tr>
+            <td>Next.js</td>
+            <td><span class="check">✓</span> 公式推奨。App Router・ISR・RSCをフル活用</td>
+            <td><span class="partial">△</span> 静的エクスポート(next export)のみ対応</td>
+          </tr>
+          <tr>
+            <td>CI/CD</td>
+            <td><span class="check">✓</span> Git push で自動デプロイ。PR単位でプレビュー環境生成</td>
+            <td><span class="partial">△</span> GitHub Actions で構築可能だが自己設定が必要</td>
+          </tr>
+          <tr>
+            <td>カスタムドメイン</td>
+            <td><span class="check">✓</span> 無料プランで対応。自動SSL</td>
+            <td><span class="check">✓</span> 対応。自動SSL(Let's Encrypt)</td>
+          </tr>
+          <tr>
+            <td>料金(基本)</td>
+            <td>無料枠あり。商用利用は$20/月〜</td>
+            <td>完全無料(publicリポジトリ)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: ARCH -->
+<div class="section">
+  <div class="container">
+    <div class="section-num">Section 04</div>
+    <div class="section-title">典型的な開発構成 ── AIアプリの場合</div>
+    <div class="arch-box">
+      <div class="arch-title">AI Application Architecture</div>
+      <div class="arch-row">
+        <div class="arch-node">
+          <span class="label">USER</span>
+          ブラウザ
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node highlight">
+          <span class="label">FRONTEND + HOSTING</span>
+          Next.js on Vercel
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node">
+          <span class="label">DATABASE</span>
+          Supabase
+        </div>
+      </div>
+      <div class="arch-row" style="margin-top:4px; padding-left: 148px;">
+        <div class="arch-arrow" style="transform:rotate(90deg); margin-left:4px;">→</div>
+      </div>
+      <div class="arch-row" style="padding-left: 132px;">
+        <div class="arch-node">
+          <span class="label">AI LAYER</span>
+          OpenAI API
+        </div>
+        <div class="arch-arrow">←</div>
+        <div class="arch-node highlight" style="background:rgba(0,112,243,0.3);">
+          <span class="label">SERVERLESS FUNCTION</span>
+          Vercel API Route
+        </div>
+      </div>
+      <div class="arch-note">
+        ポイント：OpenAI APIキーは <span>Vercel の環境変数</span> に保存し、Serverless Function 経由でのみ呼び出す。クライアントにキーが露出しない安全な構成。<br>
+        Supabase との認証連携、Row Level Security による権限制御も Vercel のミドルウェアで統合管理できる。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: USAGE -->
+<div class="section">
+  <div class="container">
+    <div class="section-num">Section 05</div>
+    <div class="section-title">実務視点 ── どんな時に使うか？</div>
+    <div class="usage-grid">
+      <div class="usage-card">
+        <div class="usage-card-head v-head">▲ Vercel を使う場面</div>
+        <ul>
+          <li><span class="li-icon">🤖</span>OpenAI / Anthropic APIを使ったAIアプリを作るとき</li>
+          <li><span class="li-icon">🔐</span>APIキーや認証情報をサーバー側に隠したいとき</li>
+          <li><span class="li-icon">⚡</span>SSR・ISRでSEOを最適化したいプロダクトサイト</li>
+          <li><span class="li-icon">🚀</span>スタートアップのMVP・プロトタイプ開発</li>
+          <li><span class="li-icon">🌐</span>ECサイト・ダッシュボード・SaaSフロントエンド</li>
+          <li><span class="li-icon">🔄</span>チームでPRレビュー時にプレビュー環境が必要なとき</li>
+          <li><span class="li-icon">📱</span>Next.js App Router・RSCをフル活用したいとき</li>
+        </ul>
+      </div>
+      <div class="usage-card">
+        <div class="usage-card-head g-head">◆ GitHub Pages を使う場面</div>
+        <ul>
+          <li><span class="li-icon">📄</span>OSSプロジェクトのドキュメントサイト</li>
+          <li><span class="li-icon">🎨</span>個人ポートフォリオ・プロフィールページ</li>
+          <li><span class="li-icon">📝</span>技術ブログ（Jekyll・Hugo・Astro）</li>
+          <li><span class="li-icon">💰</span>コストをかけたくないシンプルな静的サイト</li>
+          <li><span class="li-icon">🏫</span>学習用・演習用サイトの公開</li>
+          <li><span class="li-icon">📚</span>社内Wiki・マニュアルの公開（publicリポジトリ）</li>
+          <li><span class="li-icon">🎓</span>GitHub の学習と同時に進めたい初学者</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: SUMMARY -->
+<div class="section">
+  <div class="container">
+    <div class="section-num">Section 06</div>
+    <div class="section-title">初学者向けまとめ ── 結局どう使い分けるか</div>
+    <div class="summary-box">
+      <div class="summary-rule">一言で言えば「動くかどうか」で決める</div>
+      <p style="color:rgba(255,255,255,0.7); font-size:14px; line-height:1.8;">HTMLファイルを置くだけで完結するサイトなら <strong style="color:white;">GitHub Pages</strong>、サーバー処理・APIキー・動的なデータが必要なら <strong style="color:white;">Vercel</strong>。迷ったら下の判断軸を使おう。</p>
+      <div class="summary-items">
+        <div class="summary-item sv">
+          <strong>VERCEL を選ぶ基準</strong>
+          APIを叩く処理がある<br>
+          ログインや認証がある<br>
+          DBのデータを表示したい<br>
+          Next.js を使っている<br>
+          AIを組み込みたい
+        </div>
+        <div class="summary-item sg">
+          <strong>GITHUB PAGES を選ぶ基準</strong>
+          HTMLをそのまま見せたい<br>
+          サーバー処理が一切ない<br>
+          ドキュメント・ブログ<br>
+          完全無料で運用したい<br>
+          設定を最小限にしたい
+        </div>
+      </div>
+      <div class="final-line">
+        💡 <strong>学習ロードマップとして：</strong>まず GitHub Pages でHTMLの公開を体験 → Vercel で React/Next.js アプリをデプロイ → Serverless Functions で API を実装 → AIアプリの構築へ。この順番で学ぶと自然にスキルアップできる。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: GLOSSARY -->
+<div class="section">
+  <div class="container">
+    <div class="section-num">Section 07</div>
+    <div class="section-title">用語集 ── この教材に出てきた言葉をやさしく解説</div>
+    <p style="font-size:13px; color:var(--mid); margin-bottom:28px;">カテゴリをクリックして絞り込めます。</p>
+
+    <div class="gloss-filter">
+      <button class="gf-btn active" onclick="filterGloss(this,'all')">すべて</button>
+      <button class="gf-btn" onclick="filterGloss(this,'render')">描画方式</button>
+      <button class="gf-btn" onclick="filterGloss(this,'infra')">インフラ</button>
+      <button class="gf-btn" onclick="filterGloss(this,'framework')">フレームワーク</button>
+      <button class="gf-btn" onclick="filterGloss(this,'saas')">SaaS開発</button>
+    </div>
+
+    <div class="gloss-grid" id="glossGrid">
+
+      <!-- 描画方式 -->
+      <div class="gloss-card" data-cat="render">
+        <div class="gloss-head"><span class="gloss-abbr">SSR</span><span class="gloss-cat render-cat">描画方式</span></div>
+        <div class="gloss-full">Server Side Rendering</div>
+        <div class="gloss-body">
+          <p>ユーザーがページを開いたとき、<strong>サーバーがHTMLを作ってから</strong>ブラウザに送る方式です。</p>
+          <p>たとえばSNSのタイムラインのように「開くたびに最新の内容が必要」なページに向いています。SEO（検索エンジンへの表示）にも強い。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓</span><span class="vs-g">GitHub Pages ✗</span></div>
+        </div>
+      </div>
+
+      <div class="gloss-card" data-cat="render">
+        <div class="gloss-head"><span class="gloss-abbr">CSR</span><span class="gloss-cat render-cat">描画方式</span></div>
+        <div class="gloss-full">Client Side Rendering</div>
+        <div class="gloss-body">
+          <p>HTMLのガワだけ先に送って、<strong>ブラウザ（クライアント）がJavaScriptで画面を組み立てる</strong>方式です。</p>
+          <p>ReactのシンプルなSPAがこれにあたります。最初の表示は少し遅いですが、ページ遷移はスムーズです。GitHub Pages で動かせるのはこの形式だけです。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓</span><span class="vs-g">GitHub Pages ✓（これのみ）</span></div>
+        </div>
+      </div>
+
+      <div class="gloss-card" data-cat="render">
+        <div class="gloss-head"><span class="gloss-abbr">SSG</span><span class="gloss-cat render-cat">描画方式</span></div>
+        <div class="gloss-full">Static Site Generation</div>
+        <div class="gloss-body">
+          <p>コードをデプロイする<strong>「ビルド」という準備作業のときに、あらかじめHTMLを全ページ作り置き</strong>しておく方式です。</p>
+          <p>ブログや商品カタログのように内容が頻繁に変わらないサイトに最適。配信が超高速で、GitHub Pages との相性も抜群です。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓</span><span class="vs-g">GitHub Pages ✓</span></div>
+        </div>
+      </div>
+
+      <div class="gloss-card" data-cat="render">
+        <div class="gloss-head"><span class="gloss-abbr">ISR</span><span class="gloss-cat render-cat">描画方式</span></div>
+        <div class="gloss-full">Incremental Static Regeneration</div>
+        <div class="gloss-body">
+          <p>SSGの「作り置き」をしつつ、<strong>一定時間が経ったら自動でページを再生成</strong>できる仕組みです。Next.js独自の機能。</p>
+          <p>「毎回サーバーで作るほどでもないが、1日1回は最新にしたい」ニュースサイトや商品ページに向いています。Vercel でしか動きません。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓</span><span class="vs-g">GitHub Pages ✗</span></div>
+        </div>
+      </div>
+
+      <div class="gloss-card" data-cat="render">
+        <div class="gloss-head"><span class="gloss-abbr">RSC</span><span class="gloss-cat render-cat">描画方式</span></div>
+        <div class="gloss-full">React Server Components</div>
+        <div class="gloss-body">
+          <p>Reactのコンポーネント（部品）を<strong>サーバー側で実行して、結果だけブラウザに送る</strong>仕組みです。</p>
+          <p>ブラウザに送るJavaScriptの量が減るので表示が速くなります。「この部品はサーバーで動かす」「この部品はブラウザで動かす」と役割を分担できるのが特徴。Next.js 13以降で使えます。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓</span><span class="vs-g">GitHub Pages ✗</span></div>
+        </div>
+      </div>
+
+      <!-- インフラ -->
+      <div class="gloss-card" data-cat="infra">
+        <div class="gloss-head"><span class="gloss-abbr">CDN</span><span class="gloss-cat infra-cat">インフラ</span></div>
+        <div class="gloss-full">Content Delivery Network</div>
+        <div class="gloss-body">
+          <p><strong>世界中にファイルのコピーを置いておいて、ユーザーに一番近い場所から配信する</strong>仕組みです。</p>
+          <p>東京のユーザーが見るとき、アメリカのサーバーまで取りに行くより東京のサーバーから届けたほうが速い、という当たり前の発想を自動でやってくれます。VercelもGitHub Pagesも標準搭載。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓</span><span class="vs-g">GitHub Pages ✓</span></div>
+        </div>
+      </div>
+
+      <div class="gloss-card" data-cat="infra">
+        <div class="gloss-head"><span class="gloss-abbr">Serverless</span><span class="gloss-cat infra-cat">インフラ</span></div>
+        <div class="gloss-full">Serverless Functions</div>
+        <div class="gloss-body">
+          <p>「サーバーを常に動かしておく」のではなく、<strong>リクエストが来たときだけ処理を実行して、終わったら消える</strong>実行環境です。</p>
+          <p>たとえばOpenAI APIを呼び出す処理を、呼ばれたときだけ動くミニサーバーとして登録しておけます。管理不要・従量課金でコスパが良い。AWS Lambda が有名。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓（内蔵）</span><span class="vs-g">GitHub Pages ✗</span></div>
+        </div>
+      </div>
+
+      <div class="gloss-card" data-cat="infra">
+        <div class="gloss-head"><span class="gloss-abbr">Edge</span><span class="gloss-cat infra-cat">インフラ</span></div>
+        <div class="gloss-full">Edge Computing / Edge Function</div>
+        <div class="gloss-body">
+          <p>CDNのサーバー（＝エッジ）の上でコードを動かすことです。<strong>ユーザーの近くで処理が完結するため、往復の時間が極端に短い</strong>のが特徴。</p>
+          <p>たとえば「日本語ユーザーには日本語ページ、英語ユーザーには英語ページを返す」といった振り分けをエッジでやると、遅延なしで動作します。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓</span><span class="vs-g">GitHub Pages △（静的ファイル配信のみ）</span></div>
+        </div>
+      </div>
+
+      <div class="gloss-card" data-cat="infra">
+        <div class="gloss-head"><span class="gloss-abbr">CI/CD</span><span class="gloss-cat infra-cat">インフラ</span></div>
+        <div class="gloss-full">継続的インテグレーション / 継続的デリバリー</div>
+        <div class="gloss-body">
+          <p>コードを変更してGitHubにpushしたら、<strong>テスト・ビルド・デプロイまでを自動でやってくれる</strong>仕組みです。</p>
+          <p>Vercelでは設定ゼロでこれが動きます。「pushしたら数秒で本番に反映される」体験がこれ。GitHub Pagesでも GitHub Actions を自分で書けば同様のことができます。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓（自動）</span><span class="vs-g">GitHub Pages △（自己設定）</span></div>
+        </div>
+      </div>
+
+      <!-- フレームワーク -->
+      <div class="gloss-card" data-cat="framework">
+        <div class="gloss-head"><span class="gloss-abbr">Next.js</span><span class="gloss-cat framework-cat">フレームワーク</span></div>
+        <div class="gloss-full">Reactベースのフルスタックフレームワーク</div>
+        <div class="gloss-body">
+          <p>Reactで作った画面に、<strong>SSR・ルーティング・APIサーバー機能をまるごと追加</strong>したフレームワークです。Vercelが開発しています。</p>
+          <p>「ReactだけだとフロントのUIしか作れないが、Next.jsならバックエンドAPIまで同じプロジェクト内に書ける」というのが最大の利点。現代のSaaS開発では事実上の標準です。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓（フル機能）</span><span class="vs-g">GitHub Pages △（静的書き出しのみ）</span></div>
+        </div>
+      </div>
+
+      <div class="gloss-card" data-cat="framework">
+        <div class="gloss-head"><span class="gloss-abbr">App Router</span><span class="gloss-cat framework-cat">フレームワーク</span></div>
+        <div class="gloss-full">Next.js 13以降の新しいルーティング方式</div>
+        <div class="gloss-body">
+          <p><strong>フォルダの構造がそのままURLになる</strong>仕組みです。たとえば <code>app/blog/page.tsx</code> というファイルを作ると、自動で <code>/blog</code> というURLが生まれます。</p>
+          <p>RSC（React Server Components）をフル活用できる設計になっており、Next.jsの最新機能はすべてApp Router前提です。旧来のPages Routerと設計思想が異なるため、学習時は混同しないよう注意。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓</span><span class="vs-g">GitHub Pages ✗</span></div>
+        </div>
+      </div>
+
+      <div class="gloss-card" data-cat="framework">
+        <div class="gloss-head"><span class="gloss-abbr">Hydration</span><span class="gloss-cat framework-cat">フレームワーク</span></div>
+        <div class="gloss-full">ハイドレーション（水和）</div>
+        <div class="gloss-body">
+          <p>SSRで作られた「静的なHTML」に対して、<strong>ブラウザのReactがJavaScriptを流し込んでインタラクティブに変換する</strong>処理です。</p>
+          <p>乾いたスポンジに水を含ませるイメージから「Hydration（水和）」と呼ばれます。この処理が終わるまでボタンを押しても反応しないため、高速化の重要なポイントになっています。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel（SSR/RSC使用時）</span></div>
+        </div>
+      </div>
+
+      <!-- SaaS開発 -->
+      <div class="gloss-card" data-cat="saas">
+        <div class="gloss-head"><span class="gloss-abbr">API</span><span class="gloss-cat saas-cat">SaaS開発</span></div>
+        <div class="gloss-full">Application Programming Interface</div>
+        <div class="gloss-body">
+          <p><strong>アプリ同士が会話するときのルール・窓口</strong>です。「このURLにこの形式でリクエストを送ると、このデータが返ってくる」という約束事。</p>
+          <p>たとえばOpenAI APIは「このURLにテキストを送ると、AIの返答が返ってくる」という窓口です。APIキーは「あなたが誰かを証明するパスワード」で、絶対に公開してはいけません（Vercelの環境変数に隠すのはこのため）。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓（サーバー側で安全に呼べる）</span><span class="vs-g">GitHub Pages ✗（キー露出リスク）</span></div>
+        </div>
+      </div>
+
+      <div class="gloss-card" data-cat="saas">
+        <div class="gloss-head"><span class="gloss-abbr">Auth</span><span class="gloss-cat saas-cat">SaaS開発</span></div>
+        <div class="gloss-full">Authentication（認証）</div>
+        <div class="gloss-body">
+          <p><strong>「あなたは誰ですか？」を確認する仕組み</strong>です。ログイン画面でIDとパスワードを入力するのが最もシンプルな認証。</p>
+          <p>現代のWebアプリでは「Googleでログイン」などのOAuth認証が主流です。Supabase Auth や NextAuth.js を使うと、Next.js + Vercel 構成に簡単に組み込めます。GitHub Pagesは静的サイトなので、認証の仕組み自体を持てません。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓</span><span class="vs-g">GitHub Pages ✗</span></div>
+        </div>
+      </div>
+
+      <div class="gloss-card" data-cat="saas">
+        <div class="gloss-head"><span class="gloss-abbr">Dashboard</span><span class="gloss-cat saas-cat">SaaS開発</span></div>
+        <div class="gloss-full">ダッシュボード（管理画面）</div>
+        <div class="gloss-body">
+          <p>ユーザーがログインした後に見る<strong>「自分専用の情報まとめ画面」</strong>です。売上グラフ・タスク一覧・通知などを一覧表示します。</p>
+          <p>ユーザーごとに異なるデータを表示するため、必ずSSRまたはCSRでデータを取得する必要があります。静的サイトには作れないため、Vercelが必要です。</p>
+          <div class="gloss-vs"><span class="vs-v">Vercel ✓</span><span class="vs-g">GitHub Pages ✗</span></div>
+        </div>
+      </div>
+
+    </div><!-- /gloss-grid -->
+  </div>
+</div>
+
+
+<!-- SECTION 8: DIAGRAM -->
+<div class="section">
+  <div class="container">
+    <div class="section-num">Section 08</div>
+    <div class="section-title">用語の関係図 ── どこで動くか・どちらが大きい概念か</div>
+    <p style="font-size:13px; color:var(--mid); margin-bottom:20px;">横軸は「実行される場所」、破線の枠は「概念の包含関係（どちらが上位か）」を表しています。画面が小さい場合は横スクロールできます。</p>
+    <div style="width:100%; overflow-x:auto; border:1px solid var(--rule); border-radius:6px; background:#f8f6f1;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 760" width="100%" style="min-width:700px;display:block;"
+     font-family="'DM Mono', 'Courier New', monospace">
+
+  <defs>
+    <!-- background gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f6f1"/>
+      <stop offset="100%" style="stop-color:#f0ede6"/>
+    </linearGradient>
+
+    <!-- lane gradients -->
+    <linearGradient id="laneLocal" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fffbeb;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#fef9e4;stop-opacity:0.7"/>
+    </linearGradient>
+    <linearGradient id="laneEdge" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f3e8ff;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#ede9fe;stop-opacity:0.7"/>
+    </linearGradient>
+    <linearGradient id="laneServer" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e0f2fe;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#dbeafe;stop-opacity:0.7"/>
+    </linearGradient>
+    <linearGradient id="laneBuild" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#dcfce7;stop-opacity:0.9"/>
+      <stop offset="100%" style="stop-color:#d1fae5;stop-opacity:0.7"/>
+    </linearGradient>
+
+    <!-- arrow marker -->
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrowDark" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0070f3"/>
+    </marker>
+
+    <!-- drop shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#00000018"/>
+    </filter>
+    <filter id="shadowMd">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#00000020"/>
+    </filter>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- BACKGROUND -->
+  <rect width="1000" height="760" fill="url(#bgGrad)"/>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- TITLE -->
+  <text x="500" y="36" text-anchor="middle" font-size="18" font-weight="700"
+        fill="#1a1a1a" letter-spacing="1">用語の関係図 ── どこで動くか・どちらが大きい概念か</text>
+  <text x="500" y="54" text-anchor="middle" font-size="11" fill="#94a3b8" letter-spacing="0.5">
+    Vercel vs GitHub Pages / SaaSフロントエンド関連用語
+  </text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- LANE HEADERS (vertical swim lanes) -->
+  <!-- Lane layout: BUILD(x=20) LOCAL/BROWSER(x=225) EDGE(x=430) SERVER(x=635) -->
+
+  <!-- BUILD LANE -->
+  <rect x="20" y="68" width="195" height="630" rx="8" fill="url(#laneBuild)"
+        stroke="#86efac" stroke-width="1.5"/>
+  <rect x="20" y="68" width="195" height="32" rx="8" fill="#16a34a"/>
+  <rect x="20" y="88" width="195" height="12" fill="#16a34a"/>
+  <text x="117" y="89" text-anchor="middle" font-size="12" font-weight="600"
+        fill="white" letter-spacing="1">🔨 BUILD TIME</text>
+  <text x="117" y="108" text-anchor="middle" font-size="10" fill="#166534">デプロイ前の準備段階</text>
+
+  <!-- BROWSER LANE -->
+  <rect x="225" y="68" width="195" height="630" rx="8" fill="url(#laneLocal)"
+        stroke="#fbbf24" stroke-width="1.5"/>
+  <rect x="225" y="68" width="195" height="32" rx="8" fill="#d97706"/>
+  <rect x="225" y="88" width="195" height="12" fill="#d97706"/>
+  <text x="322" y="89" text-anchor="middle" font-size="12" font-weight="600"
+        fill="white" letter-spacing="1">🌐 BROWSER</text>
+  <text x="322" y="108" text-anchor="middle" font-size="10" fill="#92400e">ユーザーのPC・スマホ</text>
+
+  <!-- EDGE LANE -->
+  <rect x="430" y="68" width="195" height="630" rx="8" fill="url(#laneEdge)"
+        stroke="#c084fc" stroke-width="1.5"/>
+  <rect x="430" y="68" width="195" height="32" rx="8" fill="#7c3aed"/>
+  <rect x="430" y="88" width="195" height="12" fill="#7c3aed"/>
+  <text x="527" y="89" text-anchor="middle" font-size="12" font-weight="600"
+        fill="white" letter-spacing="1">⚡ EDGE</text>
+  <text x="527" y="108" text-anchor="middle" font-size="10" fill="#5b21b6">CDN上・ユーザーの近く</text>
+
+  <!-- SERVER LANE -->
+  <rect x="635" y="68" width="345" height="630" rx="8" fill="url(#laneServer)"
+        stroke="#60a5fa" stroke-width="1.5"/>
+  <rect x="635" y="68" width="345" height="32" rx="8" fill="#1d4ed8"/>
+  <rect x="635" y="88" width="345" height="12" fill="#1d4ed8"/>
+  <text x="807" y="89" text-anchor="middle" font-size="12" font-weight="600"
+        fill="white" letter-spacing="1">🖥️ SERVER</text>
+  <text x="807" y="108" text-anchor="middle" font-size="10" fill="#1e40af">データセンター・クラウド</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- NEXT.JS OUTER FRAME (spans Browser + Edge + Server) -->
+  <rect x="217" y="120" width="755" height="430" rx="10"
+        fill="none" stroke="#0070f3" stroke-width="2.5" stroke-dasharray="8,4"
+        filter="url(#shadow)"/>
+  <rect x="245" y="113" width="80" height="20" rx="3" fill="#0070f3"/>
+  <text x="285" y="127" text-anchor="middle" font-size="11" font-weight="600"
+        fill="white">Next.js</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- VERCEL OUTER FRAME (spans Edge + Server columns) -->
+  <rect x="422" y="134" width="550" height="200" rx="8"
+        fill="none" stroke="#0a0a0a" stroke-width="2" stroke-dasharray="5,3"/>
+  <rect x="432" y="127" width="60" height="18" rx="3" fill="#0a0a0a"/>
+  <text x="462" y="140" text-anchor="middle" font-size="10" font-weight="600"
+        fill="white">Vercel</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- ── NODES ── -->
+
+  <!-- ─ BUILD TIME column ─ -->
+
+  <!-- SSG -->
+  <g filter="url(#shadow)">
+    <rect x="38" y="148" width="158" height="62" rx="6" fill="white"
+          stroke="#86efac" stroke-width="1.5"/>
+    <rect x="38" y="148" width="158" height="22" rx="6" fill="#16a34a"/>
+    <rect x="38" y="159" width="158" height="11" fill="#16a34a"/>
+    <text x="117" y="163" text-anchor="middle" font-size="12" font-weight="700"
+          fill="white">SSG</text>
+    <text x="117" y="178" text-anchor="middle" font-size="9.5" fill="#166534">Static Site Generation</text>
+    <text x="117" y="195" text-anchor="middle" font-size="9" fill="#4b5563">ビルド時にHTMLを全生成</text>
+    <text x="117" y="207" text-anchor="middle" font-size="9" fill="#4b5563">→ 完成ファイルを配信</text>
+  </g>
+
+  <!-- ISR -->
+  <g filter="url(#shadow)">
+    <rect x="38" y="232" width="158" height="72" rx="6" fill="white"
+          stroke="#86efac" stroke-width="1.5"/>
+    <rect x="38" y="232" width="158" height="22" rx="6" fill="#15803d"/>
+    <rect x="38" y="243" width="158" height="11" fill="#15803d"/>
+    <text x="117" y="247" text-anchor="middle" font-size="12" font-weight="700"
+          fill="white">ISR</text>
+    <text x="117" y="263" text-anchor="middle" font-size="9.5" fill="#166534">Incremental Static Regen.</text>
+    <text x="117" y="278" text-anchor="middle" font-size="9" fill="#4b5563">一定時間後に再生成</text>
+    <text x="117" y="290" text-anchor="middle" font-size="9" fill="#4b5563">SSGを動的に更新する仕組み</text>
+    <text x="117" y="302" text-anchor="middle" font-size="9" fill="#dc2626">※ Vercel のみ対応</text>
+  </g>
+
+  <!-- CI/CD -->
+  <g filter="url(#shadow)">
+    <rect x="38" y="326" width="158" height="62" rx="6" fill="white"
+          stroke="#86efac" stroke-width="1.5"/>
+    <rect x="38" y="326" width="158" height="22" rx="6" fill="#166534"/>
+    <rect x="38" y="337" width="158" height="11" fill="#166534"/>
+    <text x="117" y="341" text-anchor="middle" font-size="11" font-weight="700"
+          fill="white">CI / CD</text>
+    <text x="117" y="358" text-anchor="middle" font-size="9.5" fill="#166534">継続的インテグレーション</text>
+    <text x="117" y="372" text-anchor="middle" font-size="9" fill="#4b5563">push → 自動ビルド → デプロイ</text>
+    <text x="117" y="384" text-anchor="middle" font-size="9" fill="#4b5563">GitHub Actions / Vercel</text>
+  </g>
+
+  <!-- ─ BROWSER column ─ -->
+
+  <!-- React -->
+  <g filter="url(#shadow)">
+    <rect x="243" y="148" width="158" height="62" rx="6" fill="white"
+          stroke="#fbbf24" stroke-width="1.5"/>
+    <rect x="243" y="148" width="158" height="22" rx="6" fill="#d97706"/>
+    <rect x="243" y="159" width="158" height="11" fill="#d97706"/>
+    <text x="322" y="163" text-anchor="middle" font-size="12" font-weight="700"
+          fill="white">React</text>
+    <text x="322" y="178" text-anchor="middle" font-size="9.5" fill="#92400e">UIライブラリ</text>
+    <text x="322" y="195" text-anchor="middle" font-size="9" fill="#4b5563">コンポーネントでUIを組む</text>
+    <text x="322" y="207" text-anchor="middle" font-size="9" fill="#4b5563">Next.jsの土台</text>
+  </g>
+
+  <!-- CSR -->
+  <g filter="url(#shadow)">
+    <rect x="243" y="232" width="158" height="72" rx="6" fill="white"
+          stroke="#fbbf24" stroke-width="1.5"/>
+    <rect x="243" y="232" width="158" height="22" rx="6" fill="#b45309"/>
+    <rect x="243" y="243" width="158" height="11" fill="#b45309"/>
+    <text x="322" y="247" text-anchor="middle" font-size="12" font-weight="700"
+          fill="white">CSR</text>
+    <text x="322" y="263" text-anchor="middle" font-size="9.5" fill="#92400e">Client Side Rendering</text>
+    <text x="322" y="278" text-anchor="middle" font-size="9" fill="#4b5563">ブラウザがJSで画面生成</text>
+    <text x="322" y="290" text-anchor="middle" font-size="9" fill="#4b5563">GitHub Pages対応はこれのみ</text>
+    <text x="322" y="302" text-anchor="middle" font-size="9" fill="#16a34a">※ どちらでも対応</text>
+  </g>
+
+  <!-- Hydration -->
+  <g filter="url(#shadow)">
+    <rect x="243" y="326" width="158" height="62" rx="6" fill="white"
+          stroke="#fbbf24" stroke-width="1.5"/>
+    <rect x="243" y="326" width="158" height="22" rx="6" fill="#92400e"/>
+    <rect x="243" y="337" width="158" height="11" fill="#92400e"/>
+    <text x="322" y="341" text-anchor="middle" font-size="11" font-weight="700"
+          fill="white">Hydration</text>
+    <text x="322" y="358" text-anchor="middle" font-size="9.5" fill="#92400e">ハイドレーション</text>
+    <text x="322" y="372" text-anchor="middle" font-size="9" fill="#4b5563">SSR HTMLにJSを流し込み</text>
+    <text x="322" y="384" text-anchor="middle" font-size="9" fill="#4b5563">→ 操作可能なUIに変換</text>
+  </g>
+
+  <!-- Client Component -->
+  <g filter="url(#shadow)">
+    <rect x="243" y="410" width="158" height="62" rx="6" fill="white"
+          stroke="#fbbf24" stroke-width="1.5"/>
+    <rect x="243" y="410" width="158" height="22" rx="6" fill="#a16207"/>
+    <rect x="243" y="421" width="158" height="11" fill="#a16207"/>
+    <text x="322" y="425" text-anchor="middle" font-size="10" font-weight="700"
+          fill="white">"use client"</text>
+    <text x="322" y="443" text-anchor="middle" font-size="9.5" fill="#92400e">Client Component</text>
+    <text x="322" y="457" text-anchor="middle" font-size="9" fill="#4b5563">useState等が使えるReact部品</text>
+    <text x="322" y="469" text-anchor="middle" font-size="9" fill="#4b5563">ブラウザで動作する</text>
+  </g>
+
+  <!-- ─ EDGE column ─ -->
+
+  <!-- CDN -->
+  <g filter="url(#shadow)">
+    <rect x="448" y="148" width="158" height="62" rx="6" fill="white"
+          stroke="#c084fc" stroke-width="1.5"/>
+    <rect x="448" y="148" width="158" height="22" rx="6" fill="#7c3aed"/>
+    <rect x="448" y="159" width="158" height="11" fill="#7c3aed"/>
+    <text x="527" y="163" text-anchor="middle" font-size="12" font-weight="700"
+          fill="white">CDN</text>
+    <text x="527" y="178" text-anchor="middle" font-size="9.5" fill="#5b21b6">Content Delivery Network</text>
+    <text x="527" y="195" text-anchor="middle" font-size="9" fill="#4b5563">世界中にコピーを置いて</text>
+    <text x="527" y="207" text-anchor="middle" font-size="9" fill="#4b5563">近い場所から高速配信</text>
+  </g>
+
+  <!-- Edge Function -->
+  <g filter="url(#shadow)">
+    <rect x="448" y="232" width="158" height="72" rx="6" fill="white"
+          stroke="#c084fc" stroke-width="1.5"/>
+    <rect x="448" y="232" width="158" height="22" rx="6" fill="#6d28d9"/>
+    <rect x="448" y="243" width="158" height="11" fill="#6d28d9"/>
+    <text x="527" y="247" text-anchor="middle" font-size="11" font-weight="700"
+          fill="white">Edge Function</text>
+    <text x="527" y="263" text-anchor="middle" font-size="9.5" fill="#5b21b6">CDN上で動くコード</text>
+    <text x="527" y="278" text-anchor="middle" font-size="9" fill="#4b5563">ユーザーの近くで処理完結</text>
+    <text x="527" y="290" text-anchor="middle" font-size="9" fill="#4b5563">言語振り分け・A/Bテスト等</text>
+    <text x="527" y="302" text-anchor="middle" font-size="9" fill="#dc2626">※ Vercel のみ対応</text>
+  </g>
+
+  <!-- ─ SERVER column ─ -->
+
+  <!-- SSR -->
+  <g filter="url(#shadow)">
+    <rect x="653" y="148" width="150" height="72" rx="6" fill="white"
+          stroke="#60a5fa" stroke-width="1.5"/>
+    <rect x="653" y="148" width="150" height="22" rx="6" fill="#1d4ed8"/>
+    <rect x="653" y="159" width="150" height="11" fill="#1d4ed8"/>
+    <text x="728" y="163" text-anchor="middle" font-size="12" font-weight="700"
+          fill="white">SSR</text>
+    <text x="728" y="178" text-anchor="middle" font-size="9.5" fill="#1e40af">Server Side Rendering</text>
+    <text x="728" y="193" text-anchor="middle" font-size="9" fill="#4b5563">リクエストごとにHTMLを生成</text>
+    <text x="728" y="205" text-anchor="middle" font-size="9" fill="#4b5563">SEO強・最新データ対応</text>
+    <text x="728" y="218" text-anchor="middle" font-size="9" fill="#dc2626">※ Vercel のみ対応</text>
+  </g>
+
+  <!-- Serverless Function -->
+  <g filter="url(#shadow)">
+    <rect x="815" y="148" width="152" height="72" rx="6" fill="white"
+          stroke="#60a5fa" stroke-width="1.5"/>
+    <rect x="815" y="148" width="152" height="22" rx="6" fill="#1e40af"/>
+    <rect x="815" y="159" width="152" height="11" fill="#1e40af"/>
+    <text x="891" y="163" text-anchor="middle" font-size="10" font-weight="700"
+          fill="white">Serverless Function</text>
+    <text x="891" y="178" text-anchor="middle" font-size="9.5" fill="#1e40af">サーバーレス関数</text>
+    <text x="891" y="193" text-anchor="middle" font-size="9" fill="#4b5563">呼ばれたときだけ起動・終了</text>
+    <text x="891" y="205" text-anchor="middle" font-size="9" fill="#4b5563">APIキー保護・DB接続</text>
+    <text x="891" y="218" text-anchor="middle" font-size="9" fill="#dc2626">※ Vercel のみ対応</text>
+  </g>
+
+  <!-- RSC / Server Component -->
+  <g filter="url(#shadow)">
+    <rect x="653" y="240" width="150" height="72" rx="6" fill="white"
+          stroke="#60a5fa" stroke-width="1.5"/>
+    <rect x="653" y="240" width="150" height="22" rx="6" fill="#1e3a8a"/>
+    <rect x="653" y="251" width="150" height="11" fill="#1e3a8a"/>
+    <text x="728" y="255" text-anchor="middle" font-size="11" font-weight="700"
+          fill="white">RSC / Server Component</text>
+    <text x="728" y="273" text-anchor="middle" font-size="9.5" fill="#1e40af">React Server Components</text>
+    <text x="728" y="288" text-anchor="middle" font-size="9" fill="#4b5563">サーバー側でReactを実行</text>
+    <text x="728" y="300" text-anchor="middle" font-size="9" fill="#4b5563">JS送信量を削減</text>
+    <text x="728" y="312" text-anchor="middle" font-size="9" fill="#dc2626">※ Vercel のみ対応</text>
+  </g>
+
+  <!-- API -->
+  <g filter="url(#shadow)">
+    <rect x="815" y="240" width="152" height="72" rx="6" fill="white"
+          stroke="#60a5fa" stroke-width="1.5"/>
+    <rect x="815" y="240" width="152" height="22" rx="6" fill="#0369a1"/>
+    <rect x="815" y="251" width="152" height="11" fill="#0369a1"/>
+    <text x="891" y="255" text-anchor="middle" font-size="12" font-weight="700"
+          fill="white">API</text>
+    <text x="891" y="273" text-anchor="middle" font-size="9.5" fill="#0369a1">アプリ通信の窓口・ルール</text>
+    <text x="891" y="288" text-anchor="middle" font-size="9" fill="#4b5563">リクエスト→レスポンス</text>
+    <text x="891" y="300" text-anchor="middle" font-size="9" fill="#4b5563">APIキーはサーバー側に秘匿</text>
+    <text x="891" y="312" text-anchor="middle" font-size="9" fill="#dc2626">※ Vercel のみ安全に使用可</text>
+  </g>
+
+  <!-- App Router -->
+  <g filter="url(#shadow)">
+    <rect x="653" y="332" width="150" height="62" rx="6" fill="white"
+          stroke="#93c5fd" stroke-width="1.5"/>
+    <rect x="653" y="332" width="150" height="22" rx="6" fill="#2563eb"/>
+    <rect x="653" y="343" width="150" height="11" fill="#2563eb"/>
+    <text x="728" y="347" text-anchor="middle" font-size="11" font-weight="700"
+          fill="white">App Router</text>
+    <text x="728" y="364" text-anchor="middle" font-size="9.5" fill="#1e40af">Next.js 13以降の新ルーティング</text>
+    <text x="728" y="378" text-anchor="middle" font-size="9" fill="#4b5563">フォルダ＝URL構造</text>
+    <text x="728" y="390" text-anchor="middle" font-size="9" fill="#4b5563">RSCをフル活用</text>
+  </g>
+
+  <!-- Auth -->
+  <g filter="url(#shadow)">
+    <rect x="815" y="332" width="152" height="62" rx="6" fill="white"
+          stroke="#93c5fd" stroke-width="1.5"/>
+    <rect x="815" y="332" width="152" height="22" rx="6" fill="#0284c7"/>
+    <rect x="815" y="343" width="152" height="11" fill="#0284c7"/>
+    <text x="891" y="347" text-anchor="middle" font-size="12" font-weight="700"
+          fill="white">Auth（認証）</text>
+    <text x="891" y="364" text-anchor="middle" font-size="9.5" fill="#0369a1">「あなたは誰か？」の確認</text>
+    <text x="891" y="378" text-anchor="middle" font-size="9" fill="#4b5563">ログイン・セッション管理</text>
+    <text x="891" y="390" text-anchor="middle" font-size="9" fill="#dc2626">※ Vercel のみ対応</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- GITHUB PAGES BOX (build + browser only) -->
+  <rect x="18" y="490" width="400" height="120" rx="8"
+        fill="none" stroke="#238636" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <rect x="30" y="483" width="110" height="18" rx="3" fill="#238636"/>
+  <text x="85" y="496" text-anchor="middle" font-size="10" font-weight="600"
+        fill="white">GitHub Pages</text>
+
+  <!-- GH Pages content -->
+  <text x="118" y="520" text-anchor="middle" font-size="11" font-weight="600" fill="#166534">
+    対応範囲：ここまで
+  </text>
+  <text x="118" y="538" text-anchor="middle" font-size="10" fill="#4b5563">SSG でビルド → CDN で静的配信</text>
+  <text x="118" y="553" text-anchor="middle" font-size="10" fill="#4b5563">CSR（JS製SPA）の公開</text>
+  <text x="118" y="568" text-anchor="middle" font-size="10" fill="#4b5563">Jekyll / Hugo / Astro ブログ</text>
+  <text x="118" y="583" text-anchor="middle" font-size="10" fill="#dc2626">✗ SSR / API / Auth 不可</text>
+  <text x="118" y="598" text-anchor="middle" font-size="10" fill="#dc2626">✗ APIキーの安全な保持 不可</text>
+
+  <!-- GH Pages icon area -->
+  <rect x="280" y="503" width="128" height="95" rx="6" fill="#f0fdf4" stroke="#86efac" stroke-width="1"/>
+  <text x="344" y="527" text-anchor="middle" font-size="22">📄</text>
+  <text x="344" y="548" text-anchor="middle" font-size="10" font-weight="600" fill="#166534">静的ファイル</text>
+  <text x="344" y="562" text-anchor="middle" font-size="9" fill="#4b5563">HTML / CSS / JS</text>
+  <text x="344" y="576" text-anchor="middle" font-size="9" fill="#4b5563">そのまま配信</text>
+  <text x="344" y="590" text-anchor="middle" font-size="9" fill="#4b5563">完全無料</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- VERCEL FULL BOX -->
+  <rect x="18" y="626" width="962" height="62" rx="8"
+        fill="none" stroke="#0a0a0a" stroke-width="2" stroke-dasharray="5,3"/>
+  <rect x="30" y="619" width="60" height="18" rx="3" fill="#0a0a0a"/>
+  <text x="60" y="632" text-anchor="middle" font-size="10" font-weight="600" fill="white">Vercel</text>
+
+  <text x="500" y="650" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a1a">
+    対応範囲：すべてのレーンをカバー
+  </text>
+  <text x="500" y="667" text-anchor="middle" font-size="10" fill="#4b5563">
+    SSG / ISR / CSR / SSR / RSC / Edge Functions / Serverless Functions / CDN / CI-CD / Auth ── 全対応
+  </text>
+  <text x="500" y="682" text-anchor="middle" font-size="10" fill="#0070f3">
+    Next.js の全機能をフル活用。AIアプリ・SaaS・本番プロダクトに最適。
+  </text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- ARROWS (data flow) -->
+
+  <!-- Build → Browser (SSG to CDN/CSR) -->
+  <line x1="196" y1="179" x2="243" y2="179" stroke="#94a3b8" stroke-width="1.5"
+        stroke-dasharray="4,2" marker-end="url(#arrow)"/>
+  <line x1="196" y1="263" x2="243" y2="263" stroke="#94a3b8" stroke-width="1.5"
+        stroke-dasharray="4,2" marker-end="url(#arrow)"/>
+
+  <!-- Browser → Edge (CDN request) -->
+  <line x1="401" y1="179" x2="448" y2="179" stroke="#94a3b8" stroke-width="1.5"
+        stroke-dasharray="4,2" marker-end="url(#arrow)"/>
+
+  <!-- Edge → Server -->
+  <line x1="606" y1="179" x2="653" y2="179" stroke="#94a3b8" stroke-width="1.5"
+        stroke-dasharray="4,2" marker-end="url(#arrow)"/>
+  <line x1="606" y1="268" x2="653" y2="268" stroke="#94a3b8" stroke-width="1.5"
+        stroke-dasharray="4,2" marker-end="url(#arrow)"/>
+
+  <!-- Server → Browser (SSR result back) -->
+  <path d="M728,220 Q728,420 420,456 Q370,466 322,472" fill="none"
+        stroke="#0070f3" stroke-width="1.5" stroke-dasharray="5,3"
+        marker-end="url(#arrowBlue)"/>
+  <text x="600" y="435" text-anchor="middle" font-size="9" fill="#0070f3">SSR結果を返す</text>
+
+  <!-- RSC → Hydration arrow -->
+  <path d="M728,312 Q680,370 520,395 Q430,405 400,410" fill="none"
+        stroke="#475569" stroke-width="1.2" stroke-dasharray="4,3"
+        marker-end="url(#arrowDark)"/>
+  <text x="560" y="390" text-anchor="middle" font-size="9" fill="#475569">RSC Payload → Hydration</text>
+
+  <!-- User flow label -->
+  <text x="40" y="742" font-size="10" fill="#94a3b8">← 開発・ビルド時</text>
+  <text x="920" y="742" text-anchor="end" font-size="10" fill="#94a3b8">実行時（リクエスト） →</text>
+  <line x1="20" y1="748" x2="980" y2="748" stroke="#d1d5db" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="500" y="758" text-anchor="middle" font-size="9" fill="#9ca3af">
+    ユーザーのリクエスト → CDN/Edge → サーバー処理 → ブラウザへ返す　というデータの流れ
+  </text>
+</svg>
+
+    </div>
+  </div>
+</div>
+
+<footer>
+  IT教育教材 ── Vercel vs GitHub Pages ── Web公開サービス比較
+</footer>
+
+<script>
+function filterGloss(btn, cat) {
+  document.querySelectorAll('.gf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.gloss-card').forEach(card => {
+    card.classList.toggle('hidden', cat !== 'all' && card.dataset.cat !== cat);
+  });
+}
+
+function switchTab(btn, id) {
+  document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.level-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
