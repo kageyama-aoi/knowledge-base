@@ -13,3 +13,6 @@ __pycache__/
 # OSが自動生成するファイル
 .DS_Store
 Thumbs.db
+
+# Vercelビルド出力
+public/

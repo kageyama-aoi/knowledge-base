@@ -1,0 +1,12 @@
+{
+  "name": "knowledge-base",
+  "version": "1.0.0",
+  "description": "HTML documentation knowledge base",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node build.js && http-server public"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
