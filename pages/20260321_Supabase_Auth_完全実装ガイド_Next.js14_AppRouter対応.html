@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supabase Auth 完全実装ガイド — Next.js 14</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue-50:#EFF6FF;--blue-100:#DBEAFE;--blue-200:#BFDBFE;
+  --blue-600:#2563EB;--blue-700:#1D4ED8;--blue-800:#1E40AF;--blue-900:#1E3A8A;
+  --purple-50:#F5F3FF;--purple-100:#EDE9FE;--purple-200:#DDD6FE;
+  --purple-600:#7C3AED;--purple-700:#6D28D9;
+  --teal-50:#F0FDFA;--teal-100:#CCFBF1;--teal-200:#99F6E4;
+  --teal-600:#0D9488;--teal-700:#0F766E;
+  --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;
+  --amber-600:#D97706;--amber-700:#B45309;
+  --red-50:#FFF1F2;--red-100:#FFE4E6;--red-200:#FECDD3;
+  --red-600:#E11D48;--red-700:#BE123C;
+  --green-50:#F0FDF4;--green-200:#BBF7D0;--green-700:#15803D;
+  --gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-300:#D1D5DB;
+  --gray-400:#9CA3AF;--gray-500:#6B7280;--gray-600:#4B5563;
+  --gray-700:#374151;--gray-800:#1F2937;--gray-900:#111827;
+  --bg:#E8EDF4;--card:#FFFFFF;--text:#1F2937;--muted:#6B7280;
+  --r:8px;--r-lg:14px;
+  --sh:0 1px 4px rgba(0,0,0,.07),0 2px 8px rgba(0,0,0,.05);
+  --sh-lg:0 4px 20px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding-bottom:100px;font-size:14px;}
+
+.site-header{background:linear-gradient(135deg,#0f2460 0%,#1d4ed8 55%,#2563eb 100%);color:#fff;padding:56px 24px 0;text-align:center;position:relative;overflow:hidden;}
+.site-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 15% 60%,rgba(255,255,255,.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 20%,rgba(99,179,237,.12) 0%,transparent 45%);}
+.site-header .inner{position:relative;max-width:800px;margin:0 auto;}
+.chip{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.08em;padding:4px 16px;margin-bottom:20px;text-transform:uppercase;}
+.site-header h1{font-size:clamp(24px,4.5vw,36px);font-weight:700;letter-spacing:-.03em;line-height:1.2;margin-bottom:12px;}
+.site-header h1 span{opacity:.7;font-weight:400;font-size:.65em;display:block;letter-spacing:-.01em;margin-top:6px;}
+.site-header p{font-size:14px;opacity:.72;margin:0 auto 32px;max-width:520px;line-height:1.6;}
+.nav-bar{display:flex;justify-content:center;gap:4px;flex-wrap:wrap;padding-bottom:0;}
+.nav-tab{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.8);border-radius:999px 999px 0 0;padding:8px 20px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;text-decoration:none;font-family:'Noto Sans JP',sans-serif;border-bottom:none;position:relative;top:1px;}
+.nav-tab:hover{background:rgba(255,255,255,.2);color:#fff;}
+.nav-tab.active{background:var(–bg);color:var(–blue-700);border-color:var(–bg);font-weight:700;}
+
+.main{max-width:1000px;margin:0 auto;padding:0 20px;}
+.page{padding-top:40px;display:none;animation:fadeUp .3s ease both;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.card{background:var(–card);border-radius:var(–r-lg);box-shadow:var(–sh);overflow:hidden;margin-bottom:24px;}
+.card-body{padding:28px;}
+
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:24px;}
+.sec-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;margin-top:1px;}
+.sec-head h2{font-size:21px;font-weight:700;letter-spacing:-.02em;color:var(–gray-900);}
+.sec-head p{font-size:13px;color:var(–muted);margin-top:4px;line-height:1.55;}
+
+.ch{border-left:4px solid var(–blue-600);padding:12px 16px 12px 20px;margin:32px 0 16px;background:linear-gradient(to right,var(–blue-50),transparent);}
+.ch h3{font-size:16px;font-weight:700;color:var(–blue-800);}
+.ch p{font-size:12.5px;color:var(–muted);margin-top:4px;}
+
+.callout{border-radius:var(–r);padding:13px 15px;margin:14px 0;font-size:13px;line-height:1.65;display:flex;gap:10px;align-items:flex-start;}
+.callout-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.callout b{display:block;margin-bottom:3px;}
+.cl-info{background:var(–blue-50);border:1px solid var(–blue-200);color:var(–blue-800);}
+.cl-warn{background:var(–amber-50);border:1px solid var(–amber-200);color:var(–amber-700);}
+.cl-danger{background:var(–red-50);border:1px solid var(–red-200);color:var(–red-700);}
+.cl-success{background:var(–green-50);border:1px solid var(–green-200);color:var(–green-700);}
+
+.tw{overflow-x:auto;border-radius:var(–r);box-shadow:var(–sh);margin:14px 0;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(–gray-800);color:#fff;padding:10px 14px;text-align:left;font-size:12px;font-weight:700;letter-spacing:.04em;white-space:nowrap;}
+tbody td{padding:10px 14px;border-bottom:1px solid var(–gray-100);vertical-align:top;line-height:1.6;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(–gray-50);}
+.tbl-sep td{background:var(–blue-50)!important;font-size:11px;font-weight:700;letter-spacing:.05em;color:var(–blue-700);padding:7px 14px;border-bottom:1px solid var(–blue-100)!important;}
+
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(–gray-100);border-radius:4px;padding:2px 6px;color:var(–gray-800);}
+
+.doc-link{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(–r);border:1px solid var(–gray-200);background:var(–gray-50);margin-bottom:8px;text-decoration:none;color:var(–text);transition:all .15s;font-size:13px;}
+.doc-link:hover{background:var(–blue-50);border-color:var(–blue-200);color:var(–blue-700);}
+.doc-link .dl-t{font-weight:700;flex:1;}
+.doc-link .dl-u{font-size:11px;color:var(–muted);font-family:'JetBrains Mono',monospace;}
+
+footer{text-align:center;font-size:12px;color:var(–gray-400);padding:40px 20px 0;max-width:1000px;margin:0 auto;border-top:1px solid var(–gray-200);}
+
+@media(max-width:680px){
+.card-body{padding:18px;}
+}
+</style>
+
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <div class="chip">Next.js 14 App Router · @supabase/ssr 対応</div>
+    <h1>Supabase Auth 完全実装ガイド
+      <span>ログイン・ログアウト・データ保護をゼロから理解する</span>
+    </h1>
+    <p>概念の理解から全コード実装まで、手順書・図解・用語集をひとつにまとめた完全リファレンスです</p>
+    <nav class="nav-bar">
+      <a class="nav-tab active" onclick="show('overview',this)">🗺 概要・フロー</a>
+      <a class="nav-tab" onclick="show('setup',this)">⚙️ セットアップ</a>
+      <a class="nav-tab" onclick="show('auth',this)">🔐 認証実装</a>
+      <a class="nav-tab" onclick="show('rls',this)">🛡 RLS</a>
+      <a class="nav-tab" onclick="show('deploy',this)">🚀 デプロイ</a>
+      <a class="nav-tab" onclick="show('reference',this)">📖 リファレンス</a>
+    </nav>
+  </div>
+</header>
+
+<main class="main">
+
+<!-- TAB 1: 概要・フロー -->
+
+<section id="overview" class="page active">
+
+  <div class="card" style="margin-top:40px;">
+    <div class="card-body">
+      <div class="sec-head">
+        <div class="sec-icon" style="background:var(--blue-100);">🔑</div>
+        <div><h2>Supabase Auth とは何か？</h2><p>「なぜ認証が必要なのか」— まずここから理解しましょう。</p></div>
+      </div>
+      <p style="font-size:13.5px;line-height:1.8;color:var(--gray-700);margin:10px 0;">Webアプリに「ユーザーごとのデータ」が存在するなら、必ず「この人は誰？」という仕組みが必要です。この<strong>「誰なのかを確認する仕組み」が認証（Authentication）</strong>です。</p>
+      <p style="font-size:13.5px;line-height:1.8;color:var(--gray-700);margin:10px 0;">Supabase Auth は、次の3つの役割を一括で担うサービスです。</p>
+      <div class="tw"><table>
+        <thead><tr><th>役割</th><th>やっていること</th><th>身近な例え</th></tr></thead>
+        <tbody>
+          <tr><td><strong>① 本人確認（認証）</strong></td><td>メール+パスワードや OAuth でユーザーを識別する</td><td>「会員証を確認する」</td></tr>
+          <tr><td><strong>② セッション管理</strong></td><td>ログイン状態を Cookie に保存して維持する</td><td>「入館スタンプを押す」</td></tr>
+          <tr><td><strong>③ アクセス制御（RLS）</strong></td><td>DB のデータを「自分のものだけ」に絞り込む</td><td>「自分のロッカーしか開けない」</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="sec-head">
+        <div class="sec-icon" style="background:var(--red-100);">⚠️</div>
+        <div><h2>新旧パッケージの違い（最重要）</h2><p>古い記事をコピペすると動かない理由がここにあります。必ず確認してください。</p></div>
+      </div>
+      <div class="callout cl-danger"><div class="callout-icon">🚨</div><div><b>ネット上の古い記事・チュートリアルに注意</b>旧パッケージ <code>@supabase/auth-helpers-nextjs</code> を使った実装が多数存在します。コピペすると動きません。</div></div>
+      <div class="tw"><table>
+        <thead><tr><th>項目</th><th>旧（使ってはいけない）</th><th>新（これを使う）</th></tr></thead>
+        <tbody>
+          <tr><td>パッケージ名</td><td><code>@supabase/auth-helpers-nextjs</code></td><td><code>@supabase/ssr</code></td></tr>
+          <tr><td>ブラウザ用クライアント</td><td><code>createClientComponentClient()</code></td><td><code>createBrowserClient()</code></td></tr>
+          <tr><td>サーバー用クライアント</td><td><code>createServerComponentClient()</code></td><td><code>createServerClient()</code></td></tr>
+          <tr><td>環境変数キー</td><td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td><td><code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="callout cl-info" style="margin-top:12px;"><div class="callout-icon">💡</div><div><b>なぜ変わったのか？</b>Next.js の Server Component は Cookie を「読む」ことはできても「書く」ことができない制約があります。新パッケージはこの制約を前提に設計されており、Middleware がセッション更新を担う構成になっています。</div></div>
+    </div>
+  </div>
+
+</section>
+
+</main>
+
+<footer>Supabase Auth 完全実装ガイド ／ Next.js 14 App Router 対応 ／ @supabase/ssr 使用 ／ 公式ドキュメント照合済み（2026-03-21）</footer>
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>

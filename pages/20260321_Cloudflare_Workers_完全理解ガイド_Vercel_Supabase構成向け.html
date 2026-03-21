@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloudflare Workers 完全理解ガイド — Vercel + Supabase 構成向け</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue-50:#EFF6FF;--blue-100:#DBEAFE;--blue-200:#BFDBFE;
+  --blue-600:#2563EB;--blue-700:#1D4ED8;--blue-800:#1E40AF;--blue-900:#1E3A8A;
+  --purple-50:#F5F3FF;--purple-100:#EDE9FE;--purple-200:#DDD6FE;
+  --purple-600:#7C3AED;--purple-700:#6D28D9;
+  --teal-50:#F0FDFA;--teal-100:#CCFBF1;--teal-200:#99F6E4;
+  --teal-600:#0D9488;--teal-700:#0F766E;
+  --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;
+  --amber-600:#D97706;--amber-700:#B45309;
+  --red-50:#FFF1F2;--red-100:#FFE4E6;--red-200:#FECDD3;
+  --red-600:#E11D48;--red-700:#BE123C;
+  --green-50:#F0FDF4;--green-100:#DCFCE7;--green-200:#BBF7D0;--green-700:#15803D;
+  --orange-50:#FFF7ED;--orange-100:#FFEDD5;--orange-200:#FED7AA;--orange-700:#C2410C;
+  --gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-300:#D1D5DB;
+  --gray-400:#9CA3AF;--gray-500:#6B7280;--gray-600:#4B5563;
+  --gray-700:#374151;--gray-800:#1F2937;--gray-900:#111827;
+  --cf-orange:#F48120;--cf-orange-dark:#E8620A;--cf-orange-light:#FEF3E8;
+  --bg:#E8EDF4;--card:#FFFFFF;--text:#1F2937;--muted:#6B7280;
+  --r:8px;--r-lg:14px;
+  --sh:0 1px 4px rgba(0,0,0,.07),0 2px 8px rgba(0,0,0,.05);
+  --sh-lg:0 4px 20px rgba(0,0,0,.10),0 1px 4px rgba(0,0,0,.06);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;padding-bottom:100px;font-size:14px;}
+
+.site-header{background:linear-gradient(135deg,#7c2d00 0%,#c2410c 45%,#f48120 100%);color:#fff;padding:56px 24px 0;text-align:center;position:relative;overflow:hidden;}
+.site-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 15% 60%,rgba(255,255,255,.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 20%,rgba(255,200,100,.1) 0%,transparent 45%);}
+.site-header .inner{position:relative;max-width:800px;margin:0 auto;}
+.chip{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.08em;padding:4px 16px;margin-bottom:20px;text-transform:uppercase;}
+.site-header h1{font-size:clamp(22px,4vw,34px);font-weight:700;letter-spacing:-.03em;line-height:1.2;margin-bottom:12px;}
+.site-header h1 span{opacity:.75;font-weight:400;font-size:.62em;display:block;letter-spacing:-.01em;margin-top:6px;}
+.site-header p{font-size:14px;opacity:.78;margin:0 auto 32px;max-width:540px;line-height:1.65;}
+.nav-bar{display:flex;justify-content:center;gap:4px;flex-wrap:wrap;}
+.nav-tab{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);border-radius:999px 999px 0 0;padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;text-decoration:none;font-family:'Noto Sans JP',sans-serif;border-bottom:none;position:relative;top:1px;}
+.nav-tab:hover{background:rgba(255,255,255,.22);color:#fff;}
+.nav-tab.active{background:var(–bg);color:#c2410c;border-color:var(–bg);font-weight:700;}
+
+.main{max-width:1000px;margin:0 auto;padding:0 20px;}
+.page{padding-top:40px;display:none;animation:fadeUp .3s ease both;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.card{background:var(–card);border-radius:var(–r-lg);box-shadow:var(–sh);overflow:hidden;margin-bottom:24px;}
+.card-body{padding:28px;}
+
+.sec-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px;}
+.sec-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;margin-top:1px;}
+.sec-head h2{font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(–gray-900);}
+.sec-head p{font-size:13px;color:var(–muted);margin-top:4px;line-height:1.55;}
+
+.ch{border-left:4px solid var(–cf-orange);padding:12px 16px 12px 20px;margin:32px 0 16px;background:linear-gradient(to right,var(–cf-orange-light),transparent);}
+.ch h3{font-size:16px;font-weight:700;color:var(–orange-700);}
+.ch p{font-size:12.5px;color:var(–muted);margin-top:4px;}
+
+.callout{border-radius:var(–r);padding:13px 15px;margin:14px 0;font-size:13px;line-height:1.65;display:flex;gap:10px;align-items:flex-start;}
+.callout-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.callout b{display:block;margin-bottom:3px;}
+.cl-info{background:var(–blue-50);border:1px solid var(–blue-200);color:var(–blue-800);}
+.cl-warn{background:var(–amber-50);border:1px solid var(–amber-200);color:var(–amber-700);}
+.cl-danger{background:var(–red-50);border:1px solid var(–red-200);color:var(–red-700);}
+.cl-success{background:var(–green-50);border:1px solid var(–green-200);color:var(–green-700);}
+.cl-cf{background:var(–cf-orange-light);border:1px solid var(–orange-200);color:var(–orange-700);}
+
+.tw{overflow-x:auto;border-radius:var(–r);box-shadow:var(–sh);margin:14px 0;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(–gray-800);color:#fff;padding:10px 14px;text-align:left;font-size:12px;font-weight:700;letter-spacing:.04em;white-space:nowrap;}
+tbody td{padding:10px 14px;border-bottom:1px solid var(–gray-100);vertical-align:top;line-height:1.6;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(–gray-50);}
+.tbl-sep td{background:var(–orange-50)!important;font-size:11px;font-weight:700;letter-spacing:.05em;color:var(–orange-700);padding:7px 14px;border-bottom:1px solid var(–orange-200)!important;}
+
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(–gray-100);border-radius:4px;padding:2px 6px;color:var(–gray-800);}
+
+.doc-link{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(–r);border:1px solid var(–gray-200);background:var(–gray-50);margin-bottom:8px;text-decoration:none;color:var(–text);transition:all .15s;font-size:13px;}
+.doc-link:hover{background:var(–cf-orange-light);border-color:var(–orange-200);color:var(–orange-700);}
+.doc-link .dl-t{font-weight:700;flex:1;}
+.doc-link .dl-u{font-size:11px;color:var(–muted);font-family:'JetBrains Mono',monospace;}
+
+footer{text-align:center;font-size:12px;color:var(–gray-400);padding:40px 20px 0;max-width:1000px;margin:0 auto;border-top:1px solid var(–gray-200);}
+
+@media(max-width:680px){
+.card-body{padding:18px;}
+}
+</style>
+
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <div class="chip">Vercel + Supabase 構成向け</div>
+    <h1>Cloudflare Workers 完全理解ガイド
+      <span>「何ができるか・なぜ使うか・どう繋がるか」をゼロから理解する</span>
+    </h1>
+    <p>Vercel + Supabase をすでに使っている（または使う予定の）人が、Cloudflare Workers を理解するための完全リファレンスです</p>
+    <nav class="nav-bar">
+      <a class="nav-tab active" onclick="show('concept',this)">🌐 Workers とは</a>
+      <a class="nav-tab" onclick="show('setup',this)">⚙️ セットアップ</a>
+      <a class="nav-tab" onclick="show('nextjs',this)">🔗 Next.js 連携</a>
+      <a class="nav-tab" onclick="show('supabase',this)">🗄 Supabase 連携</a>
+      <a class="nav-tab" onclick="show('deploy',this)">🚀 デプロイ</a>
+      <a class="nav-tab" onclick="show('reference',this)">📖 リファレンス</a>
+    </nav>
+  </div>
+</header>
+
+<main class="main">
+
+<section id="concept" class="page active">
+
+  <div class="card" style="margin-top:40px;">
+    <div class="card-body">
+      <div class="sec-head">
+        <div class="sec-icon" style="background:var(--cf-orange-light);">🌐</div>
+        <div>
+          <h2>Cloudflare Workers とは何か？</h2>
+          <p>「サーバーレスで動く小さなプログラム」が、世界中のエッジサーバーで実行されるサービスです。</p>
+        </div>
+      </div>
+      <p style="font-size:13.5px;line-height:1.8;color:var(--gray-700);margin:10px 0;">Cloudflare は世界 300 以上の都市にサーバーを持つ CDN（コンテンツ配信ネットワーク）会社です。Workers は、<strong>そのサーバー群の上でコードを直接実行できる仕組み</strong>です。</p>
+      <div class="callout cl-cf"><div class="callout-icon">☁️</div><div><b>Workers が速い理由：</b>通常のサーバーレスは Node.js プロセスを起動するのに時間がかかります。Workers は Google Chrome と同じ「V8 エンジン」を使い、コンテナの起動なしにコードを実行するため、コールドスタートがほぼゼロです。</div></div>
+    </div>
+  </div>
+
+</section>
+
+</main>
+
+<footer>Cloudflare Workers 完全理解ガイド ／ Vercel + Supabase 構成向け ／ 公式ドキュメント照合済み（2026-03-21）</footer>
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
